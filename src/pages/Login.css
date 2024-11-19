@@ -1,0 +1,149 @@
+/* Latar belakang halaman login */
+.login-page {
+  width: 100%;
+  height: 100vh;
+  background-image: url('../assets/rumah.jpg');
+  background-size: cover;
+  background-position: center;
+  background-attachment: fixed;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  font-family: 'Arial', sans-serif;
+  overflow: hidden;
+  color: #333;
+}
+
+/* Logo di luar form, di atas form */
+.login-logo-container {
+  width: 100px;
+  height: 100px;
+  background-image: url('../assets/logoselaras.png');
+  background-size: cover;
+  background-position: center;
+  border-radius: 50%;
+  margin-bottom: 20px; /* Memberikan jarak antara logo dan form */
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+/* Container utama untuk form login */
+.login-container {
+  width: 350px;
+  padding: 40px 30px;
+  background: rgba(255, 255, 255, 0.9);
+  border-radius: 10px;
+  box-shadow: 0px 8px 16px rgba(0, 0, 0, 0.2);
+  text-align: center;
+  position: relative;
+  backdrop-filter: blur(8px);
+  margin-top: 30px; /* Menurunkan form sedikit dari bagian atas */
+}
+
+/* Form login */
+.login-form {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+/* Kolom input dengan garis bawah */
+.input-container {
+  position: relative;
+}
+
+.input-container input {
+  width: calc(100% - 50px); /* Membatasi lebar input agar garis tidak terlalu panjang */
+  padding: 10px 12px;
+  padding-left: 40px; /* Ruang untuk ikon */
+  border: none;
+  border-bottom: 2px solid #c62828;
+  background: transparent;
+  font-size: 16px;
+  color: #333;
+  outline: none;
+  transition: border-color 0.3s ease;
+}
+
+.input-container input:focus {
+  border-bottom: 2px solid #b71c1c;
+}
+
+.input-container input::placeholder {
+  color: #aaa;
+  font-style: italic;
+}
+
+/* Ikon di kolom input */
+.input-container .icon {
+  position: absolute;
+  left: 10px;
+  top: 50%;
+  transform: translateY(-50%);
+  color: #7e7e7e;
+  font-size: 20px;
+}
+
+/* Tombol untuk toggle visibility password */
+#toggle-password {
+  position: absolute;
+  right: 10px;
+  top: 50%;
+  transform: translateY(-50%);
+  background: none;
+  border: none;
+  color: #7e7e7e;
+  font-size: 20px;
+  cursor: pointer;
+  transition: color 0.3s;
+}
+
+#toggle-password:hover {
+  color: #b71c1c;
+}
+
+/* Tombol Login */
+.login-form button {
+  padding: 12px;
+  background-color: #c62828;
+  color: #fff;
+  border: none;
+  border-radius: 6px;
+  cursor: pointer;
+  font-weight: bold;
+  font-size: 16px;
+  transition: background-color 0.3s ease, transform 0.2s ease;
+}
+
+.login-form button:hover {
+  background-color: #b71c1c;
+  transform: translateY(-2px);
+}
+
+.login-form button:active {
+  transform: translateY(0);
+}
+
+/* Tautan Lupa Password */
+.forgot-password {
+  margin-top: 10px;
+  color: #0066cc;
+  cursor: pointer;
+  text-decoration: underline;
+  font-size: 14px;
+}
+
+/* Responsive untuk layar kecil */
+@media (max-width: 768px) {
+  .login-container {
+    width: 90%;
+    padding: 20px;
+  }
+
+  .login-logo-container {
+    width: 80px;
+    height: 80px;
+  }
+}

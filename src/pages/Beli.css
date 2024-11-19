@@ -1,0 +1,54 @@
+/* src/pages/Beli.css */
+.banner-container {
+    position: relative;
+    overflow: hidden; /* Menyembunyikan gambar yang keluar dari container */
+    width: 100%; /* Lebar penuh */
+    height: 400px; /* Atur tinggi sesuai kebutuhan */
+  }
+  
+  .banner-wrapper {
+    display: flex; /* Mengatur gambar dalam baris */
+  }
+  
+  .banner-image {
+    width: 100%; /* Mengatur lebar gambar menjadi penuh */
+    height: auto; /* Mengatur tinggi otomatis sesuai aspek rasio gambar */
+  }
+  
+  .button-icon {
+    position: absolute; /* Mengatur posisi tombol */
+    top: 50%; /* Menempatkan di tengah vertikal */
+    transform: translateY(-50%); /* Menyesuaikan posisi */
+    background: rgba(255, 255, 255, 0.7); /* Warna latar belakang semi-transparan */
+    border: none; /* Menghilangkan border */
+    cursor: pointer; /* Menambahkan pointer */
+    z-index: 10; /* Menempatkan di atas gambar */
+  }
+  
+  .button-icon img {
+    width: 30px; /* Ukuran ikon */
+    height: 30px; /* Ukuran ikon */
+  }
+  
+  .button-icon:first-of-type {
+    left: 10px; /* Jarak dari kiri untuk tombol sebelumnya */
+  }
+  
+  .button-icon:last-of-type {
+    right: 10px; /* Jarak dari kanan untuk tombol berikutnya */
+  }
+  
+  /* Konten */
+  .content {
+    text-align: center; /* Pusatkan konten */
+    margin-top: 20px; /* Jarak atas */
+  }
+  
+  .content h2 {
+    font-size: 24px; /* Ukuran font untuk judul */
+  }
+  
+  .content p {
+    font-size: 16px; /* Ukuran font untuk deskripsi */
+  }
+  
