@@ -11,6 +11,7 @@ import Home4Image from '../assets/img/HomeExample2.jpg';  // Gambar rumah tambah
 import supportImage from '../assets/img/support.png';
 import leftButtonImage from '../assets/img/left.png';
 import nextButtonImage from '../assets/img/next.png';
+import HouseImage from '../assets/img/Home3.png';
 
 function Homepage() {
     const [currentIndex, setCurrentIndex] = useState(0);
@@ -54,17 +55,17 @@ function Homepage() {
         },
         {
             id: 4,
-            name: "Rumah Tipe D",
-            location: "Yogyakarta",
-            price: "Rp 650 juta",
+            name: "Rumah Tipe E",
+            location: "Bekasi",
+            price: "Rp 700 juta",
             availableUnits: 8, // Properti baru
             image: Home4Image,
         },
         {
             id: 4,
-            name: "Rumah Tipe D",
-            location: "Yogyakarta",
-            price: "Rp 650 juta",
+            name: "Rumah Tipe F",
+            location: "Semarang",
+            price: "Rp 750 juta",
             availableUnits: 8, // Properti baru
             image: Home4Image,
         },
@@ -109,7 +110,7 @@ function Homepage() {
             <div className="icon-section">
                 <div className="icon">
                     <Link to="/beli">
-                        <img src={HomeImage} alt="Beli" />
+                        <img src={HouseImage} alt="Beli" />
                         <p>Beli Rumah</p>
                     </Link>
                 </div>
