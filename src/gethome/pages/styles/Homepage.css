@@ -1,3 +1,9 @@
+/* Global Styling */
+a {
+    text-decoration: none; /* Menghapus garis bawah pada semua tautan */
+}
+
+/* --- Styling untuk Banner --- */
 /* Container untuk banner */
 .banner-container {
     position: relative;
@@ -5,11 +11,13 @@
     max-width: 1200px;
     margin: 0 auto;
     overflow: hidden;
+    border-radius: 12px; /* Membuat sudut lebih halus */
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1); /* Tambahkan bayangan lembut */
 }
 
 .banner-wrapper {
     display: flex;
-    transition: transform 0.5s ease;
+    transition: transform 0.5s ease-in-out;
     width: 100%;
 }
 
@@ -17,7 +25,6 @@
     width: 100%;
     height: auto;
     object-fit: cover;
-    border-radius: 8px;
 }
 
 /* Tombol navigasi banner */
@@ -25,13 +32,14 @@
     position: absolute;
     top: 50%;
     transform: translateY(-50%);
-    background: none;
-    border: 2px solid #fff;
+    background: rgba(255, 255, 255, 0.8);
+    border: 2px solid #ddd;
     border-radius: 50%;
     cursor: pointer;
     z-index: 10;
     padding: 12px;
-    opacity: 0.7;
+    opacity: 0.8;
+    transition: background-color 0.3s ease, transform 0.3s ease;
     width: 50px;
     height: 50px;
     display: flex;
@@ -39,12 +47,17 @@
     align-items: center;
 }
 
+.button-icon:hover {
+    background-color: rgba(255, 255, 255, 1);
+    transform: scale(1.1); /* Tombol sedikit membesar saat hover */
+}
+
 .button-icon img {
     width: 24px;
     height: 24px;
 }
 
-/* Icon Section */
+/* --- Icon Section --- */
 .icon-section {
     display: flex;
     justify-content: center;
@@ -66,16 +79,16 @@
 
 .icon p {
     font-size: 0.9rem;
-    color: #333;
+    color: #444; /* Warna abu-abu lebih gelap untuk kontras */
 }
 
-/* Container untuk rekomendasi rumah */
+/* --- Section untuk Rekomendasi Rumah --- */
 .recommendations-section {
     margin-top: 2rem;
     padding: 2rem;
-    background-color: #f9f9f9;
-    border-radius: 8px;
-    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.05);
+    background-color: #f7f7f7; /* Warna latar lebih lembut */
+    border-radius: 12px;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
     display: flex;
     flex-direction: column;
     align-items: center;
@@ -83,27 +96,30 @@
 
 .recommendations-section h2 {
     font-size: 1.8rem;
-    color: #333;
+    color: #222;
     margin-bottom: 1.5rem;
     font-weight: bold;
     text-transform: uppercase;
     letter-spacing: 1px;
+    text-align: center;
 }
 
-/* Tampilan horizontal untuk rekomendasi rumah */
-.recommendations-section .property-list {
-    display: flex;
-    gap: 1.5rem;
-    justify-content: center;
-    flex-wrap: wrap;
-    max-width: 100%;
+/* Grid untuk rekomendasi rumah */
+.recommendations-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); /* Kolom fleksibel */
+    gap: 1.5rem; /* Jarak antar card */
+    justify-content: center; /* Pusatkan grid */
+    padding: 0 1rem;
+    width: 100%;
 }
 
+/* Card untuk setiap properti */
 .property-card {
     background-color: #fff;
     border: 1px solid #e6e6e6;
     border-radius: 12px;
-    width: 280px;
+    width: 300px; /* Ukuran card tetap */
     text-align: left;
     padding: 1.5rem;
     display: flex;
@@ -112,14 +128,16 @@
     position: relative;
 }
 
+/* Gambar di dalam card */
 .property-image {
     width: 100%;
-    height: 160px;
+    height: 200px; /* Tinggi gambar tetap */
     object-fit: cover;
     border-radius: 8px;
     margin-bottom: 1rem;
 }
 
+/* Judul dan deskripsi properti */
 .property-card h3 {
     font-size: 1.4rem;
     color: #333;
@@ -132,13 +150,13 @@
     margin: 0.3rem 0;
 }
 
+/* Tombol untuk melihat detail */
 .view-details {
     align-self: flex-start;
     margin-top: auto;
     padding: 0.5rem 1rem;
     color: #333;
     font-weight: bold;
-    text-decoration: none;
     border: 2px solid #333;
     border-radius: 6px;
     transition: background-color 0.3s ease, color 0.3s ease;
@@ -155,9 +173,44 @@
     box-shadow: 0 10px 20px rgba(0, 0, 0, 0.1);
 }
 
-/* Responsif untuk layar lebih kecil */
+/* --- Responsif untuk Layar Kecil --- */
 @media (max-width: 768px) {
-    .property-card {
-        max-width: 100%;
+    .recommendations-grid {
+        grid-template-columns: 1fr; /* 1 kolom untuk layar kecil */
     }
+
+    .property-card {
+        width: 100%; /* Gambar memenuhi layar */
+    }
+}
+
+/* --- Styling untuk Kotak Konsultasi --- */
+.consultation-box {
+    width: 90%;
+    max-width: 500px;
+    margin: 20px auto;
+    padding: 30px;
+    background-color: #f9f9f9;
+    border: 1px solid #ddd;
+    border-radius: 12px;
+    text-align: center;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+}
+
+.consultation-image {
+    max-width: 100px;
+    margin-bottom: 15px;
+}
+
+.whatsapp-button {
+    display: inline-block;
+    padding: 10px 25px;
+    background-color: #25d366;
+    color: #fff;
+    font-size: 1rem;
+    font-weight: bold;
+    text-decoration: none;
+    border-radius: 6px;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
 }

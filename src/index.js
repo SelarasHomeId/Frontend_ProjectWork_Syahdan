@@ -2,7 +2,7 @@
 import React from 'react';
 import ReactDOM from 'react-dom/client';
 import { BrowserRouter as Router } from 'react-router-dom';
-import './assets/styles/index.css'; // Pastikan jalur ini benar sesuai lokasi file CSS
+import './gethome/assets/styles/index.css'; // Pastikan jalur ini benar sesuai lokasi file CSS
 import App from './App'; // Mengimpor komponen App
 
 // Membuat root menggunakan React 18

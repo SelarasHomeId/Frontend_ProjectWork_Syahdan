@@ -1,6 +1,6 @@
 // src/pages/Contact.js
 import React, { useState } from 'react';
-import './Contact.css'; // Pastikan file CSS terhubung
+import '../pages/styles/Contact.css'; // Pastikan file CSS terhubung
 
 function Contact() {
   const [formData, setFormData] = useState({
@@ -28,9 +28,9 @@ function Contact() {
 
   return (
     <div className="contact-container">
-      <h2>Kontak Kami</h2>
+      <h2>Gabung Sebagai Agen</h2>
       <p>
-        Jika ada pertanyaan, silakan hubungi kami melalui informasi kontak di bawah ini:
+        Dapatkan komisi jutaan rupiah menjadi agen properti di selarashome
       </p>
       <ul>
         <li>Email: contact@selarashome.com</li>
@@ -43,7 +43,7 @@ function Contact() {
           <h3>Kirim Pesan</h3>
           <form onSubmit={handleSubmit}>
             <div className="form-group">
-              <label htmlFor="name">Nama:</label>
+              <label htmlFor="name">Nama Lengkap:</label>
               <input
                 type="text"
                 id="name"
@@ -75,13 +75,13 @@ function Contact() {
                 required
               />
             </div>
-            <button type="submit" className="submit-btn">Kirim</button>
+            <button type="submit" className="submit-btn">Lanjut</button>
           </form>
         </div>
       ) : (
         <div className="thank-you-message">
           <h3>Terima kasih!</h3>
-          <p>Pesan Anda telah terkirim. Kami akan segera menghubungi Anda.</p>
+          <p>Dengan ini saya menyetujui Syarat dan Ketentuan dan Kebijakan Privasi yang berlaku</p>
         </div>
       )}
     </div>

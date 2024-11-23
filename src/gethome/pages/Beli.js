@@ -1,11 +1,11 @@
 // src/pages/Beli.js
 import React, { useState } from 'react';
-import './Beli.css';
-import bannerbeli1Image from '../assets/bannerbeli1.jpg';
-import bannerbeli2Image from '../assets/bannerbeli2.jpg';
-import bannerbeli3Image from '../assets/bannerbeli3.jpg';
-import leftButtonImage from '../assets/left.png';
-import nextButtonImage from '../assets/next.png';
+import '../pages/styles/Beli.css';
+import bannerbeli1Image from '../assets/img/bannerbeli1.jpg';
+import bannerbeli2Image from '../assets/img/bannerbeli2.jpg';
+import bannerbeli3Image from '../assets/img/bannerbeli3.jpg';
+import leftButtonImage from '../assets/img/left.png';
+import nextButtonImage from '../assets/img/next.png';
 
 function Beli() {
   const [currentIndex, setCurrentIndex] = useState(0); // State untuk indeks gambar
