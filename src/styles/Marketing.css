@@ -1,0 +1,32 @@
+.marketing-container {
+    padding: 20px;
+    background-color: #fef8e1;
+    border-radius: 8px;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+  }
+  
+  .marketing-title {
+    font-size: 2rem;
+    font-weight: bold;
+    color: #ff9800;
+    margin-bottom: 10px;
+  }
+  
+  .marketing-description {
+    font-size: 1.2rem;
+    color: #555;
+    margin-bottom: 20px;
+  }
+  
+  .marketing-goals h3 {
+    font-size: 1.5rem;
+    color: #333;
+    margin-bottom: 10px;
+  }
+  
+  .marketing-goals ol {
+    list-style: decimal inside;
+    color: #444;
+    font-size: 1.1rem;
+  }
+  

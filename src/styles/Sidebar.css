@@ -1,0 +1,204 @@
+/* Struktur dasar untuk layout */
+.app-container {
+  display: flex;
+  transition: margin-left 0.3s ease-in-out;
+  height: 100vh; /* Pastikan layout menggunakan seluruh tinggi layar */
+  position: relative;
+}
+
+/* Sidebar container */
+.sidebar-container {
+  position: fixed;
+  top: 0;
+  left: -250px; /* Sidebar tersembunyi secara default */
+  width: 250px;
+  height: 100%;
+  background-color: #343a40;
+  color: #fff;
+  box-shadow: 2px 0 8px rgba(0, 0, 0, 0.2);
+  overflow-y: auto;
+  transition: left 0.3s ease-in-out;
+  z-index: 999;
+  padding-top: 20px; /* Memberi jarak di bagian atas sidebar */
+}
+
+/* Sidebar aktif */
+.sidebar-container.active {
+  left: 0; /* Sidebar muncul */
+}
+
+/* Styling untuk tombol burger */
+.burger-menu-btn {
+  position: absolute;
+  top: 20px;
+  left: 20px;
+  z-index: 1000;
+  font-size: 30px;
+  background: none;
+  border: none;
+  color: white;
+  cursor: pointer;
+  transition: transform 0.3s ease;
+}
+
+/* Efek saat tombol burger ditekan */
+.burger-menu-btn:hover {
+  transform: scale(1.1); /* Efek memperbesar tombol saat hover */
+}
+
+/* Sidebar item */
+.sidebar-item {
+  display: block;
+  padding: 12px 20px;
+  margin-bottom: 10px;
+  color: #fff;
+  text-decoration: none;
+  font-size: 16px;
+  border-radius: 6px; /* Sudut lebih membulat untuk kesan modern */
+  background-color: transparent;
+  transition: background-color 0.3s, color 0.3s;
+}
+
+.sidebar-item:hover {
+  background-color: #495057; /* Warna abu-abu lebih lembut */
+  color: #fff;
+}
+
+/* Sub-menu */
+.sidebar-link {
+  display: block;
+  padding: 8px 20px;
+  color: #ccc; /* Warna lebih terang untuk sub-menu */
+  text-decoration: none;
+  font-size: 14px;
+  border-radius: 4px;
+  transition: background-color 0.3s, color 0.3s;
+}
+
+.sidebar-link:hover {
+  background-color: #495057;
+  color: #fff;
+}
+
+/* Styling untuk daftar di dalam sidebar */
+.sidebar ul {
+  margin: 0;
+  padding-left: 20px; /* Memberi jarak yang lebih baik untuk item list */
+}
+
+.sidebar ul li {
+  margin-bottom: 8px; /* Jarak antar item */
+  list-style: none;
+}
+
+/* Sidebar aktif class */
+.app-container.sidebar-active .main-content {
+  margin-left: 250px; /* Geser konten utama saat sidebar aktif */
+}
+
+/* Main content */
+.main-content {
+  flex-grow: 1;
+  transition: margin-left 0.3s ease-in-out;
+  margin-left: 0;
+  padding: 20px;
+  background-color: #f8f9fa; /* Latar belakang lebih terang untuk konten utama */
+  overflow-y: auto;
+}
+
+/* Sidebar header */
+.sidebar h5 {
+  font-size: 18px;
+  font-weight: bold;
+  margin-bottom: 20px;
+  text-align: center;
+  color: #f8f9fa; /* Warna terang agar kontras dengan background sidebar */
+}
+
+/* Sidebar link style */
+.sidebar ul li,
+.sidebar-item,
+.sidebar-link {
+  background-color: transparent;
+  color: #fff;
+  border: none;
+}
+
+.sidebar ul li:hover,
+.sidebar-item:hover,
+.sidebar-link:hover {
+  background-color: #495057;
+  color: #fff;
+}
+
+/* Menambahkan animasi untuk transisi menu hamburger */
+.sidebar-container {
+  position: fixed;
+  top: 0;
+  left: -250px;
+  width: 250px;
+  height: 100%;
+  background-color: #343a40;
+  transition: left 0.3s ease;
+}
+
+.sidebar-container.active {
+  left: 0; /* Tampilkan sidebar */
+}
+
+.app-container.sidebar-active {
+  overflow: hidden;
+}
+
+/* CSS untuk Konten dengan sidebar */
+.content-with-sidebar {
+  margin-left: 250px; /* Sesuaikan dengan lebar sidebar */
+  transition: margin-left 0.3s ease;
+}
+
+/* Media query untuk responsivitas */
+@media (max-width: 768px) {
+  .sidebar-container {
+    width: 220px; /* Sesuaikan lebar sidebar untuk layar kecil */
+  }
+
+  .sidebar-active .main-content {
+    margin-left: 220px;
+  }
+
+  .burger-menu-btn {
+    font-size: 26px; /* Ukuran tombol lebih kecil */
+  }
+}
+
+@media (max-width: 576px) {
+  .sidebar-container {
+    width: 200px; /* Sidebar lebih kecil di layar sangat kecil */
+  }
+
+  .sidebar-active .main-content {
+    margin-left: 200px;
+  }
+
+  .sidebar-item {
+    font-size: 14px; /* Kecilkan ukuran font untuk sidebar */
+  }
+
+  .burger-menu-btn {
+    font-size: 24px; /* Ukuran tombol burger lebih kecil */
+  }
+}
+
+@media (max-width: 400px) {
+  .sidebar-container {
+    width: 180px; /* Sidebar lebih kecil pada layar ponsel */
+  }
+
+  .sidebar-active .main-content {
+    margin-left: 180px;
+  }
+
+  .burger-menu-btn {
+    font-size: 22px; /* Ukuran tombol semakin kecil */
+  }
+}

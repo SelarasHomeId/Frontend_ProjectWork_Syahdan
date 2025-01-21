@@ -1,45 +1,24 @@
-import React from 'react';
-import { Route, Routes } from 'react-router-dom';
-import Navbar from './gethome/components/Navbar'; // Komponen Navbar
-import Homepage from './gethome/pages/Homepage'; // Halaman utama
-import Contact from './gethome/pages/Contact'; // Halaman Kontak
-import About from './gethome/pages/About'; // Halaman Tentang Kami
-import Beli from './gethome/pages/Beli'; // Halaman Beli
-import Properties from './gethome/pages/Properties'; // Halaman Properti
-import HomeDetail from './gethome/pages/HomeDetail'; // Halaman Detail Rumah
-import Lainnya from './gethome/pages/Lainnya'; // Halaman untuk Lainnya
-import Profile from './gethome/pages/Profile'; // Halaman Profil
-import Settings from './gethome/pages/Settings'; // Halaman Pengaturan
-import Help from './gethome/pages/Help'; // Halaman Bantuan
+import React from "react";
+import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
+import Login from "./pages/Login";
+import Home from "./pages/Home";
+import Marketing from "./components/workspace/Marketing";
+import Legal from "./components/workspace/Legal";
+import Technical from "./components/workspace/Technical";
+import Accounting from "./components/workspace/Accounting";
 
 function App() {
   return (
-    <div className="App">
-      {/* Navbar akan muncul di setiap halaman */}
-      <Navbar />
+    <Router>
       <Routes>
-        {/* Rute untuk halaman utama */}
-        <Route path="/" element={<Homepage />} />
-        {/* Rute untuk halaman Beli */}
-        <Route path="/beli" element={<Beli />} />
-        {/* Rute untuk halaman Tentang Kami */}
-        <Route path="/about" element={<About />} />
-        {/* Rute untuk halaman Kontak */}
-        <Route path="/contact" element={<Contact />} />
-        {/* Rute untuk halaman Properti */}
-        <Route path="/properties" element={<Properties />} />
-        {/* Rute untuk halaman Detail Rumah */}
-        <Route path="/homes/:id" element={<HomeDetail />} />
-        {/* Rute untuk halaman Lainnya */}
-        <Route path="/lainnya" element={<Lainnya />} />
-        {/* Rute untuk halaman Profil */}
-        <Route path="/profile" element={<Profile />} />
-        {/* Rute untuk halaman Pengaturan */}
-        <Route path="/settings" element={<Settings />} />
-        {/* Rute untuk halaman Bantuan */}
-        <Route path="/help" element={<Help />} />
+        <Route path="/" element={<Login />} />
+        <Route path="/home" element={<Home />} />
+        <Route path="/marketing" element={<Marketing />} />
+        <Route path="/legal" element={<Legal />} />
+        <Route path="/technical" element={<Technical />} />
+        <Route path="/accounting" element={<Accounting />} />
       </Routes>
-    </div>
+    </Router>
   );
 }
 

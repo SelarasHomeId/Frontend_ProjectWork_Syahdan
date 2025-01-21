@@ -1,0 +1,17 @@
+/* Styling dasar untuk ToDoList */
+h2 {
+    color: blue;
+  }
+  
+  ul {
+    list-style-type: none;
+    padding: 0;
+  }
+  
+  li {
+    margin: 10px 0;
+    padding: 5px;
+    border: 1px solid #ccc;
+    background-color: #f9f9f9;
+  }
+  

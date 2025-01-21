@@ -1,38 +1,207 @@
-.App {
-  text-align: center;
-}
-
-.App-logo {
-  height: 40vmin;
-  pointer-events: none;
-}
-
-@media (prefers-reduced-motion: no-preference) {
-  .App-logo {
-    animation: App-logo-spin infinite 20s linear;
-  }
-}
-
-.App-header {
-  background-color: #282c34;
-  min-height: 100vh;
+/* Styling utama untuk aplikasi */
+.app-container {
   display: flex;
-  flex-direction: column;
+  height: 100vh;
+  font-family: 'Arial', sans-serif;
+  background-color: #ffffff; /* Warna putih */
+  margin: 0;
+  padding: 0;
+  transition: margin-left 0.3s ease-in-out;
+}
+
+/* Jika sidebar aktif */
+.sidebar-active .main-content {
+  margin-left: 250px; /* Sesuaikan dengan lebar sidebar */
+}
+
+/* Navbar styling */
+.navbar {
+  display: flex;
+  justify-content: space-between;
   align-items: center;
-  justify-content: center;
-  font-size: calc(10px + 2vmin);
+  padding: 10px 20px;
+  background-color: #ffffff; /* Warna putih */
+  color: black; /* Teks gelap untuk kontras */
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  position: sticky;
+  top: 0;
+  z-index: 10;
+}
+
+.navbar-logo {
+  font-size: 20px;
+  font-weight: bold;
+}
+
+.navbar-profile,
+.navbar-notification {
+  display: flex;
+  align-items: center;
+  cursor: pointer;
+}
+
+.navbar-profile img,
+.navbar-notification img {
+  width: 24px;
+  height: 24px;
+  margin-left: 10px;
+}
+
+/* Sidebar styling */
+.sidebar {
+  width: 250px;
+  height: 100vh;
+  background-color: #ffffff; /* Warna putih */
+  border-right: 1px solid #ddd;
+  box-shadow: 2px 0 4px rgba(0, 0, 0, 0.1);
+  position: fixed;
+  top: 0;
+  left: 0;
+  padding: 20px;
+  overflow-y: auto;
+  transition: transform 0.3s ease-in-out;
+}
+
+.sidebar ul {
+  list-style-type: none;
+  padding: 0;
+  margin: 0;
+}
+
+.sidebar li {
+  padding: 10px 15px;
+  margin-bottom: 5px;
+  border-radius: 4px;
+  cursor: pointer;
+  transition: all 0.2s ease-in-out;
+  background-color: #ffffff; /* Warna putih */
+}
+
+.sidebar li:hover {
+  background-color: #f0f0f0;
+}
+
+.sidebar .submenu {
+  margin-left: 20px;
+  margin-top: 5px;
+}
+
+.sidebar .submenu li {
+  font-size: 14px;
+  margin-bottom: 3px;
+  background-color: #ffffff; /* Warna putih */
+}
+
+/* Main layout */
+.main-content {
+  flex-grow: 1;
+  padding: 20px;
+  background-color: #ffffff; /* Warna putih */
+  overflow-y: auto;
+  transition: margin-left 0.3s ease-in-out;
+}
+
+/* Content styling */
+.content {
+  margin-top: 20px;
+  color: #333;
+}
+
+.content h1 {
+  font-size: 24px;
+  color: #333;
+  margin-bottom: 10px;
+}
+
+.content p {
+  font-size: 16px;
+  color: #666;
+  line-height: 1.5;
+}
+
+/* ToDoList styling */
+.to-do-list {
+  max-width: 600px;
+  margin: 20px auto;
+  background-color: #ffffff; /* Warna putih */
+  padding: 20px;
+  border-radius: 8px;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+}
+
+.to-do-list h2 {
+  margin-bottom: 20px;
+  font-size: 20px;
+  color: #333;
+}
+
+.input-task {
+  width: 80%;
+  padding: 10px;
+  margin-right: 10px;
+  border: 1px solid #ccc;
+  border-radius: 4px;
+}
+
+.add-task-button {
+  padding: 10px 20px;
+  border: none;
+  background-color: #333; /* Warna tombol untuk kontras */
   color: white;
+  font-size: 16px;
+  border-radius: 4px;
+  cursor: pointer;
 }
 
-.App-link {
-  color: #61dafb;
+.add-task-button:hover {
+  background-color: #555; /* Warna lebih gelap saat hover */
 }
 
-@keyframes App-logo-spin {
-  from {
-    transform: rotate(0deg);
+.task-list {
+  list-style-type: none;
+  padding: 0;
+  margin-top: 20px;
+}
+
+.task-item {
+  background-color: #ffffff; /* Warna putih */
+  padding: 10px;
+  margin-bottom: 10px;
+  border: 1px solid #ddd;
+  border-radius: 4px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.delete-task-button {
+  background-color: #f44336;
+  color: white;
+  padding: 5px 10px;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+}
+
+.delete-task-button:hover {
+  background-color: #e53935; /* Warna lebih gelap saat hover */
+}
+
+/* Responsive design */
+@media (max-width: 768px) {
+  .sidebar {
+    transform: translateX(-100%);
   }
-  to {
-    transform: rotate(360deg);
+
+  .sidebar-active .sidebar {
+    transform: translateX(0);
+  }
+
+  .main-content {
+    padding: 10px;
+  }
+
+  .navbar {
+    flex-wrap: wrap;
   }
 }
