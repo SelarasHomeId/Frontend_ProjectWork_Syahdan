@@ -1,0 +1,65 @@
+/* src/assets/styles/index.css */
+nav {
+  background-color: red; /* Mengubah warna latar belakang menjadi merah */
+  color: #fff;
+  padding: 10px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  position: relative; /* Membuat posisi relatif untuk dropdown */
+}
+
+nav .site-title {
+  margin: 0;
+}
+
+nav ul {
+  list-style-type: none;
+  padding: 0;
+  margin: 0;
+  position: relative; /* Membuat posisi relatif untuk dropdown */
+}
+
+nav li {
+  display: inline;
+  margin: 0 10px;
+  position: relative; /* Membuat posisi relatif untuk menu dropdown */
+}
+
+nav a {
+  color: #fff;
+  text-decoration: none;
+}
+
+nav a:hover {
+  text-decoration: underline;
+}
+
+/* Gaya untuk dropdown */
+.dropdown {
+  display: none; /* Menyembunyikan dropdown secara default */
+  position: absolute; /* Menempatkan dropdown di posisi absolut */
+  background-color: red; /* Warna latar belakang dropdown */
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2); /* Bayangan untuk dropdown */
+  z-index: 1; /* Menempatkan dropdown di atas elemen lainnya */
+}
+
+nav li:hover .dropdown {
+  display: block; /* Menampilkan dropdown saat mouse hover pada li */
+}
+
+.dropdown ul {
+  list-style-type: none;
+  padding: 0;
+  margin: 0;
+}
+
+.dropdown li {
+  display: block; /* Menampilkan item dropdown sebagai block */
+  margin: 0; /* Menghapus margin */
+}
+
+.dropdown a {
+  padding: 10px; /* Menambahkan padding */
+  display: block; /* Menampilkan link sebagai block */
+}

@@ -1,0 +1,6 @@
+Cara push code ke GitHub 
+1. buka terminal
+2. masukkan perintah git add .
+3. check status dengan git status
+4. untuk memberi label atau menamai perubahan code dengan git commit -m "initial commit"
+5. push ke git hub dengan git push

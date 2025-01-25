@@ -57,6 +57,7 @@
   border-radius: 6px; /* Sudut lebih membulat untuk kesan modern */
   background-color: transparent;
   transition: background-color 0.3s, color 0.3s;
+  cursor: pointer;
 }
 
 .sidebar-item:hover {

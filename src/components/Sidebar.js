@@ -1,10 +1,13 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import "bootstrap/dist/css/bootstrap.min.css";
 import "bootstrap-icons/font/bootstrap-icons.css";
 import "../styles/Sidebar.css";
+import { workspaceFind } from "../service/apiService";
+import { getIconClass } from "../utils/general";
 
 function Sidebar({ showSidebar, toggleSidebar, onPageChange }) {
   const [showWorkspace, setShowWorkspace] = useState(false);
+  const [workspaceList, setWorkspaceList] = useState([]);
   const [showMasterdata, setShowMasterdata] = useState(false);
 
   // Fungsi toggle submenu
@@ -15,6 +18,19 @@ function Sidebar({ showSidebar, toggleSidebar, onPageChange }) {
       resetSubmenu();
     }
   };
+
+  const fetchWorkspaceData = async () => {
+    try {
+      const response = await workspaceFind();
+      setWorkspaceList(response);
+    } catch (error) {
+      console.error("Error fetching Workspace data:", error);
+    }
+  };
+
+  useEffect(() => {
+    fetchWorkspaceData();
+  }, []);
 
   return (
     <div className={`app-container ${showSidebar ? "sidebar-active" : ""}`}>
@@ -43,18 +59,13 @@ function Sidebar({ showSidebar, toggleSidebar, onPageChange }) {
             </h6>
             {showWorkspace && (
               <ul className="list-unstyled ms-3">
-                {[ 
-                  { name: "Marketing", icon: "bi bi-graph-up", page: "marketing" },
-                  { name: "Legal", icon: "bi bi-briefcase", page: "legal" },
-                  { name: "Technical", icon: "bi bi-tools", page: "technical" },
-                  { name: "Accounting", icon: "bi bi-calculator", page: "accounting" }
-                ].map((item) => (
-                  <li key={item.page}>
+                {workspaceList.map((item) => (
+                  <li key={item.id}>
                     <button
                       className="sidebar-link"
-                      onClick={() => onPageChange(item.page)}
+                      onClick={() => onPageChange(item.name.toLowerCase())}
                     >
-                      <i className={item.icon}></i> {item.name}
+                      <i className={getIconClass(item.name)}></i> {item.name}
                     </button>
                   </li>
                 ))}

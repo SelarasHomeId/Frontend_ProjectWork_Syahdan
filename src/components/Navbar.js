@@ -2,7 +2,7 @@ import React, { useState } from "react";
 import "../styles/Navbar.css";
 import { FaBell, FaUser } from "react-icons/fa";
 import { Link, useNavigate } from "react-router-dom";
-import { logout } from "../service/apiService"; // Import logout dari apiService
+import { authLogout } from "../service/apiService"; // Import logout dari apiService
 
 function Navbar({ toggleSidebar }) {
   const [showNotificationDropdown, setShowNotificationDropdown] = useState(false);
@@ -27,10 +27,10 @@ function Navbar({ toggleSidebar }) {
 
   const handleLogout = async () => {
     try {
-      const response = await logout(); // Panggil fungsi logout dari apiService
+      const response = await authLogout();
       if (response.success) {
-        alert(response.data.message); // Menampilkan pesan sukses
-        // Mengarahkan pengguna ke halaman login setelah logout berhasil
+        localStorage.clear();
+        alert(response.data.message);
         navigate("/");
       }
     } catch (error) {
@@ -83,9 +83,9 @@ function Navbar({ toggleSidebar }) {
           <div className="nav-item dropdown user-section" onClick={toggleUserDropdown}>
             <FaUser className="user-icon" />
             <div className="user-details">
-              <span className="user-name">Syahdan</span>
+              Hello <span className="user-name">{localStorage.getItem('name')}</span>!
               <div className="user-role-divisi">
-                <span className="user-role">Admin</span> - <span className="user-divisi">IT</span>
+                <span className="user-role">{localStorage.getItem('roleName')}</span> - <span className="user-divisi">{localStorage.getItem('divisiName')}</span>
               </div>
             </div>
             {showUserDropdown && (

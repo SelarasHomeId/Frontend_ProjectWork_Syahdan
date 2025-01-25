@@ -1,0 +1,75 @@
+/* src/pages/Contact.css */
+.contact-container {
+    max-width: 800px;
+    margin: 0 auto;
+    padding: 20px;
+    background-color: #f9f9f9;
+    border-radius: 8px;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+  }
+  
+  .contact-container h2 {
+    color: #333;
+    font-size: 24px;
+    margin-bottom: 20px;
+  }
+  
+  .contact-container p {
+    color: #555;
+    font-size: 16px;
+    line-height: 1.6;
+  }
+  
+  .contact-container ul {
+    list-style-type: none;
+    padding: 0;
+  }
+  
+  .contact-container ul li {
+    color: #333;
+    font-size: 16px;
+    margin-bottom: 10px;
+  }
+  
+  .contact-form {
+    margin-top: 20px;
+  }
+  
+  .form-group {
+    margin-bottom: 15px;
+  }
+  
+  .form-group label {
+    display: block;
+    margin-bottom: 5px;
+    color: #333;
+  }
+  
+  .form-group input,
+  .form-group textarea {
+    width: 100%;
+    padding: 10px;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+  }
+  
+  .submit-btn {
+    background-color: #f00; /* Warna tombol merah */
+    color: #fff;
+    padding: 10px 15px;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+    font-size: 16px;
+  }
+  
+  .submit-btn:hover {
+    background-color: #c00; /* Warna tombol saat hover */
+  }
+  
+  .thank-you-message {
+    margin-top: 20px;
+    text-align: center;
+    color: #333;
+  }
+  

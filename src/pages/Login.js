@@ -3,7 +3,7 @@ import React, { useState } from "react";
 import "../styles/Login.css";
 import { FaUser, FaLock, FaEye, FaEyeSlash } from "react-icons/fa";
 import { useNavigate } from "react-router-dom"; // Untuk navigasi
-import { login } from "../service/apiService"; // Mengimpor fungsi login
+import { authLogin } from "../service/apiService"; // Mengimpor fungsi login
 
 function Login() {
   const [email, setEmail] = useState("");
@@ -20,10 +20,26 @@ function Login() {
     event.preventDefault();
 
     try {
-      const data = await login(email, password);
+      const response = await authLogin(email, password);
 
-      if (data) {
-        // Jika login berhasil, redirect ke halaman Home
+      if (response && response.success === true) {
+        const token = response.data.token
+        const email = response.data.data.email
+        const name = response.data.data.name
+        const id = response.data.data.id
+        const roleId = response.data.data.role.id
+        const divisiId = response.data.data.divisi.id
+        const roleName = response.data.data.role.name
+        const divisiName = response.data.data.divisi.name
+        localStorage.setItem("token", token)
+        localStorage.setItem("email", email)
+        localStorage.setItem("name", name)
+        localStorage.setItem("id", id)
+        localStorage.setItem("roleId", roleId)
+        localStorage.setItem("divisiId", divisiId)
+        localStorage.setItem("roleName", roleName)
+        localStorage.setItem("divisiName", divisiName)
+
         navigate("/home");
       } else {
         setError("Email atau password salah!"); // Tampilkan pesan error

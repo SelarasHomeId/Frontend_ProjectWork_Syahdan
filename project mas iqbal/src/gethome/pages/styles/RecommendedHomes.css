@@ -1,0 +1,39 @@
+/* src/pages/RecommendedHomes.css */
+.recommended-homes {
+    text-align: center;
+    margin: 40px 0;
+}
+
+.homes-container {
+    display: flex;
+    justify-content: space-around;
+    flex-wrap: wrap;
+}
+
+.home-card {
+    border: 1px solid #ccc;
+    border-radius: 8px;
+    margin: 20px;
+    padding: 10px;
+    width: 30%; /* Ubah sesuai kebutuhan */
+    cursor: pointer;
+    transition: transform 0.2s;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1); /* Tambahkan bayangan untuk card */
+}
+
+.home-card:hover {
+    transform: scale(1.05);
+}
+
+.home-image {
+    width: 100%;
+    height: auto;
+    border-radius: 8px;
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+    .home-card {
+        width: 80%; /* Lebar lebih besar pada perangkat kecil */
+    }
+}

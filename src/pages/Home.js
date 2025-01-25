@@ -6,9 +6,9 @@ import Marketing from "../components/workspace/Marketing.js";
 import Legal from "../components/workspace/Legal.js";
 import Technical from "../components/workspace/Technical.js";
 import Accounting from "../components/workspace/Accounting.js";
-import User from "../components/master_data/User";
-import Role from "../components/master_data/Role";
-import Division from "../components/master_data/Division";
+import User from "../components/masterdata/User.js";
+import Role from "../components/masterdata/Role.js";
+import Division from "../components/masterdata/Division.js";
 
 // Enum untuk mendefinisikan halaman agar lebih terorganisir dan mudah diubah
 const PAGES = Object.freeze({
@@ -37,7 +37,7 @@ function Home() {
     setCurrentPage(page);
   };
 
-  // Fungsi untuk merender konten halaman sesuai dengan state `currentPage`
+  // Fungsi untuk merender konten halaman sesuai dengan state currentPage
   const renderPage = () => {
     switch (currentPage) {
       case PAGES.DASHBOARD:
