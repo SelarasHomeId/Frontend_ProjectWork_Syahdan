@@ -40,12 +40,11 @@ function Sidebar({ showSidebar, toggleSidebar, onPageChange }) {
           <h5 className="mb-4 text-center">Menu</h5>
 
           {/* Dashboard */}
-          <button
-            className="sidebar-item"
-            onClick={() => onPageChange("dashboard")}
-          >
-            <i className="bi bi-house-door-fill"></i> Dashboard
-          </button>
+          <div>
+            <h6 className="sidebar-item clickable" onClick={() => onPageChange("dashboard")}>
+              <i className="bi bi-house-door-fill"></i> Dashboard
+            </h6>
+          </div>
 
           {/* Workspace */}
           <div>
