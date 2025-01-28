@@ -9,6 +9,7 @@ function Sidebar({ showSidebar, toggleSidebar, onPageChange }) {
   const [showWorkspace, setShowWorkspace] = useState(false);
   const [workspaceList, setWorkspaceList] = useState([]);
   const [showMasterdata, setShowMasterdata] = useState(false);
+  const [divisiId, setDivisiId] = useState(null);
 
   // Fungsi toggle submenu
   const toggleSubMenu = (submenuSetter, resetSubmenu) => {
@@ -30,6 +31,8 @@ function Sidebar({ showSidebar, toggleSidebar, onPageChange }) {
 
   useEffect(() => {
     fetchWorkspaceData();
+    const storedDivisiId = localStorage.getItem("divisiId");
+    setDivisiId(storedDivisiId ? parseInt(storedDivisiId, 10) : null);
   }, []);
 
   return (
@@ -88,7 +91,11 @@ function Sidebar({ showSidebar, toggleSidebar, onPageChange }) {
                   { name: "User", icon: "bi bi-person", page: "user" },
                   { name: "Role", icon: "bi bi-person-check", page: "role" },
                   { name: "Division", icon: "bi bi-sliders", page: "division" }
-                ].map((item) => (
+                ]
+                .filter((item) =>
+                  divisiId === 1 ? true : item.page !== "division" && item.page !== "role"
+                )
+                .map((item) => (
                   <li key={item.page}>
                     <button
                       className="sidebar-link"
