@@ -1,8 +1,6 @@
 import React, { useState } from 'react';
-import { useParams } from 'react-router-dom';
 
-function WorkspacePage() {
-  const { division } = useParams();  // Mengambil parameter division dari URL
+function Workspace({workspaceName}) {
   const [cards, setCards] = useState([]);
 
   // Fungsi untuk menambahkan kartu baru
@@ -29,52 +27,45 @@ function WorkspacePage() {
     setCards([]); // Menghapus semua kartu
   };
 
-  // Fungsi untuk mengurutkan kartu berdasarkan tanggal
-  const sortByDate = () => {
-    const sortedCards = [...cards].sort((a, b) => b.createdAt - a.createdAt);
-    setCards(sortedCards);
-  };
-
   return (
     <div>
-      <h2>{division} Workspace</h2>
+      <h2 className='text-center'>{workspaceName} Workspace</h2>
       <div className="btn-group">
         <button
           type="button"
           className="btn btn-outline-primary btn-sm dropdown-toggle"
           data-bs-toggle="dropdown"
-          aria-expanded="false"
         >
           Actions
         </button>
         <ul className="dropdown-menu">
           <li>
-            <a className="dropdown-item" href="#" onClick={addCard}>
+            <div className="dropdown-item" onClick={addCard}>
               Add Card
-            </a>
+            </div>
           </li>
           <li>
-            <a className="dropdown-item" href="#" onClick={moveList}>
+            <div className="dropdown-item" onClick={moveList}>
               Move List
-            </a>
+            </div>
           </li>
           <li>
-            <a className="dropdown-item" href="#" onClick={copyList}>
+            <div className="dropdown-item" onClick={copyList}>
               Copy List
-            </a>
+            </div>
           </li>
           <li>
-            <a className="dropdown-item" href="#" onClick={moveAllCards}>
+            <div className="dropdown-item" onClick={moveAllCards}>
               Move All Cards in This List
-            </a>
+            </div>
           </li>
         </ul>
       </div>
       
       <div className="mt-4">
-        <h5>Card List for {division}</h5>
+        <h5>Card List for {workspaceName}</h5>
         {cards.length === 0 ? (
-          <p>No cards available for this division.</p>
+          <p>No cards available for this workspaceName.</p>
         ) : (
           cards.map((card) => (
             <div key={card.id} className="card mb-2">
@@ -90,4 +81,4 @@ function WorkspacePage() {
   );
 }
 
-export default WorkspacePage;
+export default Workspace;

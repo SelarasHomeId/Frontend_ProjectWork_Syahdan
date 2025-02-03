@@ -1,11 +1,15 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import "bootstrap/dist/css/bootstrap.min.css";
 import "bootstrap-icons/font/bootstrap-icons.css";
 import "../styles/Sidebar.css";
+import { workspaceFind } from "../service/apiService";
+import { getIconClass } from "../utils/general";
 
 function Sidebar({ showSidebar, toggleSidebar, onPageChange }) {
   const [showWorkspace, setShowWorkspace] = useState(false);
+  const [workspaceList, setWorkspaceList] = useState([]);
   const [showMasterdata, setShowMasterdata] = useState(false);
+  const [divisiId, setDivisiId] = useState(null);
 
   // Fungsi toggle submenu
   const toggleSubMenu = (submenuSetter, resetSubmenu) => {
@@ -16,6 +20,21 @@ function Sidebar({ showSidebar, toggleSidebar, onPageChange }) {
     }
   };
 
+  const fetchWorkspaceData = async () => {
+    try {
+      const response = await workspaceFind();
+      setWorkspaceList(response);
+    } catch (error) {
+      console.error("Error fetching Workspace data:", error);
+    }
+  };
+
+  useEffect(() => {
+    fetchWorkspaceData();
+    const storedDivisiId = localStorage.getItem("divisiId");
+    setDivisiId(storedDivisiId ? parseInt(storedDivisiId, 10) : null);
+  }, []);
+
   return (
     <div className={`app-container ${showSidebar ? "sidebar-active" : ""}`}>
       {/* Sidebar */}
@@ -24,12 +43,11 @@ function Sidebar({ showSidebar, toggleSidebar, onPageChange }) {
           <h5 className="mb-4 text-center">Menu</h5>
 
           {/* Dashboard */}
-          <button
-            className="sidebar-item"
-            onClick={() => onPageChange("dashboard")}
-          >
-            <i className="bi bi-house-door-fill"></i> Dashboard
-          </button>
+          <div>
+            <h6 className="sidebar-item clickable" onClick={() => onPageChange("dashboard")}>
+              <i className="bi bi-house-door-fill"></i> Dashboard
+            </h6>
+          </div>
 
           {/* Workspace */}
           <div>
@@ -43,18 +61,13 @@ function Sidebar({ showSidebar, toggleSidebar, onPageChange }) {
             </h6>
             {showWorkspace && (
               <ul className="list-unstyled ms-3">
-                {[ 
-                  { name: "Marketing", icon: "bi bi-graph-up", page: "marketing" },
-                  { name: "Legal", icon: "bi bi-briefcase", page: "legal" },
-                  { name: "Technical", icon: "bi bi-tools", page: "technical" },
-                  { name: "Accounting", icon: "bi bi-calculator", page: "accounting" }
-                ].map((item) => (
-                  <li key={item.page}>
+                {workspaceList.map((item) => (
+                  <li key={item.id}>
                     <button
                       className="sidebar-link"
-                      onClick={() => onPageChange(item.page)}
+                      onClick={() => onPageChange(item.name.toLowerCase())}
                     >
-                      <i className={item.icon}></i> {item.name}
+                      <i className={getIconClass(item.name)}></i> {item.name}
                     </button>
                   </li>
                 ))}
@@ -78,7 +91,11 @@ function Sidebar({ showSidebar, toggleSidebar, onPageChange }) {
                   { name: "User", icon: "bi bi-person", page: "user" },
                   { name: "Role", icon: "bi bi-person-check", page: "role" },
                   { name: "Division", icon: "bi bi-sliders", page: "division" }
-                ].map((item) => (
+                ]
+                .filter((item) =>
+                  divisiId === 1 ? true : item.page !== "division" && item.page !== "role"
+                )
+                .map((item) => (
                   <li key={item.page}>
                     <button
                       className="sidebar-link"

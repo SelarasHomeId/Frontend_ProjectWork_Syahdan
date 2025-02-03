@@ -1,30 +1,61 @@
 /* src/styles/Dashboard.css */
 .dashboard {
-    padding: 20px;
-    background-color: #f8f9fa;
-  }
-  
-  .charts {
-    display: flex;
-    justify-content: space-around;
-    gap: 20px;
-  }
-  
+  padding: 20px;
+  background-color: #f4f6f8; /* Warna yang lebih lembut untuk pengalaman pengguna yang lebih baik */
+  font-family: 'Arial', sans-serif; /* Tambahkan font default */
+}
+
+.charts {
+  display: flex;
+  flex-wrap: wrap; /* Agar fleksibel untuk layar kecil */
+  justify-content: center; /* Untuk menyelaraskan chart di tengah */
+  gap: 20px;
+}
+
+.chart {
+  text-align: center;
+  background-color: #ffffff;
+  border-radius: 10px;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15); /* Bayangan lebih halus */
+  padding: 15px; /* Padding sedikit dikurangi */
+  transition: transform 0.3s ease, box-shadow 0.3s ease; /* Tambahkan animasi hover */
+}
+
+.chart:hover {
+  transform: translateY(-5px); /* Efek hover untuk interaktivitas */
+  box-shadow: 0 6px 12px rgba(0, 0, 0, 0.2);
+}
+
+.pie-chart-container {
+  margin-top: 15px; /* Kurangi jarak agar lebih proporsional */
+}
+
+h4 {
+  font-size: 18px; /* Ukuran font lebih kecil */
+  color: #333;
+  margin-bottom: 10px; /* Tambahkan margin bawah */
+}
+
+@media (max-width: 768px) {
   .chart {
-    width: 45%;
-    text-align: center;
-    background-color: #ffffff;
-    border-radius: 10px;
-    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
-    padding: 20px;
+      width: 100%; /* Perbesar ukuran chart di layar kecil */
   }
-  
-  .pie-chart-container {
-    margin-top: 20px;
+}
+
+/* Bootstrap customization */
+.dashboard .charts {
+  row-gap: 1rem;
+  column-gap: 1rem;
+}
+
+.chart {
+  flex: 1 1 calc(33.333% - 1rem); /* Responsif dengan grid */
+  max-width: calc(33.333% - 1rem);
+}
+
+@media (max-width: 768px) {
+  .chart {
+      flex: 1 1 100%;
+      max-width: 100%;
   }
-  
-  h4 {
-    font-size: 20px;
-    color: #333;
-  }
-  
+}

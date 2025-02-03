@@ -1,62 +1,140 @@
-// src/service/apiService.js
 import axios from "axios";
+import { BASE_URL } from "../utils/constant";
 
-// Base URL untuk API
-const API_URL = "https://yusnar.my.id/api-go-selarashomeid"; // Ganti dengan URL API sebenarnya
+// ==================================================================================================== //
 
-// Fungsi untuk mendapatkan token dari localStorage
-export const getAuthToken = () => {
-  return localStorage.getItem("token");
-};
+export const apiRequest = async ({
+  method,
+  endpoint,
+  body = null,
+  token = null,
+  contentType = 'application/json'
+}) => {
+  const url = `${BASE_URL}${endpoint}`;
+  const headers = { 'Content-Type': contentType };
 
-// Fungsi untuk menambahkan header Authorization untuk setiap request
-export const setAuthorizationHeader = () => {
-  const token = getAuthToken();
   if (token) {
-    axios.defaults.headers.common["Authorization"] = `Bearer ${token}`;
+    headers['Authorization'] = `Bearer ${token}`;
   }
-};
 
-// Fungsi untuk login
-export const login = async (email, password) => {
-    try {
-      const response = await axios.post(`${API_URL}/auth/login`, {
-        email,
-        password,
-        login_from: "web",
-      });
-  
-      // Jika login berhasil, simpan token dan data user di localStorage
-      if (response.data.success) {
-        const body = response.data;
-        const token = body.data.token;
-        const data = body.data.data;
-        localStorage.setItem("token", token); // Menyimpan token
-        localStorage.setItem("user", JSON.stringify(data)); // Menyimpan data user
-        return response.data; // Kembalikan data login
-      }
-      return null;
-    } catch (error) {
-      console.error("Login failed:", error);
-      throw new Error("Login failed, please try again.");
-    }
-};
-
-// Fungsi untuk logout dengan mengirimkan token di header Authorization
-export const logout = async () => {
   try {
-    setAuthorizationHeader(); // Pastikan header Authorization sudah di-set
-    const response = await axios.post(`${API_URL}/auth/logout`);
+    const hitAPI = async () => {
+      switch (method.toUpperCase()) {
+        case 'POST':
+          return contentType === 'application/json'
+            ? axios.post(url, body, { headers })
+            : handleMultipartRequest(method, url, headers, body);
+        case 'GET':
+          return axios.get(url, { headers });
+        case 'PUT':
+          return contentType === 'application/json'
+            ? axios.put(url, body, { headers })
+            : handleMultipartRequest(method, url, headers, body);
+        case 'DELETE':
+          return axios.delete(url, { headers });
+        case 'PATCH':
+          return contentType === 'application/json'
+            ? axios.patch(url, body, { headers })
+            : handleMultipartRequest(method, url, headers, body);
+        default:
+          throw new Error(`Unsupported HTTP method: ${method}`);
+      }
+    };
 
-    // Menghapus token dan data user dari localStorage setelah logout
-    if (response.data.success) {
-      localStorage.removeItem("token");
-      localStorage.removeItem("user");
+    let response = await hitAPI();
+
+    if (response.status === 401 && endpoint !== '/auth/login') {
+      const newToken = await refreshToken(token);
+
+      if (newToken) {
+        headers['Authorization'] = `Bearer ${newToken}`;
+        response = await hitAPI();
+      } else {
+        throw new Error('Failed to refresh token');
+      }
     }
 
-    return response.data; // Kembalikan respon logout
+    return response.data;
   } catch (error) {
-    console.error("Logout failed:", error);
-    throw new Error("Logout failed, please try again.");
+    console.error(error);
+    return null;
   }
 };
+
+const handleMultipartRequest = async (method, url, headers, body) => {
+  const formData = new FormData();
+
+  for (const key in body) {
+    if (body.hasOwnProperty(key)) {
+      formData.append(key, body[key]);
+    }
+  }
+
+  switch (method.toUpperCase()) {
+    case 'POST':
+      return axios.post(url, formData, { headers });
+    case 'PUT':
+      return axios.put(url, formData, { headers });
+    default:
+      throw new Error('Unsupported multipart HTTP method');
+  }
+};
+
+const refreshToken = async (token) => {
+  try {
+    const response = await axios.post(`${BASE_URL}/auth/refresh`, { token });
+    localStorage.setItem("token", response.data.token);
+    return response.data.token;
+  } catch (error) {
+    console.error('Error refreshing token:', error);
+    return null;
+  }
+};
+
+// ==================================================================================================== //
+
+export const authLogin = async (email, password) => {
+  const response = await apiRequest({
+    method: 'POST',
+    endpoint: '/auth/login',
+    body: {
+      email: email, 
+      password: password,
+      login_from: 'web',
+    },
+    token: null,
+    contentType: 'application/json',
+  });
+
+  return response;
+};
+
+export const authLogout = async () => {
+  const token = localStorage.getItem('token');
+
+  const response = await apiRequest({
+    method: 'POST',
+    endpoint: '/auth/logout',
+    body: null,
+    token: token,
+    contentType: 'application/json'
+  });
+
+  return response;
+};
+
+export const workspaceFind = async () => {
+  const token = localStorage.getItem('token');
+
+  const response = await apiRequest({
+    method: 'GET',
+    endpoint: '/workspace',
+    body: null,
+    token: token,
+    contentType: 'application/json'
+  });
+
+  return response.data.data;
+}
+
+// ==================================================================================================== //
