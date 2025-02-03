@@ -7,7 +7,7 @@ import { authLogout } from "../service/apiService";
 function Navbar({ toggleSidebar }) {
   const [showNotificationDropdown, setShowNotificationDropdown] = useState(false);
   const [showUserDropdown, setShowUserDropdown] = useState(false);
-  const [notifications, setNotifications] = useState([
+  const [notifications] = useState([
     "Pesan baru dari Admin",
     "Update tugas proyek terbaru",
     "Meeting dijadwalkan pukul 14:00",
@@ -19,6 +19,7 @@ function Navbar({ toggleSidebar }) {
     setShowNotificationDropdown(!showNotificationDropdown);
     setShowUserDropdown(false);
     if (!showNotificationDropdown) {
+      console.log(isNotificationRead);
       setIsNotificationRead(true); // Set notifikasi sebagai sudah dibaca
     }
   };
