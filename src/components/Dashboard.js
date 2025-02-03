@@ -4,32 +4,33 @@ import PieChart from '../components/PieChart';
 import '../styles/Dashboard.css'; // Pastikan file CSS diimpor
 
 function Dashboard() {
-  // Data untuk pie chart, bisa kamu ambil dari API atau state lokal
-  const [data, setData] = useState({
+  // Data untuk pie chart sebelah kiri (Instagram, WA, TikTok, dan Facebook)
+  const [socialMediaData] = useState({
     instagram: 200, // jumlah klik Instagram
-    tiktok: 150, // jumlah klik TikTok
+    whatsapp: 180,  // jumlah klik WhatsApp
+    tiktok: 150,    // jumlah klik TikTok
+    facebook: 120,  // jumlah klik Facebook
   });
 
-  const platformData = {
-    instagram: 300,
-    tiktok: 100,
-    youtube: 250, // Data tambahan untuk memperluas chart
-    twitter: 180, // Platform lain
-  };
+  // Data untuk pie chart sebelah kanan (Contact dan Affiliate)
+  const [contactAffiliateData] = useState({
+    contact: 300,   // jumlah kontak
+    affiliate: 250, // jumlah affiliate
+  });
 
   return (
     <div className="dashboard">
       <h3 className="dashboard-title">Dashboard</h3>
       <div className="charts">
-        {/* Pie chart untuk sosial media */}
+        {/* Pie chart untuk sosial media (sebelah kiri) */}
         <div className="chart">
-          <h4>Instagram vs TikTok</h4>
-          <PieChart data={data} />
+          <h4>Instagram, WA, TikTok, Facebook</h4>
+          <PieChart data={socialMediaData} />
         </div>
-        {/* Pie chart lainnya, misalnya untuk data sosial media lainnya */}
+        {/* Pie chart untuk contact dan affiliate (sebelah kanan) */}
         <div className="chart">
-          <h4>Platform Engagement</h4>
-          <PieChart data={platformData} />
+          <h4>Contact & Affiliate</h4>
+          <PieChart data={contactAffiliateData} />
         </div>
       </div>
     </div>

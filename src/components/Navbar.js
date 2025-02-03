@@ -2,28 +2,32 @@ import React, { useState } from "react";
 import "../styles/Navbar.css";
 import { FaBell, FaUser } from "react-icons/fa";
 import { Link, useNavigate } from "react-router-dom";
-import { authLogout } from "../service/apiService"; // Import logout dari apiService
+import { authLogout } from "../service/apiService";
 
 function Navbar({ toggleSidebar }) {
   const [showNotificationDropdown, setShowNotificationDropdown] = useState(false);
   const [showUserDropdown, setShowUserDropdown] = useState(false);
-  const navigate = useNavigate(); // Hook untuk navigasi
+  const [notifications] = useState([
+    "Pesan baru dari Admin",
+    "Update tugas proyek terbaru",
+    "Meeting dijadwalkan pukul 14:00",
+  ]);
+  const [isNotificationRead, setIsNotificationRead] = useState(false); // Track apakah notifikasi sudah dibaca
+  const navigate = useNavigate();
 
   const toggleNotificationDropdown = () => {
     setShowNotificationDropdown(!showNotificationDropdown);
-    setShowUserDropdown(false); // Tutup dropdown user jika terbuka
+    setShowUserDropdown(false);
+    if (!showNotificationDropdown) {
+      console.log(isNotificationRead);
+      setIsNotificationRead(true); // Set notifikasi sebagai sudah dibaca
+    }
   };
 
   const toggleUserDropdown = () => {
     setShowUserDropdown(!showUserDropdown);
-    setShowNotificationDropdown(false); // Tutup dropdown notifikasi jika terbuka
+    setShowNotificationDropdown(false);
   };
-
-  const notifications = [
-    "Pesan baru dari Admin",
-    "Update tugas proyek terbaru",
-    "Meeting dijadwalkan pukul 14:00",
-  ];
 
   const handleLogout = async () => {
     try {
@@ -56,7 +60,7 @@ function Navbar({ toggleSidebar }) {
         <div className="navbar-right">
           {/* Notification Icon */}
           <div
-            className={`nav-item dropdown notification-wrapper ${showNotificationDropdown ? 'active' : ''}`}
+            className={`nav-item dropdown notification-wrapper ${showNotificationDropdown ? "active" : ""}`}
             onClick={toggleNotificationDropdown}
           >
             <FaBell className="icon notification-icon" />
@@ -83,9 +87,9 @@ function Navbar({ toggleSidebar }) {
           <div className="nav-item dropdown user-section" onClick={toggleUserDropdown}>
             <FaUser className="user-icon" />
             <div className="user-details">
-              Hello <span className="user-name">{localStorage.getItem('name')}</span>!
+              Hello <span className="user-name">{localStorage.getItem("name")}</span>!
               <div className="user-role-divisi">
-                <span className="user-role">{localStorage.getItem('roleName')}</span> - <span className="user-divisi">{localStorage.getItem('divisiName')}</span>
+                <span className="user-role">{localStorage.getItem("roleName")}</span> - <span className="user-divisi">{localStorage.getItem("divisiName")}</span>
               </div>
             </div>
             {showUserDropdown && (

@@ -9,11 +9,11 @@ ChartJS.register(ArcElement, Tooltip, Legend);
 const PieChart = ({ data }) => {
   // Data untuk Pie Chart
   const chartData = {
-    labels: ['Instagram', 'TikTok'], // Label sosial media
+    labels: Object.keys(data), // Label sosial media: Instagram, WhatsApp, TikTok, Facebook
     datasets: [
       {
-        data: [data.instagram, data.tiktok], // Data jumlah klik
-        backgroundColor: ['#E1306C', '#69C9D0'], // Warna untuk tiap bagian pie chart
+        data: Object.values(data), // Ambil nilai data dari object
+        backgroundColor: ['#E1306C', '#69C9D0', '#7FFF00', '#00008B'], // Warna untuk tiap bagian pie chart
         hoverOffset: 4,
       },
     ],
