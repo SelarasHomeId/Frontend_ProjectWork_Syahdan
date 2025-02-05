@@ -1,242 +1,129 @@
-/* General Styles */
-body {
-    font-family: 'Arial', sans-serif;
-    background-color: #f4f7fc;
-    margin: 0;
-    padding: 0;
-    color: #333;
-    line-height: 1.6;
+/* Workspace Container */
+.workspace-container {
+  padding: 0; /* Menghapus padding agar konten menempel pada tepi */
+  background-color: #f0f2f5; /* Warna latar belakang yang lebih lembut dan modern */
+  min-height: 100vh; /* Mengatur tinggi minimal container agar memenuhi tinggi layar */
+  display: flex; /* Menggunakan flexbox untuk penyusunan elemen */
+  flex-direction: column; /* Susunan elemen dalam kolom */
+  align-items: center; /* Memusatkan elemen secara horizontal */
+  justify-content: flex-start; /* Menyusun elemen di bagian atas container */
 }
 
 /* Title */
-.workspace-title {
-    text-align: center;
-    margin-top: 30px;
-    font-size: 28px;
-    font-weight: 700;
-    color: #2c3e50;
-}
-
-/* Action Buttons */
-.action-btns {
-    display: flex;
-    justify-content: center;
-    margin: 20px 0;
-    gap: 15px;
-}
-
-.btn {
-    font-size: 16px;
-    padding: 12px 24px;
-    border-radius: 8px;
-    border: none;
-    cursor: pointer;
-    transition: all 0.3s ease;
-    box-shadow: 0px 4px 8px rgba(0, 0, 0, 0.1);
-}
-
-.add-card-btn {
-    background-color: #28a745;
-    color: white;
-}
-
-.add-card-btn:hover {
-    background-color: #218838;
-    box-shadow: 0px 4px 12px rgba(0, 0, 0, 0.2);
-}
-
-.move-card-btn {
-    background-color: #007bff;
-    color: white;
-}
-
-.move-card-btn:hover {
-    background-color: #0056b3;
-    box-shadow: 0px 4px 12px rgba(0, 0, 0, 0.2);
-}
-
-.copy-card-btn {
-    background-color: #f39c12;
-    color: white;
-}
-
-.copy-card-btn:hover {
-    background-color: #e67e22;
-    box-shadow: 0px 4px 12px rgba(0, 0, 0, 0.2);
+.workspace-container h2 {
+  font-size: 36px; /* Ukuran font untuk judul yang lebih besar */
+  font-weight: 700; /* Menambahkan ketebalan pada font judul */
+  color: #333; /* Warna teks yang gelap agar kontras dengan latar belakang */
+  margin-bottom: 40px; /* Memberikan jarak bawah antara judul dan konten */
+  text-align: center; /* Menyusun judul agar terpusat */
 }
 
 /* Cards Container */
 .cards-container {
-    display: flex;
-    justify-content: flex-start;
-    padding: 20px;
-    overflow-x: auto;
-    gap: 20px;
-    flex-wrap: nowrap;
+  display: grid; /* Menggunakan grid untuk mengatur layout kartu */
+  grid-template-columns: repeat(auto-fill, minmax(320px, 1fr)); /* Grid responsif, menyesuaikan jumlah kolom berdasarkan lebar */
+  gap: 30px; /* Jarak antar kartu */
+  overflow-x: auto; /* Membuat kontainer kartu dapat digulir secara horizontal jika konten melebihi lebar */
+  padding: 10px; /* Memberikan padding di dalam kontainer */
+  max-width: 100%; /* Mengatur lebar maksimum 100% agar kontainer responsif */
+  margin-top: 20px; /* Jarak atas antara cards container dengan elemen sebelumnya */
+  transition: transform 0.3s ease; /* Transisi halus saat transformasi terjadi */
 }
 
-/* Card Styles */
+/* Card */
 .card {
-    width: 350px;
-    height: 500px;
-    margin-right: 20px;
-    background-color: #ffffff;
-    border-radius: 12px;
-    box-shadow: 0px 6px 15px rgba(0, 0, 0, 0.1);
-    transition: transform 0.3s ease, box-shadow 0.3s ease;
-    display: flex;
-    flex-direction: column;
-    justify-content: space-between;
-    padding: 15px;
-    position: relative;
-    overflow: hidden;
-    background: linear-gradient(135deg, #ffffff 30%, #f8f9fa 100%);
+  background-color: #ffffff; /* Latar belakang kartu putih untuk kontras yang baik */
+  border-radius: 20px; /* Sudut yang membulatkan kartu */
+  box-shadow: 0px 10px 20px rgba(0, 0, 0, 0.12); /* Bayangan lembut untuk kesan elevasi */
+  width: 100%; /* Lebar kartu 100% dari kontainer */
+  min-height: 700px; /* Tinggi minimal untuk kartu agar isi di dalamnya tidak terlalu rapat */
+  display: flex; /* Menggunakan flexbox untuk penyusunan isi kartu */
+  flex-direction: column; /* Susunan konten dalam kolom */
+  justify-content: space-between; /* Menyebar elemen ke atas dan bawah kartu */
+  transition: transform 0.3s ease-in-out, box-shadow 0.3s ease-in-out; /* Animasi transisi untuk efek hover dan bayangan */
 }
 
 .card:hover {
-    transform: translateY(-10px);
-    box-shadow: 0px 8px 20px rgba(0, 0, 0, 0.2);
+  transform: translateY(-10px); /* Mengangkat kartu sedikit ke atas saat dihover */
+  box-shadow: 0px 15px 30px rgba(0, 0, 0, 0.2); /* Bayangan lebih besar saat dihover untuk efek yang lebih mencolok */
 }
 
-/* Card Body */
+/* Card Header */
+.card-header {
+  display: flex; /* Menggunakan flexbox untuk susunan horizontal elemen header */
+  justify-content: space-between; /* Menyebar elemen header ke kiri dan kanan */
+  align-items: center; /* Menyusun elemen header secara vertikal di tengah */
+  margin-bottom: 25px; /* Memberikan jarak bawah antara header dan isi kartu */
+}
+
+.card-header h3 {
+  font-size: 24px; /* Ukuran font lebih besar untuk judul dalam kartu */
+  color: #333; /* Warna teks gelap untuk kontras yang baik */
+  font-weight: 600; /* Menambahkan ketebalan pada font judul */
+}
+
+/* Task List */
+.task-list {
+  display: flex; /* Menggunakan flexbox untuk susunan vertikal task */
+  flex-direction: column; /* Menyusun task dalam kolom */
+  gap: 20px; /* Memberikan jarak antar task */
+  flex-grow: 1; /* Membuat task-list mengisi ruang kosong di dalam kartu */
+  overflow-y: auto; /* Membuat task-list dapat digulir jika konten melebihi batas */
+}
+
+/* Task List Item */
+.list-group-item {
+  border: 1px solid #ddd; /* Border tipis di sekitar setiap task */
+  border-radius: 5px; /* Sudut border membulat */
+  margin-bottom: 10px; /* Memberikan jarak antar task */
+  padding: 10px; /* Memberikan ruang di dalam task */
+  background-color: #fff; /* Latar belakang putih */
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1); /* Bayangan lembut untuk efek kedalaman */
+}
+
+.list-group-item:hover {
+  background-color: #f7f7f7; /* Ubah warna latar belakang saat dihover */
+  border-color: #007bff; /* Ubah warna border saat dihover */
+}
+
+/* No Task Message */
+.no-task {
+  color: #aaa; /* Warna teks abu-abu untuk menandakan tidak ada task */
+  font-style: italic; /* Memberikan gaya miring pada teks */
+  text-align: center; /* Menyusun teks agar berada di tengah */
+  font-size: 18px; /* Ukuran font lebih besar untuk memberikan penekanan */
+}
+
+/* Styling untuk scrollbar di dalam card */
 .card-body {
-    text-align: left;
-    flex-grow: 1;
-    overflow-y: auto;
-    max-height: 230px;
-    padding: 20px 10px 10px 10px;
-    background-color: #f9f9f9;
-    border-radius: 8px;
+  max-height: 400px; /* Membatasi tinggi card body agar ada ruang untuk footer */
+  overflow-y: auto; /* Membuat scrollbar otomatis muncul jika isi lebih banyak */
+  padding-right: 10px; /* Memberikan ruang untuk scrollbar */
 }
 
-/* Title */
-.card-title {
-    font-size: 22px;
-    font-weight: 700;
-    color: #2c3e50;
-    margin-bottom: 15px;
-    word-wrap: break-word;
-    position: sticky;
-    top: 0;
-    z-index: 1;
-    background-color: #ffffff;
-    padding: 12px 15px;
-    border-bottom: 2px solid #ddd;
-    box-shadow: 0px 4px 8px rgba(0, 0, 0, 0.1);
-    transition: box-shadow 0.3s ease, background-color 0.3s ease;
+.card-body::-webkit-scrollbar {
+  width: 8px; /* Lebar scrollbar yang tipis */
 }
 
-.card-title:hover {
-    background-color: #f1f1f1;
-    box-shadow: 0px 6px 12px rgba(0, 0, 0, 0.15);
+.card-body::-webkit-scrollbar-thumb {
+  background-color: #888; /* Warna scrollbar */
+  border-radius: 10px; /* Membulatkan scrollbar */
 }
 
-/* Card Title Input */
-.card-title-input {
-    font-size: 18px;
-    font-weight: 600;
-    border: 1px solid #ccc;
-    padding: 8px 12px;
-    width: 100%;
-    margin-bottom: 10px;
-    border-radius: 6px;
-    transition: border 0.3s ease;
+.card-body::-webkit-scrollbar-thumb:hover {
+  background-color: #555; /* Mengubah warna scrollbar saat dihover */
 }
 
-.card-title-input:focus {
-    outline: none;
-    border-color: #007bff;
+/* Button Add Task */
+.add-task-btn {
+  background: none;  /* Menghilangkan background */
+  border: none;      /* Menghilangkan border */
+  color: #007bff;     /* Menetapkan warna teks (misalnya biru) */
+  font-size: 16px;    /* Menetapkan ukuran font */
+  cursor: pointer;   /* Menambahkan kursor pointer saat hover */
+  padding: 5px 10px;  /* Menambahkan padding agar tombol lebih besar */
 }
 
-.text-muted {
-    font-size: 14px;
-    color: #777;
-}
-
-/* Card Actions */
-.card-actions {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    position: absolute;
-    bottom: 15px;
-    width: 100%;
-    padding: 10px 0;
-}
-
-.card-actions .btn {
-    padding: 8px 16px;
-    font-size: 14px;
-    border-radius: 6px;
-    transition: background-color 0.3s ease, transform 0.2s ease;
-}
-
-.card-actions .btn:hover {
-    background-color: #3498db;
-    transform: scale(1.05);
-}
-
-/* Dropdown Menu for Action Buttons */
-.dropdown-menu {
-    position: absolute;
-    bottom: 40px;
-    left: 0;
-    background-color: #fff;
-    border-radius: 8px;
-    box-shadow: 0px 4px 8px rgba(0, 0, 0, 0.1);
-    padding: 10px;
-    z-index: 10;
-    display: flex;
-    flex-direction: column;
-    gap: 10px;
-    width: 180px;
-    display: none;
-    transform: translateY(-10px);
-}
-
-.card-actions:hover .dropdown-menu {
-    display: flex;
-}
-
-/* No Cards Message */
-.no-cards {
-    text-align: center;
-    font-size: 18px;
-    color: #999;
-}
-
-/* Drag and Drop Styling */
-.card-list {
-    display: flex;
-    flex-direction: row;
-    gap: 20px;
-    flex-wrap: nowrap;
-}
-
-/* Responsiveness */
-@media (max-width: 768px) {
-    .workspace-title {
-        font-size: 24px;
-    }
-
-    .btn {
-        font-size: 14px;
-        padding: 8px 16px;
-    }
-
-    .card {
-        width: 100%;
-        max-width: 400px;
-        height: auto;
-        margin-bottom: 20px;
-    }
-
-    .cards-container {
-        flex-direction: column;
-        align-items: center;
-    }
-
-    .card-actions {
-        flex-direction: column;
-    }
+.add-task-btn:hover {
+  text-decoration: underline;  /* Memberikan efek garis bawah saat hover */
 }
