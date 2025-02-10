@@ -1,8 +1,9 @@
-import React, { useEffect, useState } from "react";
+import React, { useState } from "react";
 import "../styles/Navbar.css";
-import { FaBars, FaBell, FaTimes, FaUser } from "react-icons/fa";
+import { FaBars, FaBell, FaUser } from "react-icons/fa";
 import { Link, useNavigate } from "react-router-dom";
 import { authLogout } from "../service/apiService";
+import Swal from "sweetalert2";
 
 function Navbar({ toggleSidebar }) {
   const [showNotificationDropdown, setShowNotificationDropdown] = useState(false);
@@ -14,9 +15,6 @@ function Navbar({ toggleSidebar }) {
   ]);
   const [isNotificationRead, setIsNotificationRead] = useState(false); // Track apakah notifikasi sudah dibaca
   const navigate = useNavigate();
-  const [isSidebarOpen, setIsSidebarOpen] = useState(
-    localStorage.getItem("sidebarState") === "true"
-  );
 
   const toggleNotificationDropdown = () => {
     setShowNotificationDropdown(!showNotificationDropdown);
@@ -36,24 +34,30 @@ function Navbar({ toggleSidebar }) {
     try {
       const response = await authLogout();
       if (response.success) {
-        localStorage.clear();
-        alert(response.data.message);
-        navigate("/");
+        Swal.fire({
+          title: "Berhasil Logout",
+          text: "Sampai jumpa kembali...",
+          icon: "success",
+          timer: 2500,
+          showConfirmButton: false,
+        }).then(() => {
+          localStorage.clear();
+          navigate("/");
+        });
       }
     } catch (error) {
-      console.error("Logout failed", error);
-      alert("Gagal logout. Silakan coba lagi.");
+      Swal.fire({
+        title: "Gagal Logout, hubungi admin anda",
+        text: error,
+        icon: "error",
+        confirmButtonText: "OK",
+      })
     }
   };
 
   const handleToggleSidebar = () => {
-    setIsSidebarOpen((prev) => !prev);
     toggleSidebar();
   };
-
-  useEffect(() => {
-    setIsSidebarOpen(localStorage.getItem("sidebarState") === "true");
-  }, []);
 
   return (
     <nav className="navbar navbar-expand-lg navbar-dark bg-dark">
@@ -64,8 +68,8 @@ function Navbar({ toggleSidebar }) {
         </Link>
 
         {/* Burger Menu Button */}
-        <button className="burger-menu-btn btn btn-dark" onClick={handleToggleSidebar}>
-          {isSidebarOpen ? <FaTimes /> : <FaBars />}
+        <button className="burger-menu-btn btn btn-dark position-absolute top-0 start-0" onClick={handleToggleSidebar}>
+          {<FaBars/>}
         </button>
 
         {/* Right side */}

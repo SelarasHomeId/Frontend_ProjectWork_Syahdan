@@ -1,50 +1,50 @@
-/* Styling untuk navbar */
+/* Navbar Styling */
 .navbar {
-  background-color: #e42618; /* Warna latar navbar */
-  padding: 10px 30px; /* Padding untuk ukuran navbar */
-  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1); /* Memberikan bayangan */
+  background-color: #e42618;
+  padding: 10px 30px;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
   display: flex;
-  justify-content: space-between; /* Memastikan navbar terdistribusi dengan baik */
+  justify-content: space-between;
   align-items: center;
 }
 
-/* Styling untuk logo */
+/* Logo Styling */
 .navbar-brand img {
-  width: 50px; /* Ukuran logo */
-  transition: transform 0.3s ease, opacity 0.3s ease; /* Animasi transisi */
+  width: 50px;
+  transition: transform 0.3s ease, opacity 0.3s ease;
   cursor: pointer;
 }
 
-/* Bagian kanan navbar (ikon notifikasi dan user) */
+/* Navbar Right Section */
 .navbar-right {
   display: flex;
   align-items: center;
 }
 
-/* Wrapper untuk ikon notifikasi */
+/* Notification Wrapper */
 .notification-wrapper {
   display: flex;
   align-items: center;
-  margin-right: 20px; /* Jarak antara ikon notifikasi dan ikon user */
+  margin-right: 20px;
   position: relative;
   cursor: pointer;
   transition: all 0.3s ease;
 }
 
-/* Ikon notifikasi */
+/* Notification Icon */
 .notification-icon {
   font-size: 28px;
   color: white;
   transition: transform 0.3s ease, color 0.3s ease;
 }
 
-/* Badge notifikasi */
+/* Notification Badge */
 .notification-badge {
   position: absolute;
-  top: -5px; /* Posisi vertikal */
-  right: -5px; /* Posisi horizontal */
-  background-color: red; /* Warna badge */
-  color: white; /* Warna teks badge */
+  top: -5px;
+  right: -5px;
+  background-color: red;
+  color: white;
   font-size: 12px;
   border-radius: 50%;
   padding: 2px 6px;
@@ -52,40 +52,40 @@
   transition: transform 0.3s ease;
 }
 
-/* Dropdown Menu untuk Notifikasi */
+/* Notification Dropdown */
 .notification-dropdown {
   position: absolute;
-  top: 40px; /* Menempatkan dropdown di bawah ikon */
-  right: 0; /* Menempatkan dropdown di sebelah kanan */
+  top: 40px;
+  right: 0;
   background-color: white;
   color: black;
   border-radius: 5px;
-  box-shadow: 0px 0px 10px rgba(0, 0, 0, 0.1);
-  width: 250px; /* Lebar dropdown lebih besar */
-  padding: 10px; /* Memberi padding lebih untuk konten */
-  display: none; /* Menyembunyikan dropdown secara default */
+  box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+  width: 250px;
+  padding: 10px;
+  display: none;
   z-index: 100;
 }
 
-/* Menampilkan dropdown ketika ikon notifikasi diklik */
+/* Show dropdown when active */
 .notification-wrapper.active .notification-dropdown {
-  display: block; /* Menampilkan dropdown saat aktif */
+  display: block;
 }
 
-/* Menyesuaikan tampilan item-item dalam dropdown */
+/* Dropdown Item Styling */
 .notification-dropdown .dropdown-item {
-  padding: 8px 20px; /* Padding untuk item-item dalam dropdown */
-  font-size: 14px; /* Ukuran font yang pas */
+  padding: 8px 20px;
+  font-size: 14px;
+  border-bottom: 1px solid #f1f1f1;
   transition: background-color 0.3s ease;
-  border-bottom: 1px solid #f1f1f1; /* Menambahkan garis bawah untuk item */
 }
 
-/* Hover efek untuk item dropdown */
+/* Hover Effect */
 .notification-dropdown .dropdown-item:hover {
   background-color: #f1f1f1;
 }
 
-/* Wrapper untuk user info */
+/* User Section */
 .user-section {
   display: flex;
   align-items: center;
@@ -94,67 +94,67 @@
   transition: all 0.3s ease;
 }
 
-/* Ikon user */
+/* User Icon */
 .user-icon {
   font-size: 28px;
   color: white;
-  margin-right: 10px; /* Jarak antara ikon user dan keterangan */
+  margin-right: 10px;
 }
 
-/* Keterangan user (nama, role, divisi) */
+/* User Details */
 .user-details {
   color: white;
   font-size: 14px;
   text-align: left;
 }
 
-/* Nama user */
+/* User Name Styling */
 .user-name {
   font-weight: bold;
 }
 
-/* Dropdown menu untuk user */
+/* User Dropdown */
 .user-dropdown {
   position: absolute;
-  top: 45px; /* Posisi dropdown di bawah ikon user */
+  top: 45px;
   right: 0;
   background-color: white;
   color: black;
   border-radius: 5px;
-  box-shadow: 0px 0px 10px rgba(0, 0, 0, 0.1);
-  width: 180px; /* Lebar dropdown lebih besar */
+  box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+  width: 180px;
   z-index: 100;
   padding: 5px;
-  display: none; /* Menyembunyikan dropdown secara default */
-  transition: all 0.3s ease; /* Animasi transisi */
+  display: none;
+  transition: all 0.3s ease;
 }
 
-/* Menampilkan dropdown saat hover pada user */
+/* Show dropdown when active */
 .user-section.active .user-dropdown {
-  display: block; /* Menampilkan dropdown saat hover */
+  display: block;
 }
 
-/* Item dropdown untuk user (setting, logout, etc) */
+/* Dropdown Item */
 .dropdown-item {
   padding: 10px 20px;
   cursor: pointer;
+  border-bottom: 1px solid #f1f1f1;
   transition: background-color 0.3s ease;
-  border-bottom: 1px solid #f1f1f1; /* Menambahkan garis bawah untuk item */
 }
 
-/* Hover efek untuk item dropdown */
+/* Hover Effect */
 .dropdown-item:hover {
   background-color: #f1f1f1;
 }
 
-/* Responsivitas */
+/* Responsive Design */
 @media (max-width: 768px) {
   .navbar {
-    padding: 10px 20px; /* Padding yang lebih kecil pada layar kecil */
+    padding: 10px 20px;
   }
 
   .navbar-right {
-    display: none; /* Menyembunyikan bagian kanan navbar pada layar kecil */
+    display: none;
   }
 
   .burger-menu-btn {
@@ -163,7 +163,6 @@
     border: none;
   }
 
-  /* Menampilkan icon menu burger pada layar kecil */
   .navbar-right.active {
     display: flex;
     align-items: center;
@@ -190,7 +189,6 @@
     display: none;
   }
 
-  /* Mengatur dropdown agar lebih responsif */
   .notification-dropdown,
   .user-dropdown {
     position: static;

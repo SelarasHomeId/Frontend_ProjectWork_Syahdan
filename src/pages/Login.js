@@ -4,12 +4,12 @@ import "../styles/Login.css";
 import { FaUser, FaLock, FaEye, FaEyeSlash } from "react-icons/fa";
 import { useNavigate } from "react-router-dom"; // Untuk navigasi
 import { authLogin } from "../service/apiService"; // Mengimpor fungsi login
+import Swal from "sweetalert2";
 
 function Login() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [passwordVisible, setPasswordVisible] = useState(false);
-  const [error, setError] = useState(""); // State untuk error message
   const navigate = useNavigate();
 
   const togglePasswordVisibility = () => {
@@ -39,15 +39,33 @@ function Login() {
         localStorage.setItem("divisiId", divisiId)
         localStorage.setItem("roleName", roleName)
         localStorage.setItem("divisiName", divisiName)
-
-        navigate("/home");
+        Swal.fire({
+          title: "Berhasil Login",
+          text: "Anda akan dialihkan...",
+          icon: "success",
+          timer: 2500,
+          showConfirmButton: false,
+        }).then(() => {
+          navigate("/home");
+        });
       } else {
-        setError("Email atau password salah!"); // Tampilkan pesan error
+        Swal.fire({
+          title: "Gagal Login",
+          text: "Silakan coba lagi!",
+          icon: "error",
+          confirmButtonText: "OK",
+        }).then(() => {
+          setEmail("");
+          setPassword("");
+        });
       }
     } catch (err) {
-      setError("Terjadi kesalahan, coba lagi.");
-      // Menampilkan pop-up error login
-      alert("Login gagal. Silakan coba lagi.");
+      Swal.fire({
+        title: "Terjadi Kesalahan",
+        text: "Mohon hubungi admin anda!",
+        icon: "error",
+        confirmButtonText: "OK",
+      })
     }
   };
 
@@ -105,9 +123,6 @@ function Login() {
           {/* Tombol Login */}
           <button type="submit">Login</button>
         </form>
-
-        {/* Pesan Error */}
-        {error && <div className="error-message">{error}</div>}
 
         {/* Tautan Lupa Password */}
         <div className="forgot-password">Forgot Password?</div>

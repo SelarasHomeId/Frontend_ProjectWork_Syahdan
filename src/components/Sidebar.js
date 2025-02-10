@@ -37,8 +37,8 @@ function Sidebar({ showSidebar, toggleSidebar, onPageChange }) {
   return (
     <div className={`app-container ${showSidebar ? "sidebar-active" : ""}`}>
       {/* Sidebar */}
-      <div className={`sidebar-container ${showSidebar ? "active" : ""}`}>
-        <div className="sidebar bg-dark text-white p-3">
+      <div className={`sidebar-container bg-dark ${showSidebar ? "active" : ""}`}>
+        <div className="sidebar text-white p-3">
           {/* <h5 className="mb-4 text-center"></h5> */}
 
           <br/>

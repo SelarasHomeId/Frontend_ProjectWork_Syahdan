@@ -9,7 +9,7 @@ import Workspace from "../components/Workspace.js";
 import Project from "../components/Project.js";
 
 function Home() {
-  const [isSidebarActive, setIsSidebarActive] = useState(true); // State untuk mengelola status sidebar
+  const [isSidebarActive, setIsSidebarActive] = useState(false); // State untuk mengelola status sidebar
   const [currentPage, setCurrentPage] = useState("dashboard"); // State untuk halaman yang sedang aktif
 
   // Fungsi untuk toggle status sidebar (tampilkan/sembunyikan)
@@ -19,6 +19,7 @@ function Home() {
 
   // Fungsi untuk mengubah halaman saat menu sidebar di klik
   const handlePageChange = (page) => {
+    setIsSidebarActive(false);
     setCurrentPage(page);
   };
 
