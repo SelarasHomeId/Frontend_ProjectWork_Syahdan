@@ -1,9 +1,8 @@
-// src/pages/Login.js
 import React, { useState } from "react";
 import "../styles/Login.css";
 import { FaUser, FaLock, FaEye, FaEyeSlash } from "react-icons/fa";
 import { useNavigate } from "react-router-dom"; // Untuk navigasi
-import { authLogin } from "../service/apiService"; // Mengimpor fungsi login
+import { authLogin, resetPassword } from "../service/apiService"; // Mengimpor fungsi login & reset password
 import Swal from "sweetalert2";
 
 function Login() {
@@ -23,22 +22,22 @@ function Login() {
       const response = await authLogin(email, password);
 
       if (response && response.success === true) {
-        const token = response.data.token
-        const email = response.data.data.email
-        const name = response.data.data.name
-        const id = response.data.data.id
-        const roleId = response.data.data.role.id
-        const divisiId = response.data.data.divisi.id
-        const roleName = response.data.data.role.name
-        const divisiName = response.data.data.divisi.name
-        localStorage.setItem("token", token)
-        localStorage.setItem("email", email)
-        localStorage.setItem("name", name)
-        localStorage.setItem("id", id)
-        localStorage.setItem("roleId", roleId)
-        localStorage.setItem("divisiId", divisiId)
-        localStorage.setItem("roleName", roleName)
-        localStorage.setItem("divisiName", divisiName)
+        const token = response.data.token;
+        const email = response.data.data.email;
+        const name = response.data.data.name;
+        const id = response.data.data.id;
+        const roleId = response.data.data.role.id;
+        const divisiId = response.data.data.divisi.id;
+        const roleName = response.data.data.role.name;
+        const divisiName = response.data.data.divisi.name;
+        localStorage.setItem("token", token);
+        localStorage.setItem("email", email);
+        localStorage.setItem("name", name);
+        localStorage.setItem("id", id);
+        localStorage.setItem("roleId", roleId);
+        localStorage.setItem("divisiId", divisiId);
+        localStorage.setItem("roleName", roleName);
+        localStorage.setItem("divisiName", divisiName);
         Swal.fire({
           title: "Berhasil Login",
           text: "Anda akan dialihkan...",
@@ -65,7 +64,54 @@ function Login() {
         text: "Mohon hubungi admin anda!",
         icon: "error",
         confirmButtonText: "OK",
-      })
+      });
+    }
+  };
+
+  // Fungsi ketika klik Forgot Password
+  const handleForgotPassword = async () => {
+    const { value: userEmail } = await Swal.fire({
+      title: "Reset Password",
+      input: "email",
+      inputLabel: "Masukkan email Anda",
+      inputPlaceholder: "example@email.com",
+      showCancelButton: true,
+      confirmButtonText: "Submit",
+      cancelButtonText: "Batal",
+      inputValidator: (value) => {
+        if (!value) {
+          return "Email tidak boleh kosong!";
+        }
+      },
+    });
+
+    if (userEmail) {
+      try {
+        const response = await resetPassword(userEmail);
+
+        if (response.success) {
+          Swal.fire({
+            title: "Berhasil!",
+            text: "Link reset password telah dikirim, mohon cek email.",
+            icon: "success",
+            confirmButtonText: "OK",
+          });
+        } else {
+          Swal.fire({
+            title: "Email Tidak Ditemukan",
+            text: "Mohon periksa kembali email yang Anda masukkan.",
+            icon: "error",
+            confirmButtonText: "OK",
+          });
+        }
+      } catch (err) {
+        Swal.fire({
+          title: "Terjadi Kesalahan",
+          text: "Mohon coba lagi nanti atau hubungi admin.",
+          icon: "error",
+          confirmButtonText: "OK",
+        });
+      }
     }
   };
 
@@ -125,7 +171,9 @@ function Login() {
         </form>
 
         {/* Tautan Lupa Password */}
-        <div className="forgot-password">Forgot Password?</div>
+        <div className="forgot-password" onClick={handleForgotPassword} style={{ cursor: "pointer", color: "blue", textDecoration: "underline" }}>
+          Forgot Password?
+        </div>
       </div>
     </div>
   );

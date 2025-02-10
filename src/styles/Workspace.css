@@ -1,129 +1,126 @@
 /* Workspace Container */
 .workspace-container {
-  padding: 0; /* Menghapus padding agar konten menempel pada tepi */
-  background-color: #f0f2f5; /* Warna latar belakang yang lebih lembut dan modern */
-  min-height: 100vh; /* Mengatur tinggi minimal container agar memenuhi tinggi layar */
-  display: flex; /* Menggunakan flexbox untuk penyusunan elemen */
-  flex-direction: column; /* Susunan elemen dalam kolom */
-  align-items: center; /* Memusatkan elemen secara horizontal */
-  justify-content: flex-start; /* Menyusun elemen di bagian atas container */
+  padding: 0;
+  background-color: #f0f2f5;
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: flex-start;
 }
 
 /* Title */
 .workspace-container h2 {
-  font-size: 36px; /* Ukuran font untuk judul yang lebih besar */
-  font-weight: 700; /* Menambahkan ketebalan pada font judul */
-  color: #333; /* Warna teks yang gelap agar kontras dengan latar belakang */
-  margin-bottom: 40px; /* Memberikan jarak bawah antara judul dan konten */
-  text-align: center; /* Menyusun judul agar terpusat */
+  font-size: 32px;
+  font-weight: bold;
+  color: #d32f2f; /* Warna merah sesuai navbar */
+  margin-bottom: 30px;
+  text-align: center;
 }
 
 /* Cards Container */
 .cards-container {
-  display: grid; /* Menggunakan grid untuk mengatur layout kartu */
-  grid-template-columns: repeat(auto-fill, minmax(320px, 1fr)); /* Grid responsif, menyesuaikan jumlah kolom berdasarkan lebar */
-  gap: 30px; /* Jarak antar kartu */
-  overflow-x: auto; /* Membuat kontainer kartu dapat digulir secara horizontal jika konten melebihi lebar */
-  padding: 10px; /* Memberikan padding di dalam kontainer */
-  max-width: 100%; /* Mengatur lebar maksimum 100% agar kontainer responsif */
-  margin-top: 20px; /* Jarak atas antara cards container dengan elemen sebelumnya */
-  transition: transform 0.3s ease; /* Transisi halus saat transformasi terjadi */
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+  gap: 20px;
+  padding: 15px;
+  width: 100%;
+  max-width: 1200px;
 }
 
 /* Card */
 .card {
-  background-color: #ffffff; /* Latar belakang kartu putih untuk kontras yang baik */
-  border-radius: 20px; /* Sudut yang membulatkan kartu */
-  box-shadow: 0px 10px 20px rgba(0, 0, 0, 0.12); /* Bayangan lembut untuk kesan elevasi */
-  width: 100%; /* Lebar kartu 100% dari kontainer */
-  min-height: 700px; /* Tinggi minimal untuk kartu agar isi di dalamnya tidak terlalu rapat */
-  display: flex; /* Menggunakan flexbox untuk penyusunan isi kartu */
-  flex-direction: column; /* Susunan konten dalam kolom */
-  justify-content: space-between; /* Menyebar elemen ke atas dan bawah kartu */
-  transition: transform 0.3s ease-in-out, box-shadow 0.3s ease-in-out; /* Animasi transisi untuk efek hover dan bayangan */
+  background-color: #fff;
+  border-radius: 15px;
+  box-shadow: 0px 5px 15px rgba(0, 0, 0, 0.1);
+  transition: transform 0.2s ease-in-out, box-shadow 0.2s ease-in-out;
+  min-height: 500px;
+  display: flex;
+  flex-direction: column;
 }
 
 .card:hover {
-  transform: translateY(-10px); /* Mengangkat kartu sedikit ke atas saat dihover */
-  box-shadow: 0px 15px 30px rgba(0, 0, 0, 0.2); /* Bayangan lebih besar saat dihover untuk efek yang lebih mencolok */
+  transform: translateY(-5px);
+  box-shadow: 0px 8px 20px rgba(0, 0, 0, 0.15);
 }
 
 /* Card Header */
 .card-header {
-  display: flex; /* Menggunakan flexbox untuk susunan horizontal elemen header */
-  justify-content: space-between; /* Menyebar elemen header ke kiri dan kanan */
-  align-items: center; /* Menyusun elemen header secara vertikal di tengah */
-  margin-bottom: 25px; /* Memberikan jarak bawah antara header dan isi kartu */
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 15px;
+  border-bottom: 1px solid #eee;
 }
 
 .card-header h3 {
-  font-size: 24px; /* Ukuran font lebih besar untuk judul dalam kartu */
-  color: #333; /* Warna teks gelap untuk kontras yang baik */
-  font-weight: 600; /* Menambahkan ketebalan pada font judul */
+  font-size: 20px;
+  font-weight: 600;
+  color: #333;
 }
 
 /* Task List */
 .task-list {
-  display: flex; /* Menggunakan flexbox untuk susunan vertikal task */
-  flex-direction: column; /* Menyusun task dalam kolom */
-  gap: 20px; /* Memberikan jarak antar task */
-  flex-grow: 1; /* Membuat task-list mengisi ruang kosong di dalam kartu */
-  overflow-y: auto; /* Membuat task-list dapat digulir jika konten melebihi batas */
+  display: flex;
+  flex-direction: column;
+  gap: 15px;
+  padding: 15px;
+  flex-grow: 1;
+  overflow-y: auto;
 }
 
-/* Task List Item */
 .list-group-item {
-  border: 1px solid #ddd; /* Border tipis di sekitar setiap task */
-  border-radius: 5px; /* Sudut border membulat */
-  margin-bottom: 10px; /* Memberikan jarak antar task */
-  padding: 10px; /* Memberikan ruang di dalam task */
-  background-color: #fff; /* Latar belakang putih */
-  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1); /* Bayangan lembut untuk efek kedalaman */
+  border: 1px solid #ddd;
+  border-radius: 8px;
+  padding: 10px;
+  background-color: #fff;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.08);
+  transition: background-color 0.2s ease-in-out, border-color 0.2s ease-in-out;
 }
 
 .list-group-item:hover {
-  background-color: #f7f7f7; /* Ubah warna latar belakang saat dihover */
-  border-color: #007bff; /* Ubah warna border saat dihover */
+  background-color: #fafafa;
+  border-color: #d32f2f;
 }
 
 /* No Task Message */
 .no-task {
-  color: #aaa; /* Warna teks abu-abu untuk menandakan tidak ada task */
-  font-style: italic; /* Memberikan gaya miring pada teks */
-  text-align: center; /* Menyusun teks agar berada di tengah */
-  font-size: 18px; /* Ukuran font lebih besar untuk memberikan penekanan */
+  color: #999;
+  font-style: italic;
+  text-align: center;
+  font-size: 16px;
 }
 
-/* Styling untuk scrollbar di dalam card */
+/* Scrollbar Styling */
 .card-body {
-  max-height: 400px; /* Membatasi tinggi card body agar ada ruang untuk footer */
-  overflow-y: auto; /* Membuat scrollbar otomatis muncul jika isi lebih banyak */
-  padding-right: 10px; /* Memberikan ruang untuk scrollbar */
+  max-height: 350px;
+  overflow-y: auto;
+  padding-right: 8px;
 }
 
 .card-body::-webkit-scrollbar {
-  width: 8px; /* Lebar scrollbar yang tipis */
+  width: 6px;
 }
 
 .card-body::-webkit-scrollbar-thumb {
-  background-color: #888; /* Warna scrollbar */
-  border-radius: 10px; /* Membulatkan scrollbar */
+  background-color: #aaa;
+  border-radius: 6px;
 }
 
 .card-body::-webkit-scrollbar-thumb:hover {
-  background-color: #555; /* Mengubah warna scrollbar saat dihover */
+  background-color: #777;
 }
 
 /* Button Add Task */
 .add-task-btn {
-  background: none;  /* Menghilangkan background */
-  border: none;      /* Menghilangkan border */
-  color: #007bff;     /* Menetapkan warna teks (misalnya biru) */
-  font-size: 16px;    /* Menetapkan ukuran font */
-  cursor: pointer;   /* Menambahkan kursor pointer saat hover */
-  padding: 5px 10px;  /* Menambahkan padding agar tombol lebih besar */
+  background: none;
+  border: none;
+  color: #d32f2f;
+  font-size: 14px;
+  cursor: pointer;
+  padding: 5px 10px;
 }
 
 .add-task-btn:hover {
-  text-decoration: underline;  /* Memberikan efek garis bawah saat hover */
+  text-decoration: underline;
 }

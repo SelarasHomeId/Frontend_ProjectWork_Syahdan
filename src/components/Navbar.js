@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import "../styles/Navbar.css";
 import { FaBars, FaBell, FaUser } from "react-icons/fa";
 import { Link, useNavigate } from "react-router-dom";
@@ -6,6 +6,16 @@ import { authLogout } from "../service/apiService";
 import Swal from "sweetalert2";
 
 function Navbar({ toggleSidebar }) {
+  const navigate = useNavigate();
+  
+  // State untuk menyimpan informasi user
+  const [user, setUser] = useState({
+    name: localStorage.getItem("name") || "",
+    role: localStorage.getItem("roleName") || "",
+    divisi: localStorage.getItem("divisiName") || "",
+  });
+
+  // State untuk notifikasi
   const [showNotificationDropdown, setShowNotificationDropdown] = useState(false);
   const [showUserDropdown, setShowUserDropdown] = useState(false);
   const [notifications] = useState([
@@ -13,15 +23,22 @@ function Navbar({ toggleSidebar }) {
     "Update tugas proyek terbaru",
     "Meeting dijadwalkan pukul 14:00",
   ]);
-  const [isNotificationRead, setIsNotificationRead] = useState(false); // Track apakah notifikasi sudah dibaca
-  const navigate = useNavigate();
+  const [isNotificationRead, setIsNotificationRead] = useState(false);
+
+  // Update state jika localStorage berubah (misal setelah login)
+  useEffect(() => {
+    setUser({
+      name: localStorage.getItem("name") || "",
+      role: localStorage.getItem("roleName") || "",
+      divisi: localStorage.getItem("divisiName") || "",
+    });
+  }, []);
 
   const toggleNotificationDropdown = () => {
     setShowNotificationDropdown(!showNotificationDropdown);
     setShowUserDropdown(false);
     if (!showNotificationDropdown) {
-      console.log(isNotificationRead);
-      setIsNotificationRead(true); // Set notifikasi sebagai sudah dibaca
+      setIsNotificationRead(true);
     }
   };
 
@@ -51,12 +68,8 @@ function Navbar({ toggleSidebar }) {
         text: error,
         icon: "error",
         confirmButtonText: "OK",
-      })
+      });
     }
-  };
-
-  const handleToggleSidebar = () => {
-    toggleSidebar();
   };
 
   return (
@@ -68,8 +81,8 @@ function Navbar({ toggleSidebar }) {
         </Link>
 
         {/* Burger Menu Button */}
-        <button className="burger-menu-btn btn btn-dark position-absolute top-0 start-0" onClick={handleToggleSidebar}>
-          {<FaBars/>}
+        <button className="burger-menu-btn btn btn-dark position-absolute top-0 start-0" onClick={toggleSidebar}>
+          <FaBars />
         </button>
 
         {/* Right side */}
@@ -103,9 +116,9 @@ function Navbar({ toggleSidebar }) {
           <div className={`nav-item dropdown user-section ${showUserDropdown ? "active" : ""}`} onClick={toggleUserDropdown}>
             <FaUser className="user-icon" />
             <div className="user-details">
-              Hello <span className="user-name">{localStorage.getItem("name")}</span>!
+              Hello, <span className="user-name">{user.name}</span>!
               <div className="user-role-divisi">
-                <span>{localStorage.getItem("roleName")}</span> - <span>{localStorage.getItem("divisiName")}</span>
+                <span>{user.role}</span> - <span>{user.divisi}</span>
               </div>
             </div>
             {showUserDropdown && (

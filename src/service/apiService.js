@@ -2,139 +2,134 @@ import axios from "axios";
 import { BASE_URL } from "../utils/constant";
 
 // ==================================================================================================== //
-
+// Fungsi utama untuk melakukan request API
 export const apiRequest = async ({
   method,
   endpoint,
   body = null,
   token = null,
-  contentType = 'application/json'
+  contentType = "application/json",
 }) => {
   const url = `${BASE_URL}${endpoint}`;
-  const headers = { 'Content-Type': contentType };
+  let headers = { "Content-Type": contentType };
 
+  if (!token) {
+    token = localStorage.getItem("token");
+  }
   if (token) {
-    headers['Authorization'] = `Bearer ${token}`;
+    headers["Authorization"] = `Bearer ${token}`;
   }
 
   try {
     const hitAPI = async () => {
       switch (method.toUpperCase()) {
-        case 'POST':
-          return contentType === 'application/json'
-            ? axios.post(url, body, { headers })
-            : handleMultipartRequest(method, url, headers, body);
-        case 'GET':
+        case "POST":
+          return axios.post(url, body, { headers });
+        case "GET":
           return axios.get(url, { headers });
-        case 'PUT':
-          return contentType === 'application/json'
-            ? axios.put(url, body, { headers })
-            : handleMultipartRequest(method, url, headers, body);
-        case 'DELETE':
+        case "PUT":
+          return axios.put(url, body, { headers });
+        case "DELETE":
           return axios.delete(url, { headers });
-        case 'PATCH':
-          return contentType === 'application/json'
-            ? axios.patch(url, body, { headers })
-            : handleMultipartRequest(method, url, headers, body);
+        case "PATCH":
+          return axios.patch(url, body, { headers });
         default:
-          throw new Error(`Unsupported HTTP method: ${method}`);
+          throw new Error(`Metode HTTP tidak didukung: ${method}`);
       }
     };
 
     let response = await hitAPI();
 
-    if (response.status === 401 && endpoint !== '/auth/login') {
+    if (response.status === 401 && endpoint !== "/auth/login") {
       const newToken = await refreshToken(token);
-
       if (newToken) {
-        headers['Authorization'] = `Bearer ${newToken}`;
+        headers["Authorization"] = `Bearer ${newToken}`;
         response = await hitAPI();
       } else {
-        throw new Error('Failed to refresh token');
+        throw new Error("Gagal memperbarui token");
       }
     }
 
     return response.data;
   } catch (error) {
-    console.error(error);
-    return null;
+    console.error(`Error pada request ${method} ${endpoint}:`, error);
+    return { success: false, error: error.response?.data || error.message };
   }
 };
 
+// ==================================================================================================== //
+// Fungsi untuk menangani multipart request (upload file)
 const handleMultipartRequest = async (method, url, headers, body) => {
   const formData = new FormData();
-
-  for (const key in body) {
-    if (body.hasOwnProperty(key)) {
-      formData.append(key, body[key]);
-    }
-  }
+  Object.keys(body).forEach((key) => formData.append(key, body[key]));
 
   switch (method.toUpperCase()) {
-    case 'POST':
+    case "POST":
       return axios.post(url, formData, { headers });
-    case 'PUT':
+    case "PUT":
       return axios.put(url, formData, { headers });
     default:
-      throw new Error('Unsupported multipart HTTP method');
+      throw new Error("Metode HTTP multipart tidak didukung");
   }
 };
 
+// ==================================================================================================== //
+// Fungsi untuk memperbarui token jika sesi habis
 const refreshToken = async (token) => {
   try {
     const response = await axios.post(`${BASE_URL}/auth/refresh`, { token });
     localStorage.setItem("token", response.data.token);
     return response.data.token;
   } catch (error) {
-    console.error('Error refreshing token:', error);
+    console.error("Gagal memperbarui token:", error);
     return null;
   }
 };
 
 // ==================================================================================================== //
-
+// Fungsi untuk melakukan login
 export const authLogin = async (email, password) => {
-  const response = await apiRequest({
-    method: 'POST',
-    endpoint: '/auth/login',
-    body: {
-      email: email, 
-      password: password,
-      login_from: 'web',
-    },
-    token: null,
-    contentType: 'application/json',
+  return await apiRequest({
+    method: "POST",
+    endpoint: "/auth/login",
+    body: { email, password, login_from: "web" },
   });
-
-  return response;
 };
 
+// Fungsi untuk logout
 export const authLogout = async () => {
-  const token = localStorage.getItem('token');
+  return await apiRequest({
+    method: "POST",
+    endpoint: "/auth/logout",
+  });
+};
 
+// Fungsi untuk mendapatkan daftar workspace
+export const workspaceFind = async () => {
   const response = await apiRequest({
-    method: 'POST',
-    endpoint: '/auth/logout',
-    body: null,
-    token: token,
-    contentType: 'application/json'
+    method: "GET",
+    endpoint: "/workspace",
+  });
+  return response?.data?.data || [];
+};
+
+// Fungsi untuk mereset password
+export const resetPassword = async (email) => {
+  const response = await apiRequest({
+    method: "POST",
+    endpoint: "/auth/reset-password",
+    body: { email },
   });
 
   return response;
 };
-
-export const workspaceFind = async () => {
-  const token = localStorage.getItem('token');
-
-  const response = await apiRequest({
-    method: 'GET',
-    endpoint: '/workspace',
-    body: null,
-    token: token,
-    contentType: 'application/json'
-  });
-
-  return response.data.data;
-}
 
 // ==================================================================================================== //
+// Fungsi untuk mengubah password
+export const changePassword = async (oldPassword, newPassword) => {
+  return await apiRequest({
+    method: "POST",
+    endpoint: "/user/change-password",
+    body: { old_password: oldPassword, new_password: newPassword },
+  });
+};
