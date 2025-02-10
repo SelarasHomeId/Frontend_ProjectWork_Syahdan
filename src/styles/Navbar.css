@@ -38,11 +38,6 @@
   transition: transform 0.3s ease, color 0.3s ease;
 }
 
-.notification-icon:hover {
-  transform: scale(1.2); /* Membesar saat di-hover */
-  color: #ffd700; /* Warna emas saat di-hover */
-}
-
 /* Badge notifikasi */
 .notification-badge {
   position: absolute;
@@ -57,15 +52,10 @@
   transition: transform 0.3s ease;
 }
 
-/* Efek animasi pada badge saat ada notifikasi baru */
-.notification-wrapper.active .notification-badge {
-  transform: scale(1.2); /* Membesar sedikit saat ada notifikasi baru */
-}
-
 /* Dropdown Menu untuk Notifikasi */
 .notification-dropdown {
   position: absolute;
-  top: 35px; /* Menempatkan dropdown di bawah ikon */
+  top: 40px; /* Menempatkan dropdown di bawah ikon */
   right: 0; /* Menempatkan dropdown di sebelah kanan */
   background-color: white;
   color: black;
@@ -101,6 +91,7 @@
   align-items: center;
   cursor: pointer;
   position: relative;
+  transition: all 0.3s ease;
 }
 
 /* Ikon user */
@@ -122,30 +113,24 @@
   font-weight: bold;
 }
 
-/* Role dan Divisi user */
-.user-role {
-  font-size: 12px;
-  color: #dcdcdc;
-}
-
 /* Dropdown menu untuk user */
 .user-dropdown {
   position: absolute;
-  top: 40px; /* Posisi dropdown di bawah ikon user */
+  top: 45px; /* Posisi dropdown di bawah ikon user */
   right: 0;
   background-color: white;
   color: black;
   border-radius: 5px;
   box-shadow: 0px 0px 10px rgba(0, 0, 0, 0.1);
-  width: 250px; /* Lebar dropdown lebih besar */
+  width: 180px; /* Lebar dropdown lebih besar */
   z-index: 100;
-  padding: 10px 0;
+  padding: 5px;
   display: none; /* Menyembunyikan dropdown secara default */
   transition: all 0.3s ease; /* Animasi transisi */
 }
 
 /* Menampilkan dropdown saat hover pada user */
-.user-section:hover .user-dropdown {
+.user-section.active .user-dropdown {
   display: block; /* Menampilkan dropdown saat hover */
 }
 

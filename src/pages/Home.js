@@ -6,6 +6,7 @@ import User from "../components/User.js";
 import Role from "../components/Role.js";
 import Division from "../components/Division.js";
 import Workspace from "../components/Workspace.js";
+import Project from "../components/Project.js";
 
 function Home() {
   const [isSidebarActive, setIsSidebarActive] = useState(true); // State untuk mengelola status sidebar
@@ -31,6 +32,8 @@ function Home() {
       return <Role />;
     }else if (currentPage==="division"){
       return <Division />;
+    }else if (currentPage==="project"){
+      return <Project />;
     }else{
       return <Workspace
         workspaceName={currentPage}

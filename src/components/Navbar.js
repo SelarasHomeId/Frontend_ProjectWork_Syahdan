@@ -1,6 +1,6 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import "../styles/Navbar.css";
-import { FaBell, FaUser } from "react-icons/fa";
+import { FaBars, FaBell, FaTimes, FaUser } from "react-icons/fa";
 import { Link, useNavigate } from "react-router-dom";
 import { authLogout } from "../service/apiService";
 
@@ -14,6 +14,9 @@ function Navbar({ toggleSidebar }) {
   ]);
   const [isNotificationRead, setIsNotificationRead] = useState(false); // Track apakah notifikasi sudah dibaca
   const navigate = useNavigate();
+  const [isSidebarOpen, setIsSidebarOpen] = useState(
+    localStorage.getItem("sidebarState") === "true"
+  );
 
   const toggleNotificationDropdown = () => {
     setShowNotificationDropdown(!showNotificationDropdown);
@@ -43,6 +46,15 @@ function Navbar({ toggleSidebar }) {
     }
   };
 
+  const handleToggleSidebar = () => {
+    setIsSidebarOpen((prev) => !prev);
+    toggleSidebar();
+  };
+
+  useEffect(() => {
+    setIsSidebarOpen(localStorage.getItem("sidebarState") === "true");
+  }, []);
+
   return (
     <nav className="navbar navbar-expand-lg navbar-dark bg-dark">
       <div className="container-fluid">
@@ -52,8 +64,8 @@ function Navbar({ toggleSidebar }) {
         </Link>
 
         {/* Burger Menu Button */}
-        <button className="burger-menu-btn btn btn-dark" onClick={toggleSidebar}>
-          <i className="bi bi-list"></i>
+        <button className="burger-menu-btn btn btn-dark" onClick={handleToggleSidebar}>
+          {isSidebarOpen ? <FaTimes /> : <FaBars />}
         </button>
 
         {/* Right side */}
@@ -84,12 +96,12 @@ function Navbar({ toggleSidebar }) {
           </div>
 
           {/* User Icon and Info */}
-          <div className="nav-item dropdown user-section" onClick={toggleUserDropdown}>
+          <div className={`nav-item dropdown user-section ${showUserDropdown ? "active" : ""}`} onClick={toggleUserDropdown}>
             <FaUser className="user-icon" />
             <div className="user-details">
               Hello <span className="user-name">{localStorage.getItem("name")}</span>!
               <div className="user-role-divisi">
-                <span className="user-role">{localStorage.getItem("roleName")}</span> - <span className="user-divisi">{localStorage.getItem("divisiName")}</span>
+                <span>{localStorage.getItem("roleName")}</span> - <span>{localStorage.getItem("divisiName")}</span>
               </div>
             </div>
             {showUserDropdown && (

@@ -3,13 +3,14 @@ import "bootstrap/dist/css/bootstrap.min.css";
 import "bootstrap-icons/font/bootstrap-icons.css";
 import "../styles/Sidebar.css";
 import { workspaceFind } from "../service/apiService";
-import { getIconClass } from "../utils/general";
 
 function Sidebar({ showSidebar, toggleSidebar, onPageChange }) {
   const [showWorkspace, setShowWorkspace] = useState(false);
   const [workspaceList, setWorkspaceList] = useState([]);
   const [showMasterdata, setShowMasterdata] = useState(false);
-  const [divisiId, setDivisiId] = useState(null);
+
+  const roleId = localStorage.getItem('roleId');
+  const shouldShowMasterdata = roleId === '1';
 
   // Fungsi toggle submenu
   const toggleSubMenu = (submenuSetter, resetSubmenu) => {
@@ -31,8 +32,6 @@ function Sidebar({ showSidebar, toggleSidebar, onPageChange }) {
 
   useEffect(() => {
     fetchWorkspaceData();
-    const storedDivisiId = localStorage.getItem("divisiId");
-    setDivisiId(storedDivisiId ? parseInt(storedDivisiId, 10) : null);
   }, []);
 
   return (
@@ -40,7 +39,10 @@ function Sidebar({ showSidebar, toggleSidebar, onPageChange }) {
       {/* Sidebar */}
       <div className={`sidebar-container ${showSidebar ? "active" : ""}`}>
         <div className="sidebar bg-dark text-white p-3">
-          <h5 className="mb-4 text-center">Menu</h5>
+          {/* <h5 className="mb-4 text-center"></h5> */}
+
+          <br/>
+          <br/>
 
           {/* Dashboard */}
           <div>
@@ -60,14 +62,14 @@ function Sidebar({ showSidebar, toggleSidebar, onPageChange }) {
               <i className="bi bi-person-fill"></i> Workspace
             </h6>
             {showWorkspace && (
-              <ul className="list-unstyled ms-3">
+              <ul className="list-unstyled ms-1">
                 {workspaceList.map((item) => (
                   <li key={item.id}>
                     <button
                       className="sidebar-link"
                       onClick={() => onPageChange(item.name.toLowerCase())}
                     >
-                      <i className={getIconClass(item.name)}></i> {item.name}
+                      <i className={"bi bi-check2-square"}></i> {item.name}
                     </button>
                   </li>
                 ))}
@@ -76,38 +78,32 @@ function Sidebar({ showSidebar, toggleSidebar, onPageChange }) {
           </div>
 
           {/* Masterdata */}
-          <div>
-            <h6
-              className="sidebar-item clickable"
-              onClick={() =>
-                toggleSubMenu(setShowMasterdata, showWorkspace ? setShowWorkspace : null)
-              }
-            >
-              <i className="bi bi-database"></i> Masterdata
-            </h6>
-            {showMasterdata && (
-              <ul className="list-unstyled ms-3">
-                {[ 
-                  { name: "User", icon: "bi bi-person", page: "user" },
-                  { name: "Role", icon: "bi bi-person-check", page: "role" },
-                  { name: "Division", icon: "bi bi-sliders", page: "division" }
-                ]
-                .filter((item) =>
-                  divisiId === 1 ? true : item.page !== "division" && item.page !== "role"
-                )
-                .map((item) => (
-                  <li key={item.page}>
-                    <button
-                      className="sidebar-link"
-                      onClick={() => onPageChange(item.page)}
-                    >
-                      <i className={item.icon}></i> {item.name}
-                    </button>
-                  </li>
-                ))}
-              </ul>
-            )}
-          </div>
+          {shouldShowMasterdata && (
+            <div>
+              <h6
+                className="sidebar-item clickable"
+                onClick={() => toggleSubMenu(setShowMasterdata, showWorkspace ? setShowWorkspace : null)}
+              >
+                <i className="bi bi-database"></i> Masterdata
+              </h6>
+              {showMasterdata && (
+                <ul className="list-unstyled ms-1">
+                  {[
+                    { name: "Project", icon: "bi bi-cast", page: "project" },
+                    { name: "User", icon: "bi bi-person", page: "user" },
+                    { name: "Role", icon: "bi bi-person-check", page: "role" },
+                    { name: "Division", icon: "bi bi-sliders", page: "division" }
+                  ].map((item) => (
+                    <li key={item.page}>
+                      <button className="sidebar-link" onClick={() => onPageChange(item.page)}>
+                        <i className={item.icon}></i> {item.name}
+                      </button>
+                    </li>
+                  ))}
+                </ul>
+              )}
+            </div>
+          )}
         </div>
       </div>
     </div>
