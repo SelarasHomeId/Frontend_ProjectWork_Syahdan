@@ -59,19 +59,18 @@ export const apiRequest = async ({
 
 // ==================================================================================================== //
 // Fungsi untuk menangani multipart request (upload file)
-const handleMultipartRequest = async (method, url, headers, body) => {
-  const formData = new FormData();
-  Object.keys(body).forEach((key) => formData.append(key, body[key]));
-
-  switch (method.toUpperCase()) {
-    case "POST":
-      return axios.post(url, formData, { headers });
-    case "PUT":
-      return axios.put(url, formData, { headers });
-    default:
-      throw new Error("Metode HTTP multipart tidak didukung");
-  }
-};
+// const handleMultipartRequest = async (method, url, headers, body) => {
+//   const formData = new FormData();
+//   Object.keys(body).forEach((key) => formData.append(key, body[key]));
+//   switch (method.toUpperCase()) {
+//     case "POST":
+//       return axios.post(url, formData, { headers });
+//     case "PUT":
+//       return axios.put(url, formData, { headers });
+//     default:
+//       throw new Error("Metode HTTP multipart tidak didukung");
+//   }
+// };
 
 // ==================================================================================================== //
 // Fungsi untuk memperbarui token jika sesi habis
@@ -114,22 +113,26 @@ export const workspaceFind = async () => {
 };
 
 // Fungsi untuk mereset password
-export const resetPassword = async (email) => {
+export const sendEmailForgotPassword = async (email) => {
   const response = await apiRequest({
     method: "POST",
-    endpoint: "/auth/reset-password",
+    endpoint: "/auth/send-email/forgot-password",
     body: { email },
   });
 
   return response;
 };
 
-// ==================================================================================================== //
 // Fungsi untuk mengubah password
 export const changePassword = async (oldPassword, newPassword) => {
-  return await apiRequest({
-    method: "POST",
-    endpoint: "/user/change-password",
+  const id = localStorage.getItem("id");
+  const response = await apiRequest({
+    method: "PATCH",
+    endpoint: "/user/change-password/"+id,
     body: { old_password: oldPassword, new_password: newPassword },
   });
+
+  return response;
 };
+
+// ==================================================================================================== //

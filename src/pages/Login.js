@@ -2,7 +2,7 @@ import React, { useState } from "react";
 import "../styles/Login.css";
 import { FaUser, FaLock, FaEye, FaEyeSlash } from "react-icons/fa";
 import { useNavigate } from "react-router-dom"; // Untuk navigasi
-import { authLogin, resetPassword } from "../service/apiService"; // Mengimpor fungsi login & reset password
+import { authLogin, sendEmailForgotPassword } from "../service/apiService"; // Mengimpor fungsi login & reset password
 import Swal from "sweetalert2";
 
 function Login() {
@@ -71,13 +71,13 @@ function Login() {
   // Fungsi ketika klik Forgot Password
   const handleForgotPassword = async () => {
     const { value: userEmail } = await Swal.fire({
-      title: "Reset Password",
+      title: "Forgot Password",
       input: "email",
       inputLabel: "Masukkan email Anda",
-      inputPlaceholder: "example@email.com",
+      inputPlaceholder: "contoh@gmail.com",
       showCancelButton: true,
       confirmButtonText: "Submit",
-      cancelButtonText: "Batal",
+      cancelButtonText: "Cancel",
       inputValidator: (value) => {
         if (!value) {
           return "Email tidak boleh kosong!";
@@ -87,7 +87,7 @@ function Login() {
 
     if (userEmail) {
       try {
-        const response = await resetPassword(userEmail);
+        const response = await sendEmailForgotPassword(userEmail);
 
         if (response.success) {
           Swal.fire({

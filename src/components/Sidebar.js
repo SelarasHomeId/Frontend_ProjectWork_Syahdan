@@ -45,10 +45,10 @@ function Sidebar({ showSidebar, toggleSidebar, onPageChange }) {
           
           {/* Logo hanya muncul saat sidebar terbuka */}
           {showSidebar && (
-            <div className="sidebar-logo text-center mb-3">
+            <div className="sidebar-logo text-center mb-3 clickable" onClick={() => onPageChange("dashboard")}>
               {/* Tambahkan penanganan error jika gambar tidak ditemukan */}
               {logo ? (
-                <img src={logo} alt="Logo" className="img-fluid sidebar-logo-img" />
+                <img src={logo} alt="Logo" className="img-fluid sidebar-logo-img cursor-pointer"/>
               ) : (
                 <div className="text-white">Logo Not Found</div>
               )}
@@ -95,18 +95,23 @@ function Sidebar({ showSidebar, toggleSidebar, onPageChange }) {
               {showMasterdata && (
                 <ul className="list-unstyled ms-1">
                   <li>
-                    <button className="sidebar-link" onClick={() => onPageChange("users")}>
-                      <i className="bi bi-person-lines-fill"></i> Users
+                    <button className="sidebar-link" onClick={() => onPageChange("project")}>
+                      <i className="bi bi-kanban"></i> Project
                     </button>
                   </li>
                   <li>
-                    <button className="sidebar-link" onClick={() => onPageChange("roles")}>
-                      <i className="bi bi-person-badge-fill"></i> Roles
+                    <button className="sidebar-link" onClick={() => onPageChange("user")}>
+                      <i className="bi bi-person-lines-fill"></i> User
                     </button>
                   </li>
                   <li>
-                    <button className="sidebar-link" onClick={() => onPageChange("divisions")}>
-                      <i className="bi bi-people-fill"></i> Divisions
+                    <button className="sidebar-link" onClick={() => onPageChange("role")}>
+                      <i className="bi bi-person-badge-fill"></i> Role
+                    </button>
+                  </li>
+                  <li>
+                    <button className="sidebar-link" onClick={() => onPageChange("division")}>
+                      <i className="bi bi-people-fill"></i> Division
                     </button>
                   </li>
                 </ul>
