@@ -4,45 +4,56 @@ import "bootstrap-icons/font/bootstrap-icons.css";
 import "../styles/Sidebar.css";
 import { workspaceFind } from "../service/apiService";
 
+// Pastikan path benar
+import logo from "../assets/img/selarasBackground.jpg"; 
+
 function Sidebar({ showSidebar, toggleSidebar, onPageChange }) {
   const [showWorkspace, setShowWorkspace] = useState(false);
   const [workspaceList, setWorkspaceList] = useState([]);
   const [showMasterdata, setShowMasterdata] = useState(false);
 
-  const roleId = localStorage.getItem('roleId');
-  const shouldShowMasterdata = roleId === '1';
+  const roleId = localStorage.getItem("roleId");
+  const shouldShowMasterdata = roleId === "1";
 
-  // Fungsi toggle submenu
   const toggleSubMenu = (submenuSetter, resetSubmenu) => {
     submenuSetter((prev) => !prev);
-    // Menutup submenu lainnya ketika salah satu submenu dibuka
-    if (resetSubmenu) {
-      resetSubmenu();
-    }
-  };
-
-  const fetchWorkspaceData = async () => {
-    try {
-      const response = await workspaceFind();
-      setWorkspaceList(response);
-    } catch (error) {
-      console.error("Error fetching Workspace data:", error);
-    }
+    if (resetSubmenu) resetSubmenu(false);
   };
 
   useEffect(() => {
+    const controller = new AbortController(); 
+    const fetchWorkspaceData = async () => {
+      try {
+        const response = await workspaceFind();
+        setWorkspaceList(response);
+      } catch (error) {
+        if (error.name !== "AbortError") {
+          console.error("Error fetching Workspace data:", error);
+        }
+      }
+    };
+
     fetchWorkspaceData();
+
+    return () => controller.abort();
   }, []);
 
   return (
     <div className={`app-container ${showSidebar ? "sidebar-active" : ""}`}>
-      {/* Sidebar */}
       <div className={`sidebar-container bg-dark ${showSidebar ? "active" : ""}`}>
         <div className="sidebar text-white p-3">
-          {/* <h5 className="mb-4 text-center"></h5> */}
-
-          <br/>
-          <br/>
+          
+          {/* Logo hanya muncul saat sidebar terbuka */}
+          {showSidebar && (
+            <div className="sidebar-logo text-center mb-3">
+              {/* Tambahkan penanganan error jika gambar tidak ditemukan */}
+              {logo ? (
+                <img src={logo} alt="Logo" className="img-fluid sidebar-logo-img" />
+              ) : (
+                <div className="text-white">Logo Not Found</div>
+              )}
+            </div>
+          )}
 
           {/* Dashboard */}
           <div>
@@ -55,21 +66,16 @@ function Sidebar({ showSidebar, toggleSidebar, onPageChange }) {
           <div>
             <h6
               className="sidebar-item clickable"
-              onClick={() =>
-                toggleSubMenu(setShowWorkspace, showMasterdata ? setShowMasterdata : null)
-              }
+              onClick={() => toggleSubMenu(setShowWorkspace, setShowMasterdata)}
             >
-              <i className="bi bi-person-fill"></i> Workspace
+              <i className="bi bi-folder-fill"></i> Workspace
             </h6>
             {showWorkspace && (
               <ul className="list-unstyled ms-1">
                 {workspaceList.map((item) => (
                   <li key={item.id}>
-                    <button
-                      className="sidebar-link"
-                      onClick={() => onPageChange(item.name.toLowerCase())}
-                    >
-                      <i className={"bi bi-check2-square"}></i> {item.name}
+                    <button className="sidebar-link" onClick={() => onPageChange(item.name.toLowerCase())}>
+                      <i className="bi bi-check2-square"></i> {item.name}
                     </button>
                   </li>
                 ))}
@@ -77,33 +83,37 @@ function Sidebar({ showSidebar, toggleSidebar, onPageChange }) {
             )}
           </div>
 
-          {/* Masterdata */}
+          {/* Masterdata (Hanya untuk Admin) */}
           {shouldShowMasterdata && (
             <div>
               <h6
                 className="sidebar-item clickable"
-                onClick={() => toggleSubMenu(setShowMasterdata, showWorkspace ? setShowWorkspace : null)}
+                onClick={() => toggleSubMenu(setShowMasterdata, setShowWorkspace)}
               >
-                <i className="bi bi-database"></i> Masterdata
+                <i className="bi bi-database-fill"></i> Masterdata
               </h6>
               {showMasterdata && (
                 <ul className="list-unstyled ms-1">
-                  {[
-                    { name: "Project", icon: "bi bi-cast", page: "project" },
-                    { name: "User", icon: "bi bi-person", page: "user" },
-                    { name: "Role", icon: "bi bi-person-check", page: "role" },
-                    { name: "Division", icon: "bi bi-sliders", page: "division" }
-                  ].map((item) => (
-                    <li key={item.page}>
-                      <button className="sidebar-link" onClick={() => onPageChange(item.page)}>
-                        <i className={item.icon}></i> {item.name}
-                      </button>
-                    </li>
-                  ))}
+                  <li>
+                    <button className="sidebar-link" onClick={() => onPageChange("users")}>
+                      <i className="bi bi-person-lines-fill"></i> Users
+                    </button>
+                  </li>
+                  <li>
+                    <button className="sidebar-link" onClick={() => onPageChange("roles")}>
+                      <i className="bi bi-person-badge-fill"></i> Roles
+                    </button>
+                  </li>
+                  <li>
+                    <button className="sidebar-link" onClick={() => onPageChange("divisions")}>
+                      <i className="bi bi-people-fill"></i> Divisions
+                    </button>
+                  </li>
                 </ul>
               )}
             </div>
           )}
+
         </div>
       </div>
     </div>
