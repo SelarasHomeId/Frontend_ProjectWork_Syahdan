@@ -2,6 +2,13 @@ import axios from "axios";
 import { BASE_URL } from "../utils/constant";
 
 // ==================================================================================================== //
+// Konfigurasi dasar API dengan Axios
+const api = axios.create({
+  baseURL: BASE_URL,
+  headers: { "Content-Type": "application/json" },
+});
+
+// ==================================================================================================== //
 // Fungsi utama untuk melakukan request API
 export const apiRequest = async ({
   method,
@@ -24,15 +31,15 @@ export const apiRequest = async ({
     const hitAPI = async () => {
       switch (method.toUpperCase()) {
         case "POST":
-          return axios.post(url, body, { headers });
+          return api.post(url, body, { headers });
         case "GET":
-          return axios.get(url, { headers });
+          return api.get(url, { headers });
         case "PUT":
-          return axios.put(url, body, { headers });
+          return api.put(url, body, { headers });
         case "DELETE":
-          return axios.delete(url, { headers });
+          return api.delete(url, { headers });
         case "PATCH":
-          return axios.patch(url, body, { headers });
+          return api.patch(url, body, { headers });
         default:
           throw new Error(`Metode HTTP tidak didukung: ${method}`);
       }
@@ -58,25 +65,10 @@ export const apiRequest = async ({
 };
 
 // ==================================================================================================== //
-// Fungsi untuk menangani multipart request (upload file)
-// const handleMultipartRequest = async (method, url, headers, body) => {
-//   const formData = new FormData();
-//   Object.keys(body).forEach((key) => formData.append(key, body[key]));
-//   switch (method.toUpperCase()) {
-//     case "POST":
-//       return axios.post(url, formData, { headers });
-//     case "PUT":
-//       return axios.put(url, formData, { headers });
-//     default:
-//       throw new Error("Metode HTTP multipart tidak didukung");
-//   }
-// };
-
-// ==================================================================================================== //
 // Fungsi untuk memperbarui token jika sesi habis
 const refreshToken = async (token) => {
   try {
-    const response = await axios.post(`${BASE_URL}/auth/refresh`, { token });
+    const response = await api.post("/auth/refresh", { token });
     localStorage.setItem("token", response.data.token);
     return response.data.token;
   } catch (error) {
@@ -86,7 +78,7 @@ const refreshToken = async (token) => {
 };
 
 // ==================================================================================================== //
-// Fungsi untuk melakukan login
+// AUTHENTICATION (Login, Logout, Reset Password)
 export const authLogin = async (email, password) => {
   return await apiRequest({
     method: "POST",
@@ -95,7 +87,6 @@ export const authLogin = async (email, password) => {
   });
 };
 
-// Fungsi untuk logout
 export const authLogout = async () => {
   return await apiRequest({
     method: "POST",
@@ -103,7 +94,42 @@ export const authLogout = async () => {
   });
 };
 
-// Fungsi untuk mendapatkan daftar workspace
+export const sendEmailForgotPassword = async (email) => {
+  return await apiRequest({
+    method: "POST",
+    endpoint: "/auth/send-email/forgot-password",
+    body: { email },
+  });
+};
+
+export const changePassword = async (oldPassword, newPassword) => {
+  const id = localStorage.getItem("id");
+  return await apiRequest({
+    method: "PATCH",
+    endpoint: `/user/change-password/${id}`,
+    body: { old_password: oldPassword, new_password: newPassword },
+  });
+};
+
+// ==================================================================================================== //
+// NOTIFICATIONS
+export const fetchNotifications = async () => {
+  const response = await apiRequest({
+    method: "GET",
+    endpoint: "/notifications",
+  });
+  return response.success ? response.data : [];
+};
+
+export const markNotificationAsRead = async (notificationId) => {
+  return await apiRequest({
+    method: "PATCH",
+    endpoint: `/notifications/${notificationId}/read`,
+  });
+};
+
+// ==================================================================================================== //
+// WORKSPACE
 export const workspaceFind = async () => {
   const response = await apiRequest({
     method: "GET",
@@ -112,27 +138,41 @@ export const workspaceFind = async () => {
   return response?.data?.data || [];
 };
 
-// Fungsi untuk mereset password
-export const sendEmailForgotPassword = async (email) => {
-  const response = await apiRequest({
-    method: "POST",
-    endpoint: "/auth/send-email/forgot-password",
-    body: { email },
-  });
-
-  return response;
-};
-
-// Fungsi untuk mengubah password
-export const changePassword = async (oldPassword, newPassword) => {
-  const id = localStorage.getItem("id");
-  const response = await apiRequest({
-    method: "PATCH",
-    endpoint: "/user/change-password/"+id,
-    body: { old_password: oldPassword, new_password: newPassword },
-  });
-
-  return response;
-};
-
 // ==================================================================================================== //
+// USER MANAGEMENT (CRUD)
+export const fetchUsers = async () => {
+  return await apiRequest({
+    method: "GET",
+    endpoint: "/users",
+  });
+};
+
+export const getUserById = async (userId) => {
+  return await apiRequest({
+    method: "GET",
+    endpoint: `/users/${userId}`,
+  });
+};
+
+export const addUser = async (userData) => {
+  return await apiRequest({
+    method: "POST",
+    endpoint: "/users",
+    body: userData,
+  });
+};
+
+export const updateUser = async (userId, updatedData) => {
+  return await apiRequest({
+    method: "PUT",
+    endpoint: `/users/${userId}`,
+    body: updatedData,
+  });
+};
+
+export const deleteUser = async (userId) => {
+  return await apiRequest({
+    method: "DELETE",
+    endpoint: `/users/${userId}`,
+  });
+};
