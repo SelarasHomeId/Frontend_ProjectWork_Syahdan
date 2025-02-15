@@ -19,6 +19,8 @@
 .navbar-right {
   display: flex;
   align-items: center;
+  margin-left: auto; /* Mendorong elemen ke kanan */
+  gap: 15px;
 }
 
 /* Notification Wrapper */
@@ -146,6 +148,25 @@
 .dropdown-item:hover {
   background-color: #f1f1f1;
 }
+
+.burger-menu-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: transparent;
+  border: none;
+  color: white; /* Sesuaikan dengan warna navbar */
+  font-size: 1.5rem;
+  padding: 8px 12px;
+  margin-left: -15px; /* Geser lebih ke kiri */
+  cursor: pointer;
+}
+
+.burger-menu-btn:hover {
+  background-color: rgba(255, 255, 255, 0.1);
+  border-radius: 5px;
+}
+
 
 /* Responsive Design */
 @media (max-width: 768px) {

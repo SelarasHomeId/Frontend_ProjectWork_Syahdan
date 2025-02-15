@@ -1,6 +1,6 @@
 /* Workspace Container */
 .workspace-container {
-  padding: 0;
+  padding: 20px;
   background-color: #f0f2f5;
   min-height: 100vh;
   display: flex;
@@ -21,11 +21,11 @@
 /* Cards Container */
 .cards-container {
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+  grid-template-columns: repeat(auto-fill, minmax(320px, 1fr)); /* Lebar minimum card diperbesar */
   gap: 20px;
   padding: 15px;
   width: 100%;
-  max-width: 1200px;
+  max-width: 1400px; /* Lebar board diperbesar */
 }
 
 /* Card */
@@ -37,6 +37,8 @@
   min-height: 500px;
   display: flex;
   flex-direction: column;
+  width: 270px; /* Lebar card sedikit diperbesar */
+  padding: 10px;
 }
 
 .card:hover {
@@ -57,45 +59,15 @@
   font-size: 20px;
   font-weight: 600;
   color: #333;
+  margin: 0;
 }
 
-/* Task List */
-.task-list {
-  display: flex;
-  flex-direction: column;
-  gap: 15px;
-  padding: 15px;
-  flex-grow: 1;
-  overflow-y: auto;
-}
-
-.list-group-item {
-  border: 1px solid #ddd;
-  border-radius: 8px;
-  padding: 10px;
-  background-color: #fff;
-  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.08);
-  transition: background-color 0.2s ease-in-out, border-color 0.2s ease-in-out;
-}
-
-.list-group-item:hover {
-  background-color: #fafafa;
-  border-color: #d32f2f;
-}
-
-/* No Task Message */
-.no-task {
-  color: #999;
-  font-style: italic;
-  text-align: center;
-  font-size: 16px;
-}
-
-/* Scrollbar Styling */
+/* Card Body */
 .card-body {
+  min-height: 150px;
+  padding: 10px;
   max-height: 350px;
   overflow-y: auto;
-  padding-right: 8px;
 }
 
 .card-body::-webkit-scrollbar {
@@ -111,16 +83,64 @@
   background-color: #777;
 }
 
+/* Task List */
+.task-list {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  padding: 15px;
+  flex-grow: 1;
+  overflow-y: auto;
+}
+
+.list-group-item, .task {
+  background: #f9f9f9;
+  border: 2px solid transparent;
+  padding: 10px;
+  border-radius: 8px;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.08);
+  transition: background-color 0.2s ease-in-out, border-color 0.2s ease-in-out;
+  cursor: pointer;
+}
+
+.list-group-item:hover, .task:hover {
+  background-color: #e9f5ff;
+  border-color: #007bff;
+}
+
+/* No Task Message */
+.no-task {
+  color: #999;
+  font-style: italic;
+  text-align: center;
+  font-size: 16px;
+}
+
+/* Task Edit Input */
+.task-edit-input {
+  width: 100%;
+  padding: 5px;
+  border: 2px solid #007bff;
+  border-radius: 4px;
+  font-size: 14px;
+}
+
+/* Card Footer */
+.card-footer {
+  text-align: center;
+}
+
 /* Button Add Task */
 .add-task-btn {
-  background: none;
+  background: #007bff;
+  color: white;
   border: none;
-  color: #d32f2f;
-  font-size: 14px;
+  padding: 8px 12px;
+  border-radius: 5px;
   cursor: pointer;
-  padding: 5px 10px;
+  font-size: 14px;
 }
 
 .add-task-btn:hover {
-  text-decoration: underline;
+  background: #0056b3;
 }

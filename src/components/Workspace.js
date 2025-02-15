@@ -12,6 +12,8 @@ const initialCards = [
 
 const Workspace = () => {
   const [cards, setCards] = useState(initialCards);
+  const [editingTask, setEditingTask] = useState(null);
+  const [editValue, setEditValue] = useState("");
 
   // Fungsi untuk menangani pergerakan task
   const onDragEnd = (result) => {
@@ -45,6 +47,25 @@ const Workspace = () => {
     }
   };
 
+  const handleEditTask = (cardId, index) => {
+    setEditingTask({ cardId, index });
+    setEditValue(cards.find((card) => card.id === cardId).tasks[index]);
+  };
+
+  const handleSaveTask = (cardId, index) => {
+    setCards((prevCards) =>
+      prevCards.map((card) =>
+        card.id === cardId
+          ? {
+              ...card,
+              tasks: card.tasks.map((task, i) => (i === index ? editValue : task)),
+            }
+          : card
+      )
+    );
+    setEditingTask(null);
+  };
+
   return (
     <DragDropContext onDragEnd={onDragEnd}>
       <div className="workspace-container">
@@ -71,8 +92,20 @@ const Workspace = () => {
                                 {...provided.draggableProps}
                                 {...provided.dragHandleProps}
                                 className="task"
+                                onDoubleClick={() => handleEditTask(card.id, index)}
                               >
-                                {task}
+                                {editingTask?.cardId === card.id && editingTask.index === index ? (
+                                  <input
+                                    type="text"
+                                    className="task-edit-input"
+                                    value={editValue}
+                                    onChange={(e) => setEditValue(e.target.value)}
+                                    onBlur={() => handleSaveTask(card.id, index)}
+                                    autoFocus
+                                  />
+                                ) : (
+                                  task
+                                )}
                               </div>
                             )}
                           </Draggable>
