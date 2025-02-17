@@ -20,7 +20,6 @@ function Dashboard() {
 
   return (
     <div className="dashboard">
-      <h3 className="dashboard-title">Dashboard</h3>
       <div className="charts">
         {/* Pie chart untuk sosial media (sebelah kiri) */}
         <div className="chart">
