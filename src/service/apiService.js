@@ -61,7 +61,7 @@ export const apiRequest = async ({
 // Fungsi untuk memperbarui token jika sesi habis
 const refreshToken = async (token) => {
   try {
-    const response = await axios.post(`${BASE_URL}/auth/refresh`, { token });
+    const response = await axios.post(`${BASE_URL}/auth/refresh-token`, { token });
     localStorage.setItem("token", response.data.token);
     return response.data.token;
   } catch (error) {

@@ -33,13 +33,6 @@
   transition: all 0.3s ease;
 }
 
-/* Notification Icon */
-.notification-icon {
-  font-size: 28px;
-  color: white;
-  transition: transform 0.3s ease, color 0.3s ease;
-}
-
 /* Notification Badge */
 .notification-badge {
   position: absolute;
@@ -67,6 +60,8 @@
   padding: 10px;
   display: none;
   z-index: 100;
+  max-height: 300px; /* Atur tinggi maksimum */
+  overflow-y: auto;
 }
 
 /* Show dropdown when active */
@@ -166,6 +161,39 @@
   background-color: rgba(255, 255, 255, 0.1);
   border-radius: 5px;
 }
+
+.notification-item {
+  padding: 8px 16px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+}
+
+.notification-item:hover {
+  background-color: #f3f4f6; /* bg-gray-100 */
+}
+
+.notification-icon {
+  margin-right: 8px;
+  font-size: 24px; /* text-3xl */
+}
+
+.notification-icon.read {
+  color: #10b981; /* text-green-500 */
+}
+
+.notification-icon.unread {
+  color: #ef4444; /* text-red-500 */
+}
+
+.notification-title {
+  display: block;
+}
+
+.notification-message {
+  font-size: 12px; /* text-xs */
+}
+
 
 
 /* Responsive Design */

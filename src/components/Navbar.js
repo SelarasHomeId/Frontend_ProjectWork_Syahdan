@@ -2,9 +2,11 @@ import React, { useState, useEffect } from "react";
 import "../styles/Navbar.css";
 import { FaBars, FaBell, FaUser } from "react-icons/fa";
 import { Link, useNavigate } from "react-router-dom";
-import { authLogout, changePassword, fetchNotifications } from "../service/apiService";
+import { authLogout, changePassword, fetchNotifications, markNotificationAsRead } from "../service/apiService";
 import Swal from "sweetalert2";
 import { validatePassword } from "../utils/general";
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
+import { faEnvelopeOpen, faEnvelope } from '@fortawesome/free-solid-svg-icons';
 
 function Navbar({ toggleSidebar }) {
   const navigate = useNavigate();
@@ -131,6 +133,15 @@ function Navbar({ toggleSidebar }) {
     }
   };
 
+  const handleClickNotification = async (id) => {
+    const response = await markNotificationAsRead(id);
+    if (response.success) {
+      loadNotifications();
+    }
+    
+    setShowNotificationDropdown(false);
+  };
+
   return (
     <nav className="navbar navbar-expand-lg navbar-dark bg-dark">
       <div className="container-fluid d-flex align-items-center justify-content-between">
@@ -152,7 +163,23 @@ function Navbar({ toggleSidebar }) {
                 <h6 className="dropdown-header">Notifikasi</h6>
                 {notifications.length > 0 ? (
                   notifications.map((notif, index) => (
-                    <div key={index} className="dropdown-item">{notif.title}</div>
+                    <li key={index} className="notification-item" onClick={() => handleClickNotification(notif.id)}>
+                        {notif.is_read ? (
+                            <span className="mr-2">
+                                <FontAwesomeIcon icon={faEnvelopeOpen} className="notification-icon read" />
+                            </span>
+                        ) : (
+                            <span className="mr-2">
+                                <FontAwesomeIcon icon={faEnvelope} className="notification-icon unread" />
+                            </span>
+                        )}
+                        <span>
+                            {notif.title}<br/>  
+                            <span className='notification-message'>
+                                {notif.message}
+                            </span>
+                        </span>
+                    </li>
                   ))
                 ) : (
                   <div className="dropdown-item">Tidak ada notifikasi</div>
