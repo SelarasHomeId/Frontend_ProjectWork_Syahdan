@@ -19,39 +19,38 @@ export const apiRequest = async ({
   if (token) {
     headers["Authorization"] = `Bearer ${token}`;
   }
-
+  
+  const hitAPI = async () => {
+    switch (method.toUpperCase()) {
+      case "POST":
+        return axios.post(url, body, { headers });
+      case "GET":
+        return axios.get(url, { headers });
+      case "PUT":
+        return axios.put(url, body, { headers });
+      case "DELETE":
+        return axios.delete(url, { headers });
+      case "PATCH":
+        return axios.patch(url, body, { headers });
+      default:
+        throw new Error(`Metode HTTP tidak didukung: ${method}`);
+    }
+  };
+  
   try {
-    const hitAPI = async () => {
-      switch (method.toUpperCase()) {
-        case "POST":
-          return axios.post(url, body, { headers });
-        case "GET":
-          return axios.get(url, { headers });
-        case "PUT":
-          return axios.put(url, body, { headers });
-        case "DELETE":
-          return axios.delete(url, { headers });
-        case "PATCH":
-          return axios.patch(url, body, { headers });
-        default:
-          throw new Error(`Metode HTTP tidak didukung: ${method}`);
-      }
-    };
-
     let response = await hitAPI();
-
-    if (response.status === 401 && endpoint !== "/auth/login") {
-      const newToken = await refreshToken(token);
+    return response.data;
+  } catch (error) {
+    if (error.status === 401 && endpoint !== "/auth/login") {
+      const newToken = await refreshToken();
       if (newToken) {
         headers["Authorization"] = `Bearer ${newToken}`;
-        response = await hitAPI();
+        let response = await hitAPI();
+        return response
       } else {
         throw new Error("Gagal memperbarui token");
       }
     }
-
-    return response.data;
-  } catch (error) {
     console.error(`Error pada request ${method} ${endpoint}:`, error);
     return { success: false, error: error.response?.data || error.message };
   }
@@ -59,15 +58,13 @@ export const apiRequest = async ({
 
 // ==================================================================================================== //
 // Fungsi untuk memperbarui token jika sesi habis
-const refreshToken = async (token) => {
-  try {
-    const response = await axios.post(`${BASE_URL}/auth/refresh-token`, { token });
-    localStorage.setItem("token", response.data.token);
-    return response.data.token;
-  } catch (error) {
-    console.error("Gagal memperbarui token:", error);
-    return null;
-  }
+const refreshToken = async () => {
+  const response = await apiRequest({
+    method: "POST",
+    endpoint: "/auth/refresh-token",
+  })
+  localStorage.setItem("token", response.data.token);
+  return response.data.token;
 };
 
 // ==================================================================================================== //
@@ -116,7 +113,7 @@ export const fetchNotifications = async () => {
 
 export const markNotificationAsRead = async (notificationId) => {
   return await apiRequest({
-    method: "PATCH",
+    method: "PUT",
     endpoint: `/notifikasi/set-read/${notificationId}`,
   });
 };
