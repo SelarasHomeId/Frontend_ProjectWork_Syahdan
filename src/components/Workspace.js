@@ -12,10 +12,13 @@ const initialCards = [
 
 const Workspace = () => {
   const [cards, setCards] = useState(initialCards);
-  const [editingTask, setEditingTask] = useState(null);
-  const [editValue, setEditValue] = useState("");
+  const [editingTitle, setEditingTitle] = useState(null);
+  const [titleValue, setTitleValue] = useState("");
+  const [dropdownOpen, setDropdownOpen] = useState(null);
+  const [sortPopupOpen, setSortPopupOpen] = useState(false);
+  const [lastOpenedPopup, setLastOpenedPopup] = useState(null);
+  const [sortBy, setSortBy] = useState("");
 
-  // Fungsi untuk menangani pergerakan task
   const onDragEnd = (result) => {
     const { source, destination } = result;
     if (!destination) return;
@@ -47,23 +50,42 @@ const Workspace = () => {
     }
   };
 
-  const handleEditTask = (cardId, index) => {
-    setEditingTask({ cardId, index });
-    setEditValue(cards.find((card) => card.id === cardId).tasks[index]);
+  const handleEditTitle = (cardId, title) => {
+    setEditingTitle(cardId);
+    setTitleValue(title);
   };
 
-  const handleSaveTask = (cardId, index) => {
+  const handleSaveTitle = (cardId) => {
     setCards((prevCards) =>
       prevCards.map((card) =>
-        card.id === cardId
-          ? {
-              ...card,
-              tasks: card.tasks.map((task, i) => (i === index ? editValue : task)),
-            }
-          : card
+        card.id === cardId ? { ...card, title: titleValue } : card
       )
     );
-    setEditingTask(null);
+    setEditingTitle(null);
+  };
+
+  const toggleDropdown = (cardId) => {
+    setDropdownOpen(dropdownOpen === cardId ? null : cardId);
+  };
+
+  const toggleSortPopup = () => {
+    // Toggle the sort pop-up only if it wasn't previously open
+    if (lastOpenedPopup !== "sort") {
+      setSortPopupOpen(true);
+      setLastOpenedPopup("sort");
+    } else {
+      setSortPopupOpen(!sortPopupOpen);
+    }
+  };
+
+  const closeSortPopup = () => {
+    setSortPopupOpen(false);
+    setLastOpenedPopup(null);
+  };
+
+  const handleSortOptionClick = (option) => {
+    setSortBy(option);
+    closeSortPopup(); // Close the sort popup when an option is selected
   };
 
   return (
@@ -73,13 +95,32 @@ const Workspace = () => {
           {cards.map((card) => (
             <Droppable key={card.id} droppableId={card.id}>
               {(provided) => (
-                <div
-                  ref={provided.innerRef}
-                  {...provided.droppableProps}
-                  className="card"
-                >
+                <div ref={provided.innerRef} {...provided.droppableProps} className="card">
                   <div className="card-header">
-                    <h3>{card.title}</h3>
+                    {editingTitle === card.id ? (
+                      <input
+                        type="text"
+                        className="title-edit-input"
+                        value={titleValue}
+                        onChange={(e) => setTitleValue(e.target.value)}
+                        onBlur={() => handleSaveTitle(card.id)}
+                        autoFocus
+                      />
+                    ) : (
+                      <h3 onClick={() => handleEditTitle(card.id, card.title)}>{card.title}</h3>
+                    )}
+                    <button className="dropdown-button" onClick={() => toggleDropdown(card.id)}>
+                      ⋮
+                    </button>
+                    {dropdownOpen === card.id && (
+                      <div className="dropdown-menu">
+                        <button onClick={() => addTask(card.id)}>Add Task</button>
+                        <button>Copy List</button>
+                        <button>Move List</button>
+                        <button>Move All Cards</button>
+                        <button onClick={toggleSortPopup}>Sort By</button>
+                      </div>
+                    )}
                   </div>
                   <div className="card-body">
                     <div className="task-list">
@@ -92,20 +133,8 @@ const Workspace = () => {
                                 {...provided.draggableProps}
                                 {...provided.dragHandleProps}
                                 className="task"
-                                onDoubleClick={() => handleEditTask(card.id, index)}
                               >
-                                {editingTask?.cardId === card.id && editingTask.index === index ? (
-                                  <input
-                                    type="text"
-                                    className="task-edit-input"
-                                    value={editValue}
-                                    onChange={(e) => setEditValue(e.target.value)}
-                                    onBlur={() => handleSaveTask(card.id, index)}
-                                    autoFocus
-                                  />
-                                ) : (
-                                  task
-                                )}
+                                {task}
                               </div>
                             )}
                           </Draggable>
@@ -126,6 +155,29 @@ const Workspace = () => {
             </Droppable>
           ))}
         </div>
+
+        {sortPopupOpen && (
+          <div className="sort-popup">
+            <h4>Sort By</h4>
+            <button onClick={() => handleSortOptionClick("Date Created (Newest First)")}>
+              Date Created (Newest First)
+            </button>
+            <button onClick={() => handleSortOptionClick("Date Created (Oldest First)")}>
+              Date Created (Oldest First)
+            </button>
+            <button onClick={() => handleSortOptionClick("Card Name (Alphabetically)")}>
+              Card Name (Alphabetically)
+            </button>
+            <button onClick={() => handleSortOptionClick("Due Date")}>Due Date</button>
+            <button onClick={closeSortPopup}>Close</button>
+          </div>
+        )}
+
+        {sortBy && (
+          <div className="sort-popup">
+            <h4>Sorting By: {sortBy}</h4>
+          </div>
+        )}
       </div>
     </DragDropContext>
   );

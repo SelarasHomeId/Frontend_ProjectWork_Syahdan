@@ -53,13 +53,59 @@
   align-items: center;
   padding: 15px;
   border-bottom: 1px solid #eee;
+  position: relative;
+  width: 100%; /* Pastikan lebar card header mengikuti lebar container */
 }
 
+/* Title */
 .card-header h3 {
   font-size: 20px;
   font-weight: 600;
   color: #333;
   margin: 0;
+  word-wrap: break-word; /* Membungkus teks yang panjang */
+  overflow-wrap: break-word; /* Membungkus teks yang panjang */
+  width: 100%; /* Pastikan lebar title mengikuti lebar container */
+  word-break: break-word; /* Memastikan teks terpotong dan dibungkus jika terlalu panjang */
+}
+
+/* Dropdown Button */
+.dropdown-button {
+  background: none;
+  border: none;
+  font-size: 18px;
+  cursor: pointer;
+  padding: 5px;
+}
+
+/* Dropdown Menu */
+.dropdown-menu {
+  position: absolute;
+  background: white;
+  border-radius: 8px;
+  box-shadow: 0px 4px 10px rgba(0, 0, 0, 0.1);
+  padding: 10px;
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+  right: 0;
+  top: 40px;
+  min-width: 150px;
+  z-index: 1000;
+}
+
+.dropdown-menu button {
+  background: none;
+  border: none;
+  text-align: left;
+  font-size: 14px;
+  padding: 8px;
+  cursor: pointer;
+  width: 100%;
+}
+
+.dropdown-menu button:hover {
+  background: #f0f0f0;
 }
 
 /* Card Body */
@@ -127,14 +173,16 @@
 
 /* Card Footer */
 .card-footer {
-  text-align: center;
+  text-align: left;
+  background-color: transparent; /* Menghilangkan warna latar belakang */
 }
+
 
 /* Button Add Task */
 .add-task-btn {
-  background: #007bff;
-  color: white;
-  border: none;
+  background: transparent; /* Menghilangkan warna latar belakang */
+  color: #333; /* Warna teks */
+  border: none; /* Menghilangkan border */
   padding: 8px 12px;
   border-radius: 5px;
   cursor: pointer;
@@ -142,5 +190,6 @@
 }
 
 .add-task-btn:hover {
-  background: #0056b3;
+  background: #f0f0f0; /* Efek hover */
+  color: #007bff; /* Warna teks saat hover */
 }
