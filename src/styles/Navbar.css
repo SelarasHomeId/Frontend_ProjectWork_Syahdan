@@ -37,7 +37,7 @@
 .notification-badge {
   position: absolute;
   top: -5px;
-  right: -5px;
+  right: -2px;
   background-color: red;
   color: white;
   font-size: 12px;
@@ -86,7 +86,8 @@
 .notification-icon {
   font-size: 1.5rem;  /* Pastikan ukuran ikon cukup besar */
   margin-right: 8px;
-  font-size: 24px; /* text-3xl */
+  font-size: 28px; /* text-3xl */
+  color: white;
 }
 
 .notification-icon.read {
