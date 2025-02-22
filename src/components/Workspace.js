@@ -30,6 +30,7 @@ const Workspace = () => {
 
   const handleDragStart = (e, task, boardId) => {
     setDraggingTask({ task, from: boardId });
+    console.log(draggingTask);
     e.dataTransfer.setData("task", JSON.stringify({ task, from: boardId }));
     e.dataTransfer.effectAllowed = "move";
   };
