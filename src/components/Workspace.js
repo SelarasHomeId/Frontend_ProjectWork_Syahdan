@@ -1,152 +1,193 @@
-import React, { useState } from "react";
+import React, { useState, useRef, useEffect, useCallback } from "react";
+import PropTypes from "prop-types";
+import { useDrag, useDrop, DndProvider } from "react-dnd";
+import { HTML5Backend } from "react-dnd-html5-backend";
 import { motion, AnimatePresence } from "framer-motion";
 import "bootstrap/dist/css/bootstrap.min.css";
 import "../styles/Workspace.css";
 
+const ItemType = { TASK: "task", BOARD: "board" };
+
 const Workspace = () => {
   const [boards, setBoards] = useState([
-    { id: "marketing", title: "Marketing", tasks: ["Task 1", "Task 2"] },
-    { id: "legal", title: "Legal", tasks: ["Task 3", "Task 4"] },
-    { id: "accounting", title: "Accounting", tasks: ["Task 5"] },
-    { id: "technical", title: "Technical", tasks: ["Task 6", "Task 7"] },
+    { id: "marketing", title: "Marketing", tasks: ["Task 1", "Task 2"], isAddingTask: false },
+    { id: "legal", title: "Legal", tasks: ["Task 3", "Task 4"], isAddingTask: false },
+    { id: "accounting", title: "Accounting", tasks: ["Task 5"], isAddingTask: false },
+    { id: "technical", title: "Technical", tasks: ["Task 6", "Task 7"], isAddingTask: false },
+    { id: "technical1", title: "Technical", tasks: ["Task 6", "Task 7"], isAddingTask: false },
+    { id: "technical2", title: "Technical", tasks: ["Task 6", "Task 7"], isAddingTask: false },
+    { id: "technical3", title: "Technical", tasks: ["Task 6", "Task 7"], isAddingTask: false },
+    { id: "technical4", title: "Technical", tasks: ["Task 6", "Task 7"], isAddingTask: false },
+    { id: "technical5", title: "Technical", tasks: ["Task 6", "Task 7"], isAddingTask: false },
   ]);
 
-  const [draggingTask, setDraggingTask] = useState(null);
-  const [draggingCard, setDraggingCard] = useState(null);
-  const [highlightedCard, setHighlightedCard] = useState(null);
-
-  const taskAnimation = {
-    initial: { opacity: 0, y: -10, scale: 0.9 },
-    animate: { opacity: 1, y: 0, scale: 1, transition: { duration: 0.3 } },
-    exit: { opacity: 0, y: 10, scale: 0.9, transition: { duration: 0.3 } },
-    whileDrag: { scale: 1.1, opacity: 0.8 },
-  };
-
-  const boardAnimation = {
-    layout: true,
-    transition: { duration: 0.3, type: "spring" },
-    whileDrag: { scale: 0.95, opacity: 0.7 },
-  };
-
-  const handleDragStart = (e, task, boardId) => {
-    setDraggingTask({ task, from: boardId });
-    console.log(draggingTask);
-    e.dataTransfer.setData("task", JSON.stringify({ task, from: boardId }));
-    e.dataTransfer.effectAllowed = "move";
-  };
-
-  const handleDropTask = (e, boardId) => {
-    e.preventDefault();
-    setHighlightedCard(null);
-
-    const draggedTask = JSON.parse(e.dataTransfer.getData("task"));
-    if (!draggedTask) return;
-
-    const { task, from } = draggedTask;
-    if (from !== boardId) {
-      setBoards((prevBoards) =>
-        prevBoards.map((board) => {
-          if (board.id === from) {
-            return { ...board, tasks: board.tasks.filter((t) => t !== task) };
-          }
-          if (board.id === boardId) {
-            return { ...board, tasks: [...board.tasks, task] };
-          }
-          return board;
-        })
-      );
-    }
-    setDraggingTask(null);
-  };
-
-  const handleCardDragStart = (e, index) => {
-    setDraggingCard(index);
-    e.dataTransfer.setData("type", "board");
-  };
-
-  const handleCardDrop = (e, targetIndex) => {
-    e.preventDefault();
-    if (draggingCard === null || e.dataTransfer.getData("type") !== "board") return;
-
+  const moveBoard = useCallback((dragIndex, hoverIndex) => {
     setBoards((prevBoards) => {
-      if (draggingCard === targetIndex) return prevBoards;
-
-      const updatedBoards = [...prevBoards];
-      [updatedBoards[draggingCard], updatedBoards[targetIndex]] = [updatedBoards[targetIndex], updatedBoards[draggingCard]];
-
-      return updatedBoards;
+      const newBoards = [...prevBoards];
+      const [movedBoard] = newBoards.splice(dragIndex, 1);
+      newBoards.splice(hoverIndex, 0, movedBoard);
+      return newBoards;
     });
-    setDraggingCard(null);
-  };
+  }, []);
 
-  const handleAddBoard = () => {
-    const newBoard = {
-      id: `board-${boards.length + 1}`,
-      title: `New Board ${boards.length + 1}`,
-      tasks: [],
-    };
-    setBoards([...boards, newBoard]);
-  };
-
-  const handleAddTask = (boardId) => {
-    setBoards((prevBoards) =>
-      prevBoards.map((board) =>
-        board.id === boardId
-          ? { ...board, tasks: [...board.tasks, `Task ${board.tasks.length + 1}`] }
-          : board
-      )
-    );
+  const moveTask = (task, fromBoardId, toBoardId) => {
+    if (fromBoardId === toBoardId) return;
+    setBoards((prevBoards) => {
+      const newBoards = prevBoards.map((board) => {
+        if (board.id === fromBoardId) {
+          return { ...board, tasks: board.tasks.filter((t) => t !== task) };
+        }
+        if (board.id === toBoardId) {
+          return { ...board, tasks: [...board.tasks, task] };
+        }
+        return board;
+      });
+      return newBoards;
+    });
   };
 
   return (
-    <div className="workspace-container">
-      <h2>Workspace</h2>
-      <div className="cards-container">
-        {boards.map((board, index) => (
-          <motion.div
-            key={board.id}
-            className={`card ${highlightedCard === board.id ? "highlight" : ""}`}
-            draggable="true"
-            onDragStart={(e) => handleCardDragStart(e, index)}
-            onDragOver={(e) => e.preventDefault()}
-            onDrop={(e) => handleCardDrop(e, index)}
-            {...boardAnimation}
-          >
-            <div className="card-header">
-              <h3>{board.title}</h3>
-            </div>
-            <div
-              className="card-body task-list"
-              onDragOver={(e) => e.preventDefault()}
-              onDrop={(e) => handleDropTask(e, board.id)}
-            >
-              <AnimatePresence>
-                {board.tasks.map((task, index) => (
-                  <motion.div
-                    key={index}
-                    className="task"
-                    draggable="true"
-                    onDragStart={(e) => handleDragStart(e, task, board.id)}
-                    {...taskAnimation}
-                  >
-                    {task}
-                  </motion.div>
-                ))}
-              </AnimatePresence>
-            </div>
-            <div className="card-footer">
-              <button className="btn btn-secondary" onClick={() => handleAddTask(board.id)}>
-                + Add Task
-              </button>
-            </div>
-          </motion.div>
-        ))}
-        <button className="btn btn-primary add-board-button" onClick={handleAddBoard}>
-          + Add Another List
+    <DndProvider backend={HTML5Backend}>
+      <div className="workspace-container">
+        <div className="cards-container">
+          {boards.map((board, index) => (
+            <Board key={board.id} index={index} board={board} moveBoard={moveBoard} moveTask={moveTask} setBoards={setBoards} />
+          ))}
+        </div>
+      </div>
+    </DndProvider>
+  );
+};
+
+const Board = ({ board, index, moveBoard, moveTask, setBoards }) => {
+  const ref = useRef(null);
+  const [newTask, setNewTask] = useState("");
+  const inputRef = useRef(null);
+
+  const [, drop] = useDrop({
+    accept: ItemType.BOARD,
+    hover: (draggedBoard) => {
+      if (draggedBoard.index !== index) {
+        moveBoard(draggedBoard.index, index);
+        draggedBoard.index = index;
+      }
+    },
+  });
+
+  const [{ isDragging }, drag] = useDrag({
+    type: ItemType.BOARD,
+    item: { index },
+    collect: (monitor) => ({ isDragging: monitor.isDragging() }),
+  });
+
+  drag(drop(ref));
+
+  const [, dropTask] = useDrop({
+    accept: ItemType.TASK,
+    drop: (draggedTask) => moveTask(draggedTask.task, draggedTask.boardId, board.id),
+  });
+
+  const addTask = () => {
+    setBoards((prevBoards) => prevBoards.map((b) => (b.id === board.id ? { ...b, isAddingTask: true } : b)));
+  };
+
+  const saveTask = (isEsc = false) => {
+    if (newTask.trim() && !isEsc) {
+      setBoards((prevBoards) =>
+        prevBoards.map((b) => (b.id === board.id ? { ...b, tasks: [...b.tasks, newTask], isAddingTask: false } : b))
+      );
+    }
+    setNewTask("");
+    setBoards((prevBoards) =>
+      prevBoards.map((b) => (b.id === board.id ? { ...b, isAddingTask: false } : b))
+    );
+  };
+
+  useEffect(() => {
+    const handleClickOutside = (e) => {
+      if (inputRef.current && !inputRef.current.contains(e.target)) {
+        saveTask();
+      }
+    };
+
+    const handleEscape = (e) => {
+      if (e.key === "Escape") {
+        saveTask(true);
+      }
+    };
+
+    document.addEventListener("mousedown", handleClickOutside);
+    document.addEventListener("keydown", handleEscape);
+    return () => {
+      document.removeEventListener("mousedown", handleClickOutside);
+      document.removeEventListener("keydown", handleEscape);
+    };
+  }, [newTask]);
+
+  return (
+    <div ref={(node) => dropTask(ref.current = node)} className="card" style={{ opacity: isDragging ? 0.5 : 1 }}>
+      <div className="card-header">
+        <h3>{board.title}</h3>
+      </div>
+      <div className="card-body">
+        <AnimatePresence>
+          {board.tasks.map((task, i) => (
+            <Task key={i} task={task} boardId={board.id} />
+          ))}
+        </AnimatePresence>
+        {board.isAddingTask && (
+          <input
+            ref={inputRef}
+            type="text"
+            className="form-control mt-2"
+            placeholder="Type a task"
+            value={newTask}
+            onChange={(e) => setNewTask(e.target.value)}
+            onKeyDown={(e) => e.key === "Enter" && saveTask()}
+            autoFocus
+          />
+        )}
+      </div>
+      <div className="card-footer">
+        <button className="btn btn-secondary" onClick={addTask}>
+          + Add Task
         </button>
       </div>
     </div>
   );
+};
+
+const Task = ({ task, boardId }) => {
+  const ref = useRef(null);
+
+  const [{ isDragging }, drag] = useDrag({
+    type: ItemType.TASK,
+    item: { task, boardId },
+    collect: (monitor) => ({
+      isDragging: monitor.isDragging(),
+    }),
+  });
+
+  drag(ref);
+
+  return (
+    <motion.div ref={ref} className="task" style={{ opacity: isDragging ? 0.5 : 1 }}>
+      {task}
+    </motion.div>
+  );
+};
+
+Board.propTypes = {
+  board: PropTypes.object.isRequired,
+  index: PropTypes.number.isRequired,
+  moveBoard: PropTypes.func.isRequired,
+  moveTask: PropTypes.func.isRequired,
+  setBoards: PropTypes.func.isRequired,
+};
+
+Task.propTypes = {
+  task: PropTypes.string.isRequired,
+  boardId: PropTypes.string.isRequired,
 };
 
 export default Workspace;

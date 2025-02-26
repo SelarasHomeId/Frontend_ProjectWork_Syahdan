@@ -1,7 +1,7 @@
 /* Workspace Container */
 .workspace-container {
   padding: 20px;
-  background-color: #f0f2f5;
+  background-color: #ffffff;
   min-height: 100vh;
   display: flex;
   flex-direction: column;
@@ -9,6 +9,8 @@
   justify-content: flex-start;
   overflow-x: auto;
   width: 100%;
+  border-radius: 10px;
+  padding-bottom: 0;
 }
 
 /* Title */
@@ -18,13 +20,16 @@
   color: #d32f2f;
   margin-bottom: 30px;
   text-align: center;
+  text-transform: uppercase;
+  letter-spacing: 1.5px;
+  padding-bottom: 5px;
 }
 
 /* Cards Container */
 .cards-container {
   display: flex;
-  gap: 20px;
-  padding: 15px;
+  gap: 16px;
+  padding: 16px;
   width: max-content;
   min-width: 100%;
   overflow-x: auto;
@@ -37,33 +42,37 @@
   color: white;
   border: none;
   padding: 10px 20px;
-  border-radius: 5px;
+  border-radius: 8px;
   cursor: pointer;
   font-size: 16px;
+  font-weight: 600;
   align-self: flex-start;
   margin-left: auto;
+  transition: background 0.3s ease-in-out, transform 0.2s ease-in-out;
 }
 
 .add-list-btn:hover {
   background: #0056b3;
+  transform: scale(1.05);
 }
 
 /* Card */
 .card {
-  background-color: #fff;
+  background-color: #ffffff;
   border-radius: 15px;
-  box-shadow: 0px 5px 15px rgba(0, 0, 0, 0.1);
-  transition: transform 0.2s ease-in-out, box-shadow 0.2s ease-in-out;
-  min-height: 500px;
+  box-shadow: 0px 5px 15px rgba(0, 0, 0, 0.15);
+  transition: transform 0.3s ease-in-out, box-shadow 0.3s ease-in-out;
+  min-height: 550px;
   display: flex;
   flex-direction: column;
   width: 270px;
-  padding: 10px;
+  padding: 15px;
+  cursor: grab;
 }
 
 .card:hover {
   transform: translateY(-5px);
-  box-shadow: 0px 8px 20px rgba(0, 0, 0, 0.15);
+  box-shadow: 0px 8px 25px rgba(0, 0, 0, 0.2);
 }
 
 /* Card Header */
@@ -72,15 +81,14 @@
   justify-content: space-between;
   align-items: center;
   padding: 15px;
-  border-bottom: 1px solid #eee;
-  position: relative;
+  border-bottom: 2px solid #eee;
   width: 100%;
 }
 
 /* Title */
 .card-header h3 {
   font-size: 20px;
-  font-weight: 600;
+  font-weight: 700;
   color: #333;
   margin: 0;
   word-wrap: break-word;
@@ -91,11 +99,12 @@
 
 /* Card Body */
 .card-body {
-  min-height: 100px;
-  max-height: 350px;
+  min-height: 150px;
+  max-height: 450px;
   overflow-y: auto;
-  transition: max-height 0.3s ease-in-out;
   padding: 10px;
+  scrollbar-width: thin;
+  scrollbar-color: #aaa transparent;
 }
 
 .card-body::-webkit-scrollbar {
@@ -122,12 +131,21 @@
 }
 
 .task {
-  background-color: #f8f9fa;
+  max-width: 100%;
+  width: 100%;
+  word-wrap: break-word;
+  overflow-wrap: break-word;
+  white-space: pre-wrap;
   padding: 10px;
-  margin-bottom: 5px;
-  border-radius: 8px;
-  cursor: grab;
-  transition: background 0.3s ease-in-out;
+  background-color: #f8f9fa;
+  border-radius: 6px;
+  margin-bottom: 8px;
+  border: 1px solid #ddd;
+  transition: background 0.2s ease-in-out;
+}
+
+.task:hover {
+  background-color: #e9ecef;
 }
 
 .task:active {
@@ -144,6 +162,7 @@
   padding: 10px;
   display: flex;
   justify-content: flex-start;
+  margin-top: auto;
 }
 
 /* Add Task Button */
@@ -151,13 +170,61 @@
   background: #007bff;
   color: white;
   border: none;
-  padding: 8px 12px;
-  border-radius: 5px;
+  padding: 10px 14px;
+  border-radius: 6px;
   cursor: pointer;
   font-size: 14px;
-  transition: background 0.2s;
+  font-weight: 600;
+  transition: background 0.3s ease-in-out;
 }
 
 .add-task-btn:hover {
   background: #0056b3;
+  transform: scale(1.05);
+}
+
+/* Add Board Button */
+.add-board-container {
+  display: flex;
+  justify-content: center;
+  margin-top: 10px;
+  min-width: 250px;
+}
+
+.add-board-btn {
+  width: 100%;
+  height: 40px;
+  border-radius: 6px;
+  background-color: #6e7071;
+  color: white;
+  border: none;
+  cursor: pointer;
+  font-weight: 600;
+  transition: background 0.3s ease-in-out, transform 0.2s;
+}
+
+.add-board-btn:hover {
+  background-color: #8e9093;
+  transform: scale(1.05);
+}
+
+/* Task Input Container */
+.task-input-container {
+  display: flex;
+  gap: 5px;
+  align-items: center;
+}
+
+.task-input {
+  width: 100%;
+  padding: 6px;
+  border: 1px solid #ccc;
+  border-radius: 5px;
+  font-size: 14px;
+  transition: border-color 0.3s;
+}
+
+.task-input:focus {
+  border-color: #007bff;
+  outline: none;
 }
