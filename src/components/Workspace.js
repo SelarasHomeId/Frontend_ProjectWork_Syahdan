@@ -14,11 +14,6 @@ const Workspace = () => {
     { id: "legal", title: "Legal", tasks: ["Task 3", "Task 4"], isAddingTask: false },
     { id: "accounting", title: "Accounting", tasks: ["Task 5"], isAddingTask: false },
     { id: "technical", title: "Technical", tasks: ["Task 6", "Task 7"], isAddingTask: false },
-    { id: "technical1", title: "Technical", tasks: ["Task 6", "Task 7"], isAddingTask: false },
-    { id: "technical2", title: "Technical", tasks: ["Task 6", "Task 7"], isAddingTask: false },
-    { id: "technical3", title: "Technical", tasks: ["Task 6", "Task 7"], isAddingTask: false },
-    { id: "technical4", title: "Technical", tasks: ["Task 6", "Task 7"], isAddingTask: false },
-    { id: "technical5", title: "Technical", tasks: ["Task 6", "Task 7"], isAddingTask: false },
   ]);
 
   const moveBoard = useCallback((dragIndex, hoverIndex) => {
@@ -91,17 +86,20 @@ const Board = ({ board, index, moveBoard, moveTask, setBoards }) => {
     setBoards((prevBoards) => prevBoards.map((b) => (b.id === board.id ? { ...b, isAddingTask: true } : b)));
   };
 
-  const saveTask = (isEsc = false) => {
-    if (newTask.trim() && !isEsc) {
+  const saveTask = useCallback(
+    (isEsc = false) => {
+      if (newTask.trim() && !isEsc) {
+        setBoards((prevBoards) =>
+          prevBoards.map((b) => (b.id === board.id ? { ...b, tasks: [...b.tasks, newTask], isAddingTask: false } : b))
+        );
+      }
+      setNewTask("");
       setBoards((prevBoards) =>
-        prevBoards.map((b) => (b.id === board.id ? { ...b, tasks: [...b.tasks, newTask], isAddingTask: false } : b))
+        prevBoards.map((b) => (b.id === board.id ? { ...b, isAddingTask: false } : b))
       );
-    }
-    setNewTask("");
-    setBoards((prevBoards) =>
-      prevBoards.map((b) => (b.id === board.id ? { ...b, isAddingTask: false } : b))
-    );
-  };
+    },
+    [newTask, setBoards, board.id]
+  );
 
   useEffect(() => {
     const handleClickOutside = (e) => {
@@ -122,7 +120,7 @@ const Board = ({ board, index, moveBoard, moveTask, setBoards }) => {
       document.removeEventListener("mousedown", handleClickOutside);
       document.removeEventListener("keydown", handleEscape);
     };
-  }, [newTask]);
+  }, [saveTask]);
 
   return (
     <div ref={(node) => dropTask(ref.current = node)} className="card" style={{ opacity: isDragging ? 0.5 : 1 }}>
