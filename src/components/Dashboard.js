@@ -125,7 +125,7 @@ function Dashboard() {
 
     const exportFileName = `Export_${table.name.split(' ').join('_')}_${currentDate}`;
 
-    XLSX.writeFile(wb, `${exportFileName}`.xlsx);
+    XLSX.writeFile(wb,`${exportFileName}.xlsx`);
   };
 
   useEffect(() => {
