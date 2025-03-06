@@ -1,6 +1,5 @@
 /* src/styles/Dashboard.css */
 .dashboard {
-  padding: 20px;
   background-color: #ffffff;
   font-family: "Arial", sans-serif;
 }
@@ -20,6 +19,7 @@
   padding: 20px;
   border-radius: 8px;
   box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+  transition: transform 0.3s ease, box-shadow 0.3s ease;
 }
 
 .chart canvas {
@@ -29,7 +29,7 @@
 }
 
 .chart:hover {
-  transform: translateY(-5px);
+  transform: scale(1.05);
   box-shadow: 0 6px 12px rgba(0, 0, 0, 0.2);
 }
 
@@ -37,8 +37,8 @@
   margin-top: 15px;
 }
 
-h4 {
-  font-size: 22px;
+h5 {
+  font-size: 20px;
   color: #333;
   margin-bottom: 10px;
   text-align: center;
@@ -97,6 +97,25 @@ h4 {
   position: relative;
 }
 
+.board-icon-wrapper {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  position: relative;
+}
+
+.new-label {
+  background-color: #ff4757;
+  color: white;
+  font-size: 0.8rem;
+  font-weight: bold;
+  padding: 2px 6px;
+  border-radius: 4px;
+  position: absolute;
+  top: -10px;
+  right: -15px;
+}
+
 /* Angka di tengah icon */
 .count {
   position: absolute;
@@ -140,6 +159,7 @@ h4 {
 
 .role-table {
   width: 100%;
+  min-width: 600px;
   border-collapse: collapse;
 }
 
@@ -147,6 +167,17 @@ h4 {
   border: 1px solid #ddd;
   padding: 10px;
   text-align: left;
+  white-space: normal; /* Pastikan teks tidak terlalu cepat terpotong */
+  word-wrap: break-word;
+}
+
+/* Memberikan ukuran lebih besar khusus untuk kolom Message atau Info */
+.role-table th:nth-last-child(2),
+.role-table td:nth-last-child(2) {
+  min-width: 300px; /* Sesuaikan ukuran */
+  max-width: 500px;
+  word-wrap: break-word;
+  white-space: normal;
 }
 
 .role-table th {
@@ -171,4 +202,32 @@ h4 {
 .pagination button:disabled {
   background-color: #ccc;
   cursor: not-allowed;
+}
+
+.table-wrapper {
+  overflow-x: auto;
+  width: 100%;
+}
+
+.role-table-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 10px;
+}
+
+.export-button {
+  background-color: #28a745; /* Warna hijau */
+  color: white;
+  border: none;
+  padding: 8px 12px;
+  font-size: 14px;
+  font-weight: bold;
+  border-radius: 5px;
+  cursor: pointer;
+  transition: background 0.3s ease;
+}
+
+.export-button:hover {
+  background-color: #218838;
 }

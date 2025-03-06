@@ -1,5 +1,7 @@
 import axios from "axios";
 import { BASE_URL } from "../utils/constant";
+import { getCookie } from "../utils/general";
+import Cookies from "js-cookie";
 
 // ==================================================================================================== //
 // Fungsi utama untuk melakukan request API
@@ -14,7 +16,7 @@ export const apiRequest = async ({
   let headers = { "Content-Type": contentType };
 
   if (!token) {
-    token = localStorage.getItem("token");
+    token = getCookie("token");
   }
   if (token) {
     headers["Authorization"] = `Bearer ${token}`;
@@ -46,7 +48,7 @@ export const apiRequest = async ({
       if (newToken) {
         headers["Authorization"] = `Bearer ${newToken}`;
         let response = await hitAPI();
-        return response
+        return response.data
       } else {
         throw new Error("Gagal memperbarui token");
       }
@@ -63,7 +65,7 @@ const refreshToken = async () => {
     method: "POST",
     endpoint: "/auth/refresh-token",
   })
-  localStorage.setItem("token", response.data.token);
+  Cookies.set("token", response.data.token, { expires: 1, secure: true, sameSite: "Strict" });
   return response.data.token;
 };
 
@@ -93,7 +95,7 @@ export const sendEmailForgotPassword = async (email) => {
 };
 
 export const changePassword = async (oldPassword, newPassword) => {
-  const id = localStorage.getItem("id");
+  const id = getCookie("id");
   return await apiRequest({
     method: "PATCH",
     endpoint: `/user/change-password/${id}`,
@@ -130,24 +132,24 @@ export const workspaceFind = async () => {
 
 // ==================================================================================================== //
 // USER MANAGEMENT (CRUD)
-export const fetchUsers = async () => {
+export const getAllUser = async (endpoint) => {
   return await apiRequest({
     method: "GET",
-    endpoint: "/users",
+    endpoint: endpoint,
   });
 };
 
 export const getUserById = async (userId) => {
   return await apiRequest({
     method: "GET",
-    endpoint: `/users/${userId}`,
+    endpoint: `/user/${userId}`,
   });
 };
 
 export const addUser = async (userData) => {
   return await apiRequest({
     method: "POST",
-    endpoint: "/users",
+    endpoint: "/user",
     body: userData,
   });
 };
@@ -155,7 +157,7 @@ export const addUser = async (userData) => {
 export const updateUser = async (userId, updatedData) => {
   return await apiRequest({
     method: "PUT",
-    endpoint: `/users/${userId}`,
+    endpoint: `/user/${userId}`,
     body: updatedData,
   });
 };
@@ -163,6 +165,123 @@ export const updateUser = async (userId, updatedData) => {
 export const deleteUser = async (userId) => {
   return await apiRequest({
     method: "DELETE",
-    endpoint: `/users/${userId}`,
+    endpoint: `/user/${userId}`,
+  });
+};
+
+export const resetPasswordUser = async (userId) => {
+  return await apiRequest({
+    method: "PATCH",
+    endpoint: `/user/reset-password/${userId}`,
+  });
+};
+
+// ==================================================================================================== //
+// PROJECT MANAGEMENT (CRUD)
+export const getAllProject = async (endpoint) => {
+  return await apiRequest({
+    method: "GET",
+    endpoint: endpoint,
+  });
+};
+
+export const getProjectById = async (projectId) => {
+  return await apiRequest({
+    method: "GET",
+    endpoint: `/project/${projectId}`,
+  });
+};
+
+export const addProject = async (projectData) => {
+  return await apiRequest({
+    method: "POST",
+    endpoint: "/project",
+    body: projectData,
+  });
+};
+
+export const updateProject = async (projectId, updatedData) => {
+  return await apiRequest({
+    method: "PUT",
+    endpoint: `/project/${projectId}`,
+    body: updatedData,
+  });
+};
+
+export const deleteProject = async (projectId) => {
+  return await apiRequest({
+    method: "DELETE",
+    endpoint: `/project/${projectId}`,
+  });
+};
+
+// ==================================================================================================== //
+// DIVISION MANAGEMENT (CRUD)
+export const getAllDivision = async (endpoint) => {
+  return await apiRequest({
+    method: "GET",
+    endpoint: endpoint,
+  });
+};
+
+export const getDivisionById = async (divisiId) => {
+  return await apiRequest({
+    method: "GET",
+    endpoint: `/divisi/${divisiId}`,
+  });
+};
+
+export const addDivision = async (divisiData) => {
+  return await apiRequest({
+    method: "POST",
+    endpoint: "/divisi",
+    body: divisiData,
+  });
+};
+
+export const updateDivision = async (divisiId, updatedData) => {
+  return await apiRequest({
+    method: "PUT",
+    endpoint: `/divisi/${divisiId}`,
+    body: updatedData,
+  });
+};
+
+export const deleteDivision = async (divisiId) => {
+  return await apiRequest({
+    method: "DELETE",
+    endpoint: `/divisi/${divisiId}`,
+  });
+};
+
+// ==================================================================================================== //
+// ROLE MANAGEMENT
+export const getAllRole = async (endpoint) => {
+  return await apiRequest({
+    method: "GET",
+    endpoint: endpoint,
+  });
+};
+
+// ==================================================================================================== //
+// CRM
+export const getAllCountAccess = async () => {
+  return await apiRequest({
+    method: "GET",
+    endpoint: "/crm/access/count",
+  });
+};
+
+export const getAllCalculateTask = async () => {
+  return await apiRequest({
+    method: "GET",
+    endpoint: "/crm/calculate_task",
+  });
+};
+
+export const getAllContactAndAffiliate = async (endpoint) => {
+  return await apiRequest({
+    method: "GET",
+    endpoint: endpoint,
   });
 };

@@ -1,165 +1,259 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import PieChart from "../components/PieChart";
 import { FaClipboard } from "react-icons/fa";
 import "../styles/Dashboard.css";
+import { getAllCalculateTask, getAllContactAndAffiliate, getAllCountAccess } from "../service/apiService";
+import * as XLSX from 'xlsx';
 
 function Dashboard() {
-  // Data untuk Pie Chart
+  const [countAccess, setCountAccess] = useState({});
+  const [countCalculateTask, setCountCalculateTask] = useState([]);
+  const [contactData, setContactData] = useState([]);
+  const [affiliateData, setAffiliateData] = useState([]);
+  const [tableState, setTableState] = useState([]);
+
   const socialMediaData = {
-    instagram: 200,
-    whatsapp: 180,
-    tiktok: 150,
-    facebook: 120,
+    instagram: countAccess.count_instagram,
+    whatsapp: countAccess.count_whatsapp,
+    tiktok: countAccess.count_tiktok,
+    facebook: countAccess.count_facebook,
   };
-
+  
   const contactAffiliateData = {
-    contact: 300,
-    affiliate: 250,
+    contact: countAccess.count_contact,
+    affiliate: countAccess.count_affiliate,
   };
-
-  // Data jumlah task
-  const taskCounts = {
-    todo: 10,
-    inProgress: 5,
-    testing: 3,
-  };
-
-  const taskKeyMap = {
-    "To Do": "todo",
-    "In Progress": "inProgress",
-    "Testing": "testing",
-  };
-
-  // Data Roles
-  const roles = [
-    { id: 1, name: "Admin", description: "Manages all aspects of the app" },
-    { id: 2, name: "User", description: "Regular user with limited access" },
-    { id: 3, name: "Manager", description: "Manages tasks and users" },
-    { id: 4, name: "Developer", description: "Works on app development" },
-    { id: 5, name: "Designer", description: "Designs UI/UX for the app" },
-    { id: 6, name: "Tester", description: "Tests the app for bugs" },
-    { id: 7, name: "Support", description: "Provides customer support" },
-  ];
 
   const itemsPerPage = 5;
 
-  // State pagination & pencarian untuk setiap tabel
-  const [tableState, setTableState] = useState([
-    { currentPage: 1, searchQuery: "" },
-    { currentPage: 1, searchQuery: "" },
-  ]);
-
-  // Fungsi untuk menangani pencarian & pagination per tabel
   const handleSearchChange = (index, value) => {
-    const updatedState = [...tableState];
-    updatedState[index].searchQuery = value;
-    updatedState[index].currentPage = 1; // Reset ke halaman pertama
-    setTableState(updatedState);
+    setTableState((prev) =>
+      prev.map((table, i) =>
+        i === index ? { ...table, searchQuery: value, currentPage: 1 } : table
+      )
+    );
   };
 
-  const nextPage = (index) => {
-    if (tableState[index].currentPage < Math.ceil(roles.length / itemsPerPage)) {
-      const updatedState = [...tableState];
-      updatedState[index].currentPage += 1;
-      setTableState(updatedState);
+  const changePage = (index, direction) => {
+    setTableState((prev) =>
+      prev.map((table, i) =>
+        i === index
+          ? {
+              ...table,
+              currentPage:
+                direction === "next"
+                  ? table.currentPage + 1
+                  : table.currentPage - 1,
+            }
+          : table
+      )
+    );
+  };
+
+  const loadData = async () => {
+    const [accessRes, taskRes, contactRes, affiliateRes] = await Promise.all([
+      getAllCountAccess(),
+      getAllCalculateTask(),
+      getAllContactAndAffiliate("/crm/contact"),
+      getAllContactAndAffiliate("/crm/affiliate"),
+    ]);
+
+    if (accessRes.success) setCountAccess(accessRes.data);
+    if (taskRes.success) setCountCalculateTask(taskRes.data.data);
+
+    if (contactRes.success) {
+      const fullContactRes = await getAllContactAndAffiliate(`/crm/contact?offset=0&limit=${contactRes.data.count}`);
+      if (fullContactRes.success) setContactData(fullContactRes.data.data);
+    }
+
+    if (affiliateRes.success) {
+      const fullAffiliateRes = await getAllContactAndAffiliate(`/crm/affiliate?offset=0&limit=${affiliateRes.data.count}`);
+      if (fullAffiliateRes.success) setAffiliateData(fullAffiliateRes.data.data);
     }
   };
 
-  const prevPage = (index) => {
-    if (tableState[index].currentPage > 1) {
-      const updatedState = [...tableState];
-      updatedState[index].currentPage -= 1;
-      setTableState(updatedState);
-    }
+  const handleExportData = async (tableIndex) => {
+    const table = tableState[tableIndex];
+
+    const fieldMaps = {
+      0: {
+          no: 'No',
+          name: 'Full Name',
+          email: 'Email Address',
+          phone: 'Phone Number',
+          message: 'Message Customer',
+          created_at: 'Date Submitted'
+      },
+      1: {
+          no: 'No',
+          name: 'Full Name',
+          email: 'Email Address',
+          phone: 'Phone Number',
+          instagram: 'Instagram',
+          tiktok: 'TikTok',
+          info: 'Info from Affiliator',
+          created_at: 'Date Submited'
+      }
+    };
+
+    const fieldMap = fieldMaps[tableIndex];
+
+    const modifiedContacts = table.data.map((data, index) => {
+        const modifiedContact = {
+            no: index + 1,
+            ...data,
+            created_at: new Date(data.created_at).toISOString().split('T')[0]
+        };
+
+        const renamedContact = {};
+        Object.keys(fieldMap).forEach(key => {
+            renamedContact[fieldMap[key]] = modifiedContact[key] || '';
+        });
+
+        return renamedContact;
+    });
+
+    const wb = XLSX.utils.book_new();
+    const ws = XLSX.utils.json_to_sheet(modifiedContacts, { header: Object.values(fieldMap) });
+    XLSX.utils.book_append_sheet(wb, ws, table.name);
+
+    const today = new Date();
+    const year = today.getFullYear();
+    const month = String(today.getMonth() + 1).padStart(2, '0');
+    const day = String(today.getDate()).padStart(2, '0');
+    const currentDate = `${year}-${month}-${day}`;
+
+    const exportFileName = `Export_${table.name.split(' ').join('_')}_${currentDate}`;
+
+    XLSX.writeFile(wb, `${exportFileName}`.xlsx);
   };
+
+  useEffect(() => {
+    loadData();
+  }, []);
+
+  useEffect(() => {
+    if (contactData.length || affiliateData.length) {
+      setTableState([
+        { currentPage: 1, searchQuery: "", name: "Contact Data", data: contactData },
+        { currentPage: 1, searchQuery: "", name: "Affiliate Data", data: affiliateData },
+      ]);
+    }
+  }, [contactData, affiliateData]);
+
+  if (tableState.length < 2) return null;
 
   return (
     <div className="dashboard">
       <div className="charts">
         <div className="chart">
-          <h4>Instagram, WA, TikTok, Facebook</h4>
+          <h5>Instagram, WhatsApp, TikTok, Facebook</h5>
           <PieChart data={socialMediaData} />
         </div>
         <div className="chart">
-          <h4>Contact & Affiliate</h4>
+          <h5>Contact & Affiliate</h5>
           <PieChart data={contactAffiliateData} />
         </div>
       </div>
 
-      {/* Section Task Management */}
-      <div className="board-section">
-        <h2 className="board-title">Task Management</h2>
-        <div className="board-container">
-          {["To Do", "In Progress", "Testing"].map((status, index) => (
-            <div className="board" key={index}>
-              <FaClipboard className="board-icon" />
-              <span className="count">{taskCounts[taskKeyMap[status]]}</span>
-              <p>{status}</p>
-            </div>
-          ))}
+      {countCalculateTask.map((workspaceData, index) => (
+        <div className="board-section" key={index}>
+          <h2 className="board-title">{workspaceData.workspace}</h2>
+          <div className="board-container">
+            {workspaceData.board.map((boardItem) => (
+              <div className="board" key={boardItem.id || boardItem.name}>
+                <div className="board-icon-wrapper">
+                  <FaClipboard className="board-icon" />
+                  {boardItem.has_new && <span className="new-label">Has New!</span>}
+                </div>
+                <span className="count">{boardItem.count_task}</span>
+                <p>{boardItem.name}</p>
+              </div>
+            ))}
+          </div>
         </div>
-      </div>
+      ))}
 
-      {/* Dua tabel roles terpisah */}
-      {[0, 1].map((tableIndex) => {
-        const currentPage = tableState[tableIndex].currentPage;
-        const searchQuery = tableState[tableIndex].searchQuery;
-
+      {tableState.map((table, tableIndex) => {
+        const { currentPage, searchQuery, name, data } = table;
         const indexOfLastItem = currentPage * itemsPerPage;
         const indexOfFirstItem = indexOfLastItem - itemsPerPage;
 
-        const filteredRoles = roles
-          .filter((role) =>
-            role.name.toLowerCase().includes(searchQuery.toLowerCase())
+        const filteredData = data
+          .filter((item) =>
+            item.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
+            item.email.toLowerCase().includes(searchQuery.toLowerCase()) ||
+            item.phone.toLowerCase().includes(searchQuery.toLowerCase())
           )
           .slice(indexOfFirstItem, indexOfLastItem);
 
         return (
           <div className="role-table-container" key={tableIndex}>
-            <h3>Role Table {tableIndex + 1}</h3>
+            <div className="role-table-header">
+              <h3>{name}</h3>
+              <button className="export-button" onClick={() => handleExportData(tableIndex)}>
+                Export Data
+              </button>
+            </div>
             <input
               type="text"
-              placeholder="Search by Role Name"
+              placeholder="Search by Name, Email, or Phone"
               value={searchQuery}
               onChange={(e) => handleSearchChange(tableIndex, e.target.value)}
               className="search-bar"
             />
-            
 
-            <table className="role-table">
-              <thead>
-                <tr>
-                  <th>No</th>
-                  <th>Role Name</th>
-                  <th>Description</th>
-                </tr>
-              </thead>
-              <tbody>
-                {filteredRoles.length > 0 ? (
-                  filteredRoles.map((role, index) => (
-                    <tr key={role.id}>
-                      <td>{indexOfFirstItem + index + 1}</td>
-                      <td>{role.name}</td>
-                      <td>{role.description}</td>
-                    </tr>
-                  ))
-                ) : (
+            {/* Tambahkan div pembungkus dengan overflow-x: auto */}
+            <div className="table-wrapper">
+              <table className="role-table">
+                <thead>
                   <tr>
-                    <td colSpan="3">No roles found</td>
+                    <th>No</th>
+                    <th>Name</th>
+                    <th>Email</th>
+                    <th>Phone Number</th>
+                    {tableIndex !== 0 && (
+                      <>
+                        <th>Instagram</th>
+                        <th>TikTok</th>
+                      </>
+                    )}
+                    <th>{tableIndex === 0 ? "Message" : "Info"}</th>
+                    <th>Date Submited</th>
                   </tr>
-                )}
-              </tbody>
-            </table>
+                </thead>
+                <tbody>
+                  {filteredData.length > 0 ? (
+                    filteredData.map((item, index) => (
+                      <tr key={item.id}>
+                        <td>{indexOfFirstItem + index + 1}</td>
+                        <td>{item.name}</td>
+                        <td>{item.email}</td>
+                        <td>{item.phone}</td>
+                        {tableIndex !== 0 && (
+                          <>
+                            <td>{item.instagram || "-"}</td>
+                            <td>{item.tiktok || "-"}</td>
+                          </>
+                        )}
+                        <td dangerouslySetInnerHTML={{ __html: tableIndex === 0 ? item.message : item.info }} />
+                        <td>{new Date(item.created_at).toLocaleDateString("id-ID")}</td>
+                      </tr>
+                    ))
+                  ) : (
+                    <tr>
+                      <td colSpan={tableIndex === 0 ? 5 : 7}>No data found</td>
+                    </tr>
+                  )}
+                </tbody>
+              </table>
+            </div>
 
-            {/* Tombol pagination untuk tabel ini */}
             <div className="pagination">
-              <button onClick={() => prevPage(tableIndex)} disabled={currentPage === 1}>
+              <button onClick={() => changePage(tableIndex, "prev")} disabled={currentPage === 1}>
                 Prev
               </button>
-              <button
-                onClick={() => nextPage(tableIndex)}
-                disabled={currentPage === Math.ceil(roles.length / itemsPerPage)}
-              >
+              <button onClick={() => changePage(tableIndex, "next")} disabled={currentPage >= Math.ceil(data.length / itemsPerPage)}>
                 Next
               </button>
             </div>

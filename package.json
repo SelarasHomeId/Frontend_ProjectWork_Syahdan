@@ -13,6 +13,7 @@
     "bootstrap-icons": "^1.11.3",
     "chart.js": "^4.4.7",
     "framer-motion": "^12.4.7",
+    "js-cookie": "^3.0.5",
     "react": "^18.3.1",
     "react-beautiful-dnd": "^13.1.1",
     "react-bootstrap": "^2.10.8",
@@ -29,7 +30,8 @@
     "sweetalert2": "^11.16.0",
     "sweetalert2-react-content": "^5.1.0",
     "swiper": "^11.1.14",
-    "web-vitals": "^2.1.4"
+    "web-vitals": "^2.1.4",
+    "xlsx": "^0.18.5"
   },
   "scripts": {
     "start": "react-scripts start",

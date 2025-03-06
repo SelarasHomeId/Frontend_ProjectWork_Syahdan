@@ -1,114 +1,88 @@
-import React, { useState, useEffect } from "react";
-import "../styles/Division.css";
+import React, { useState, useEffect, useCallback  } from 'react';
+import debounce from 'lodash.debounce';
+import '../styles/Division.css';
+import { getAllDivision, addDivision, updateDivision, deleteDivision } from '../service/apiService';
 
 const Division = () => {
-  const [divisions, setDivisions] = useState([
-    { id: 1, name: "Marketing", created: "2025-01-20" },
-    { id: 2, name: "Legal", created: "2025-01-15" },
-    { id: 3, name: "Accounting", created: "2025-01-10" },
-  ]);
-  const [search, setSearch] = useState("");
+  const [divisi, setDivisions] = useState([]);
+  const [search, setSearch] = useState('');
   const [currentPage, setCurrentPage] = useState(1);
   const [itemsPerPage] = useState(5);
   const [modalType, setModalType] = useState(null);
   const [selectedDivision, setSelectedDivision] = useState(null);
-  const [newDivisionName, setNewDivisionName] = useState("");
+  const [newDivision, setNewDivision] = useState({ name: '', email: '', role: '', division: '' });
+  const [hasNextPage, setHasNextPage] = useState(false);
 
-  // Debugging perubahan state divisions
+  const fetchDivisions = useCallback(async () => {
+    try {
+      const offset = (currentPage - 1) * itemsPerPage;
+      const response = await getAllDivision(`/divisi?limit=${itemsPerPage}&offset=${offset}&search=${search}`);
+  
+      if (response.success) {
+        setDivisions(response.data.data);
+        setHasNextPage(offset + itemsPerPage < response.data.count);
+      }
+    } catch (error) {
+      console.error('Error fetching divisi:', error);
+    }
+  }, [currentPage, search, itemsPerPage]);
+  
   useEffect(() => {
-    console.log("Updated Divisions:", divisions);
-  }, [divisions]);
+    fetchDivisions();
+  }, [fetchDivisions]);
 
-  // Filter data berdasarkan pencarian
-  const filteredDivisions = divisions.filter((division) =>
-    division.name.toLowerCase().includes(search.toLowerCase())
-  );
+  const handleSearchChange = debounce((value) => {
+    setSearch(value);
+    setCurrentPage(1);
+  }, 500);
 
-  // Pagination
-  const indexOfLastItem = currentPage * itemsPerPage;
-  const indexOfFirstItem = indexOfLastItem - itemsPerPage;
-  const currentDivisions = filteredDivisions.slice(
-    indexOfFirstItem,
-    indexOfLastItem
-  );
-
-  const handleSearchChange = (e) => setSearch(e.target.value);
-  const handleNextPage = () => {
-    if (currentPage < Math.ceil(filteredDivisions.length / itemsPerPage)) {
-      setCurrentPage(currentPage + 1);
-    }
-  };
-  const handlePrevPage = () => {
-    if (currentPage > 1) {
-      setCurrentPage(currentPage - 1);
-    }
+  const handlePagination = (direction) => {
+    setCurrentPage((prev) => Math.max(1, prev + direction));
   };
 
-  // Tambah Division
-  const handleAddDivision = () => {
-    if (newDivisionName.trim() === "") {
-      alert("Division name cannot be empty!");
-      return;
-    }
-
-    // Pastikan ID selalu unik
-    const newId =
-      divisions.length > 0 ? Math.max(...divisions.map((d) => d.id)) + 1 : 1;
-
-    const newDivision = {
-      id: newId,
-      name: newDivisionName,
-      created: new Date().toISOString().split("T")[0],
-    };
-
-    console.log("Adding Division:", newDivision);
-    setDivisions([...divisions, newDivision]);
-    setNewDivisionName("");
-    setModalType(null);
+  const openModal = (type, divisi = null) => {
+    setModalType(type);
+    setSelectedDivision(divisi);
+    setNewDivision(divisi || { name: '', email: '', role: '', division: '' });
   };
 
-  // Edit Division
-  const handleEditDivision = () => {
-    if (newDivisionName.trim() === "") {
-      alert("Division name cannot be empty!");
-      return;
+  const handleDivisionSubmit = async () => {
+    if (!newDivision.name || !newDivision.email || !newDivision.role || !newDivision.division) return;
+    try {
+      const response = modalType === 'add' ? await addDivision(newDivision) : await updateDivision(selectedDivision.id, newDivision);
+      if (response.success) {
+        fetchDivisions();
+        setModalType(null);
+      }
+    } catch (error) {
+      console.error('Error submitting divisi:', error);
     }
-
-    setDivisions(
-      divisions.map((div) =>
-        div.id === selectedDivision.id ? { ...div, name: newDivisionName } : div
-      )
-    );
-    setNewDivisionName("");
-    setModalType(null);
   };
 
-  // Delete Division
-  const handleDeleteDivision = (id) => {
-    const confirmDelete = window.confirm(
-      "Are you sure you want to delete this division?"
-    );
-    if (confirmDelete) {
-      setDivisions(divisions.filter((div) => div.id !== id));
+  const handleDeleteDivision = async (id) => {
+    if (window.confirm('Are you sure you want to delete this divisi?')) {
+      try {
+        const response = await deleteDivision(id);
+        if (response.success) fetchDivisions();
+      } catch (error) {
+        console.error('Error deleting divisi:', error);
+      }
     }
   };
 
   return (
-    <div className="division-container">
+    <div className="divisi-container">
       <div className="table-header">
-        <input
-          type="text"
-          className="search-input"
-          placeholder="Search by division"
-          value={search}
-          onChange={handleSearchChange}
+        <input 
+          type="text" 
+          className="search-input" 
+          placeholder="Search by division name" 
+          onChange={(e) => handleSearchChange(e.target.value)} 
         />
-        <button className="add-button" onClick={() => setModalType("add")}>
-          Add Division
-        </button>
+        <button className="add-button" onClick={() => openModal('add')}>Add Division</button>
       </div>
 
-      <table className="division-table">
+      <table className="divisi-table">
         <thead>
           <tr>
             <th>No</th>
@@ -118,33 +92,19 @@ const Division = () => {
           </tr>
         </thead>
         <tbody>
-          {currentDivisions.length === 0 ? (
+          {divisi.length === 0 ? (
             <tr>
-              <td colSpan="4">No divisions found</td>
+              <td colSpan="7">No divisi found</td>
             </tr>
           ) : (
-            currentDivisions.map((division, index) => (
-              <tr key={division.id}>
-                <td>{index + 1 + indexOfFirstItem}</td>
-                <td>{division.name}</td>
-                <td>{division.created}</td>
+            divisi.map((divisi, index) => (
+              <tr key={divisi.id}>
+                <td>{(currentPage - 1) * itemsPerPage + index + 1}</td>
+                <td>{divisi.name}</td>
+                <td>{divisi.created_at}</td>
                 <td>
-                  <button
-                    className="action-button"
-                    onClick={() => {
-                      setModalType("edit");
-                      setSelectedDivision(division);
-                      setNewDivisionName(division.name);
-                    }}
-                  >
-                    Edit
-                  </button>
-                  <button
-                    className="action-button"
-                    onClick={() => handleDeleteDivision(division.id)}
-                  >
-                    Delete
-                  </button>
+                  <button className="action-button btn btn-warning" onClick={() => openModal('edit', divisi)}>Edit</button>
+                  <button className="action-button btn btn-danger" onClick={() => handleDeleteDivision(divisi.id)}>Delete</button>
                 </td>
               </tr>
             ))
@@ -153,49 +113,21 @@ const Division = () => {
       </table>
 
       <div className="pagination">
-        <button
-          onClick={handlePrevPage}
-          className="pagination-button"
-          disabled={currentPage === 1}
-        >
-          Prev
-        </button>
-        <button
-          onClick={handleNextPage}
-          className="pagination-button"
-          disabled={
-            currentPage >= Math.ceil(filteredDivisions.length / itemsPerPage)
-          }
-        >
-          Next
-        </button>
+        <button onClick={() => handlePagination(-1)} className="pagination-button" disabled={currentPage === 1}>Prev</button>
+        <button onClick={() => handlePagination(1)} className="pagination-button" disabled={!hasNextPage}>Next</button>
       </div>
 
-      {/* Modal untuk tambah & edit */}
       {modalType && (
         <div className="modal">
           <div className="modal-content">
-            <h3>{modalType === "add" ? "Add Division" : "Edit Division"}</h3>
-            <input
-              type="text"
-              value={newDivisionName}
-              onChange={(e) => setNewDivisionName(e.target.value)}
-              placeholder="Enter division name"
-              className="modal-input"
-            />
+            <h3>{modalType === 'add' ? 'Add Division' : 'Edit Division'}</h3>
+            <input type="text" value={newDivision.name} onChange={(e) => setNewDivision({ ...newDivision, name: e.target.value })} placeholder="Enter name" className="modal-input" />
+            <input type="email" value={newDivision.email} onChange={(e) => setNewDivision({ ...newDivision, email: e.target.value })} placeholder="Enter email" className="modal-input" />
+            <input type="text" value={newDivision.role} onChange={(e) => setNewDivision({ ...newDivision, role: e.target.value })} placeholder="Enter role" className="modal-input" />
+            <input type="text" value={newDivision.division} onChange={(e) => setNewDivision({ ...newDivision, division: e.target.value })} placeholder="Enter division" className="modal-input" />
             <div className="modal-actions">
-              <button
-                className="save-button"
-                onClick={modalType === "add" ? handleAddDivision : handleEditDivision}
-              >
-                Save
-              </button>
-              <button
-                className="cancel-button"
-                onClick={() => setModalType(null)}
-              >
-                Cancel
-              </button>
+              <button className="save-button" onClick={handleDivisionSubmit}>Save</button>
+              <button className="cancel-button" onClick={() => setModalType(null)}>Cancel</button>
             </div>
           </div>
         </div>

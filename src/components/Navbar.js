@@ -4,7 +4,7 @@ import { FaBars, FaBell, FaUser } from "react-icons/fa";
 import { Link, useNavigate } from "react-router-dom";
 import { authLogout, changePassword, fetchNotifications, markNotificationAsRead } from "../service/apiService";
 import Swal from "sweetalert2";
-import { validatePassword } from "../utils/general";
+import { getCookie, removeAllCookies, validatePassword } from "../utils/general";
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faEnvelopeOpen, faEnvelope } from '@fortawesome/free-solid-svg-icons';
 
@@ -12,9 +12,9 @@ function Navbar({ toggleSidebar }) {
   const navigate = useNavigate();
   
   const [user] = useState({
-    name: localStorage.getItem("name") || "",
-    role: localStorage.getItem("roleName") || "",
-    divisi: localStorage.getItem("divisiName") || "",
+    name: getCookie("name") || "",
+    role: getCookie("roleName") || "",
+    divisi: getCookie("divisiName") || "",
   });
 
   const [notifications, setNotifications] = useState([]);
@@ -24,7 +24,36 @@ function Navbar({ toggleSidebar }) {
 
   useEffect(() => {
     loadNotifications();
-  }, []);
+    if (!getCookie("id")) {
+      Swal.fire({
+        title: "Session anda telah berakhir.",
+        text: "Sampai jumpa kembali...",
+        icon: "success",
+        timer: 2500,
+        showConfirmButton: false,
+      }).then(() => {
+        removeAllCookies();
+        navigate("/");
+      });
+    }
+  }, [navigate]);
+
+  useEffect(() => {
+    const handleClickOutside = (event) => {
+      if (
+        !event.target.closest(".notification-wrapper") &&
+        !event.target.closest(".user-section")
+      ) {
+        setShowNotificationDropdown(false);
+        setShowUserDropdown(false);
+      }
+    };
+  
+    document.addEventListener("click", handleClickOutside);
+    return () => {
+      document.removeEventListener("click", handleClickOutside);
+    };
+  }, []);  
   
   const loadNotifications = async () => {
     const response = await fetchNotifications();
@@ -55,7 +84,7 @@ function Navbar({ toggleSidebar }) {
           timer: 2500,
           showConfirmButton: false,
         }).then(() => {
-          localStorage.clear();
+          removeAllCookies();
           navigate("/");
         });
       }

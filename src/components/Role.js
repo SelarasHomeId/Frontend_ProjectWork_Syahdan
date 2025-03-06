@@ -1,37 +1,37 @@
-import React, { useState } from 'react';
-import '../styles/Role.css'; // Pastikan file CSS ini ada di dalam folder yang sama
+import React, { useState, useEffect } from 'react';
+import '../styles/Role.css';
+import { getAllRole } from '../service/apiService';
 
-const RoleTable = () => {
-  // Contoh data role
-  const roles = [
-    { id: 1, name: 'Admin', description: 'Manages all aspects of the app' },
-    { id: 2, name: 'User', description: 'Regular user with limited access' },
-    { id: 3, name: 'Manager', description: 'Manages tasks and users' },
-    { id: 4, name: 'Developer', description: 'Works on app development' },
-    { id: 5, name: 'Designer', description: 'Designs UI/UX for the app' },
-    { id: 6, name: 'Tester', description: 'Tests the app for bugs' },
-    { id: 7, name: 'Support', description: 'Provides customer support' },
-    // Tambah data lebih banyak jika diperlukan
-  ];
-
-  // State untuk pagination dan pencarian
+const Role = () => {
+  // State untuk menyimpan data role, pagination, dan pencarian
+  const [roles, setRoles] = useState([]);
   const [currentPage, setCurrentPage] = useState(1);
   const [searchQuery, setSearchQuery] = useState('');
-  const itemsPerPage = 5;
+  const [totalPages, setTotalPages] = useState(1);
+  const itemsPerPage = 5; // Batas data per halaman
 
-  // Fungsi untuk menghitung data yang ditampilkan berdasarkan halaman
-  const indexOfLastItem = currentPage * itemsPerPage;
-  const indexOfFirstItem = indexOfLastItem - itemsPerPage;
-  const currentRoles = roles.slice(indexOfFirstItem, indexOfLastItem);
+  // Fetch data dari API dengan pagination dan search query
+  const fetchRoles = async (page = 1, query = '') => {
+    try {
+      const response = await getAllRole(`/role?page=${page}&limit=${itemsPerPage}&search=${query}`);
+      setRoles(response.data.data); // Sesuaikan dengan struktur respons dari API
+      
+      // Hitung total halaman
+      const totalData = response.data.count; // Total data dari API
+      setTotalPages(Math.ceil(totalData / itemsPerPage)); // Hitung total halaman
+    } catch (error) {
+      console.error('Error fetching roles:', error);
+    }
+  };
 
-  // Filter berdasarkan pencarian
-  const filteredRoles = currentRoles.filter(role =>
-    role.name.toLowerCase().includes(searchQuery.toLowerCase())
-  );
+  // Panggil fetchRoles saat komponen pertama kali dimuat atau saat currentPage / searchQuery berubah
+  useEffect(() => {
+    fetchRoles(currentPage, searchQuery);
+  }, [currentPage, searchQuery]);
 
-  // Fungsi untuk mengubah halaman
+  // Fungsi untuk navigasi halaman
   const nextPage = () => {
-    if (currentPage < Math.ceil(roles.length / itemsPerPage)) {
+    if (currentPage < totalPages) {
       setCurrentPage(currentPage + 1);
     }
   };
@@ -49,7 +49,10 @@ const RoleTable = () => {
         type="text"
         placeholder="Search by Role Name"
         value={searchQuery}
-        onChange={e => setSearchQuery(e.target.value)}
+        onChange={e => {
+          setSearchQuery(e.target.value);
+          setCurrentPage(1); // Reset ke halaman pertama saat mencari
+        }}
         className="search-bar"
       />
 
@@ -63,10 +66,10 @@ const RoleTable = () => {
           </tr>
         </thead>
         <tbody>
-          {filteredRoles.length > 0 ? (
-            filteredRoles.map((role, index) => (
+          {roles.length > 0 ? (
+            roles.map((role, index) => (
               <tr key={role.id}>
-                <td>{indexOfFirstItem + index + 1}</td>
+                <td>{(currentPage - 1) * itemsPerPage + index + 1}</td>
                 <td>{role.name}</td>
                 <td>{role.description}</td>
               </tr>
@@ -84,10 +87,7 @@ const RoleTable = () => {
         <button onClick={prevPage} disabled={currentPage === 1}>
           Prev
         </button>
-        <button
-          onClick={nextPage}
-          disabled={currentPage === Math.ceil(roles.length / itemsPerPage)}
-        >
+        <button onClick={nextPage} disabled={currentPage >= totalPages}>
           Next
         </button>
       </div>
@@ -95,4 +95,4 @@ const RoleTable = () => {
   );
 };
 
-export default RoleTable;
+export default Role;

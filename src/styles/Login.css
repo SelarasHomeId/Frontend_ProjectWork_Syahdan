@@ -51,13 +51,16 @@
   gap: 20px;
 }
 
-/* Kolom input dengan garis bawah */
 .input-container {
   position: relative;
+  display: flex;
+  align-items: center;
+  width: 100%;
 }
 
 .input-container input {
-  width: calc(100% - 50px); /* Membatasi lebar input agar garis tidak terlalu panjang */
+  width: 100%;
+  min-width: 200px; /* Pastikan input tidak menyusut */
   padding: 10px 12px;
   padding-left: 40px; /* Ruang untuk ikon */
   border: none;
@@ -78,7 +81,6 @@
   font-style: italic;
 }
 
-/* Ikon di kolom input */
 .input-container .icon {
   position: absolute;
   left: 10px;
@@ -88,10 +90,12 @@
   font-size: 20px;
 }
 
-/* Tombol untuk toggle visibility password */
 #toggle-password {
+  display: flex;
+  align-items: center;
+  justify-content: center;
   position: absolute;
-  right: 10px;
+  right: 3.32px;
   top: 50%;
   transform: translateY(-50%);
   background: none;
@@ -100,6 +104,7 @@
   font-size: 20px;
   cursor: pointer;
   transition: color 0.3s;
+  height: 100%;
 }
 
 #toggle-password:hover {

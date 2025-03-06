@@ -1,15 +1,24 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import "../styles/Login.css";
-import { FaUser, FaLock, FaEye, FaEyeSlash } from "react-icons/fa";
-import { useNavigate } from "react-router-dom"; // Untuk navigasi
-import { authLogin, sendEmailForgotPassword } from "../service/apiService"; // Mengimpor fungsi login & reset password
+import { FaUser, FaLock } from "react-icons/fa";
+import { useNavigate } from "react-router-dom";
+import { authLogin, sendEmailForgotPassword } from "../service/apiService";
 import Swal from "sweetalert2";
+import Cookies from "js-cookie";
+import { getCookie, setAllCookiesUserData } from "../utils/general";
 
 function Login() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [passwordVisible, setPasswordVisible] = useState(false);
   const navigate = useNavigate();
+
+  useEffect(() => {
+    const token = getCookie("token");
+    if (token) {
+      navigate("/home");
+    }
+  }, [navigate]);
 
   const togglePasswordVisibility = () => {
     setPasswordVisible(!passwordVisible);
@@ -23,21 +32,9 @@ function Login() {
 
       if (response && response.success === true) {
         const token = response.data.token;
-        const email = response.data.data.email;
-        const name = response.data.data.name;
-        const id = response.data.data.id;
-        const roleId = response.data.data.role.id;
-        const divisiId = response.data.data.divisi.id;
-        const roleName = response.data.data.role.name;
-        const divisiName = response.data.data.divisi.name;
-        localStorage.setItem("token", token);
-        localStorage.setItem("email", email);
-        localStorage.setItem("name", name);
-        localStorage.setItem("id", id);
-        localStorage.setItem("roleId", roleId);
-        localStorage.setItem("divisiId", divisiId);
-        localStorage.setItem("roleName", roleName);
-        localStorage.setItem("divisiName", divisiName);
+        Cookies.set("token", token, { expires: 1, secure: true, sameSite: "Strict" });
+        setAllCookiesUserData(response);
+        
         Swal.fire({
           title: "Berhasil Login",
           text: "Anda akan dialihkan...",
@@ -68,7 +65,6 @@ function Login() {
     }
   };
 
-  // Fungsi ketika klik Forgot Password
   const handleForgotPassword = async () => {
     const { value: userEmail } = await Swal.fire({
       title: "Forgot Password",
@@ -122,7 +118,6 @@ function Login() {
       <div className="login-container">
         <h2>Login</h2>
         <form className="login-form" onSubmit={handleSubmit}>
-          {/* Input Email */}
           <div className="input-container">
             <FaUser className="icon" />
             <input
@@ -136,7 +131,6 @@ function Login() {
             />
           </div>
 
-          {/* Input Password */}
           <div className="input-container">
             <FaLock className="icon" />
             <input
@@ -148,29 +142,14 @@ function Login() {
               onChange={(e) => setPassword(e.target.value)}
               required
             />
-            <button
-              type="button"
-              id="toggle-password"
-              onClick={togglePasswordVisibility}
-              style={{
-                position: "absolute",
-                right: "10px",
-                top: "50%",
-                transform: "translateY(-50%)",
-                background: "none",
-                border: "none",
-                cursor: "pointer",
-              }}
-            >
-              {passwordVisible ? <FaEyeSlash /> : <FaEye />}
+            <button type="button" id="toggle-password" onClick={togglePasswordVisibility}>
+              <i className={passwordVisible ? "bi bi-eye-slash" : "bi bi-eye"}></i>
             </button>
           </div>
 
-          {/* Tombol Login */}
           <button type="submit">Login</button>
         </form>
 
-        {/* Tautan Lupa Password */}
         <div className="forgot-password" onClick={handleForgotPassword} style={{ cursor: "pointer", color: "blue", textDecoration: "underline" }}>
           Forgot Password?
         </div>

@@ -3,6 +3,7 @@ import "bootstrap/dist/css/bootstrap.min.css";
 import "bootstrap-icons/font/bootstrap-icons.css";
 import "../styles/Sidebar.css";
 import { workspaceFind } from "../service/apiService";
+import { getCookie } from "../utils/general";
 
 // Pastikan path benar
 import logo from "../assets/img/selarasBackground.jpg"; 
@@ -12,31 +13,34 @@ function Sidebar({ showSidebar, toggleSidebar, onPageChange }) {
   const [workspaceList, setWorkspaceList] = useState([]);
   const [showMasterdata, setShowMasterdata] = useState(false);
 
-  const roleId = localStorage.getItem("roleId");
+  const roleId = getCookie("roleId");
   const shouldShowMasterdata = roleId === "1";
 
   const toggleSubMenu = (submenuSetter, resetSubmenu) => {
     submenuSetter((prev) => !prev);
     if (resetSubmenu) resetSubmenu(false);
   };
+  
+  const fetchWorkspaceData = async () => {
+    try {
+      const response = await workspaceFind();
+      setWorkspaceList(response);
+    } catch (error) {
+      if (error.name !== "AbortError") {
+        console.error("Error fetching Workspace data:", error);
+      }
+    }
+  };
 
   useEffect(() => {
-    const controller = new AbortController(); 
-    const fetchWorkspaceData = async () => {
-      try {
-        const response = await workspaceFind();
-        setWorkspaceList(response);
-      } catch (error) {
-        if (error.name !== "AbortError") {
-          console.error("Error fetching Workspace data:", error);
-        }
-      }
-    };
-
     fetchWorkspaceData();
-
-    return () => controller.abort();
   }, []);
+
+  useEffect(() => {
+    if (showSidebar) {
+        fetchWorkspaceData();
+    }
+}, [showSidebar]);
 
   return (
     <div className={`app-container ${showSidebar ? "sidebar-active" : ""}`}>
@@ -45,8 +49,7 @@ function Sidebar({ showSidebar, toggleSidebar, onPageChange }) {
           
           {/* Logo hanya muncul saat sidebar terbuka */}
           {showSidebar && (
-            <div className="sidebar-logo text-center mb-3 clickable" onClick={() => onPageChange("dashboard")}>
-              {/* Tambahkan penanganan error jika gambar tidak ditemukan */}
+            <div className="sidebar-logo text-center mb-3 clickable" >
               {logo ? (
                 <img src={logo} alt="Logo" className="img-fluid sidebar-logo-img cursor-pointer"/>
               ) : (

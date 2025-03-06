@@ -10,7 +10,7 @@ import Project from "../components/Project.js";
 import "bootstrap/dist/css/bootstrap.min.css";
 
 function Home() {
-  const [isSidebarActive, setIsSidebarActive] = useState(true);
+  const [isSidebarActive, setIsSidebarActive] = useState(false);
   const [currentPage, setCurrentPage] = useState("dashboard");
 
   // Menghilangkan scrollbar horizontal saat sidebar aktif
@@ -24,32 +24,68 @@ function Home() {
 
   const handlePageChange = (page) => {
     setCurrentPage(page);
+    setIsSidebarActive(false);
+  };
+
+  const pageTitles = {
+    dashboard: "Dashboard",
+    user: "User Management",
+    role: "Role Management",
+    division: "Division Management",
+    project: "Project Management",
+  };
+
+  const capitalizeWords = (str) => {
+    return str
+      .split(" ")
+      .map(word => word.charAt(0).toUpperCase() + word.slice(1))
+      .join(" ");
   };
 
   const renderPage = () => {
-    switch (currentPage) {
-      case "dashboard":
-        return <Dashboard />;
-      case "user":
-        return <User />;
-      case "role":
-        return <Role />;
-      case "division":
-        return <Division />;
-      case "project":
-        return <Project />;
-      default:
-        return <Workspace workspaceName={currentPage} />;
-    }
+    return (
+      <di>
+        <h3 
+          className={`${
+              ["user", "role", "division", "project"].includes(currentPage)
+                ? "text-left ms-3"
+                : "text-center"
+            } text-dark fw-bold display-6 mt-3`} 
+          style={{ fontFamily: "'Poppins', sans-serif" }}
+        >
+          {pageTitles[currentPage] || `${capitalizeWords(currentPage)}`}
+        </h3>
+        {currentPage === "dashboard" ? (
+          <Dashboard />
+        ) : currentPage === "user" ? (
+          <User />
+        ) : currentPage === "role" ? (
+          <Role />
+        ) : currentPage === "division" ? (
+          <Division />
+        ) : currentPage === "project" ? (
+          <Project />
+        ) : (
+          <Workspace workspaceName={currentPage} />
+        )}
+      </di>
+    )
   };
 
   return (
     <div className="vh-100 d-flex flex-column">
-      {/* Navbar */}
-      <Navbar toggleSidebar={toggleSidebar} />
+      <div 
+        style={{
+          position: "fixed",
+          top: 0,
+          width: "100%",
+          zIndex: 1000, // Pastikan navbar di atas elemen lain
+        }}
+      >
+        <Navbar toggleSidebar={toggleSidebar} />
+      </div>
 
-      {/* Container utama: Sidebar + Konten */}
-      <div className="d-flex flex-grow-1">
+      <div className="d-flex flex-grow-1" style={{ marginTop: "56px" }}> 
         {/* Sidebar */}
         <div
           className="sidebar bg-dark"
