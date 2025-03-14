@@ -132,7 +132,7 @@ const User = () => {
         } else {
           Swal.fire({
             title: "Gagal!",
-            text: response.error?.message || "Terjadi kesalahan.",
+            text: response.error.data.message || "Terjadi kesalahan.",
             icon: "error",
             confirmButtonText: "OK",
           });
@@ -291,7 +291,7 @@ const User = () => {
         } else {
           Swal.fire({
             title: "Gagal!",
-            text: response.error?.message || "Terjadi kesalahan.",
+            text: response.error.data.message || "Terjadi kesalahan.",
             icon: "error",
             confirmButtonText: "OK",
           });
@@ -333,7 +333,7 @@ const User = () => {
         } else {
           Swal.fire({
             title: "Gagal!",
-            text: response.error?.message || "Terjadi kesalahan.",
+            text: response.error.data.message || "Terjadi kesalahan.",
             icon: "error",
             confirmButtonText: "OK",
           });
@@ -375,7 +375,7 @@ const User = () => {
         } else {
           Swal.fire({
             title: "Gagal!",
-            text: response.error?.message || "Terjadi kesalahan.",
+            text: response.error.data.message || "Terjadi kesalahan.",
             icon: "error",
             confirmButtonText: "OK",
           });
@@ -419,7 +419,7 @@ const User = () => {
             </tr>
           </thead>
           <tbody>
-            {users.length === 0 ? (
+            {users == null ? (
               <tr>
                 <td colSpan="7">No users found</td>
               </tr>

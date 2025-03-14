@@ -21,6 +21,12 @@ export const apiRequest = async ({
   if (token) {
     headers["Authorization"] = `Bearer ${token}`;
   }
+
+  if (contentType === "multipart/form-data" && (method.toUpperCase() === "POST" || method.toUpperCase() === "PUT" )) {
+    const formData = new FormData();
+    Object.keys(body).forEach((key) => formData.append(key, body[key]));
+    body = formData
+  }
   
   const hitAPI = async () => {
     switch (method.toUpperCase()) {
@@ -197,6 +203,7 @@ export const addProject = async (projectData) => {
     method: "POST",
     endpoint: "/project",
     body: projectData,
+    contentType: "multipart/form-data",
   });
 };
 
@@ -205,6 +212,7 @@ export const updateProject = async (projectId, updatedData) => {
     method: "PUT",
     endpoint: `/project/${projectId}`,
     body: updatedData,
+    contentType: "multipart/form-data",
   });
 };
 
@@ -285,3 +293,82 @@ export const getAllContactAndAffiliate = async (endpoint) => {
     endpoint: endpoint,
   });
 };
+
+
+// ==================================================================================================== //
+// BOARD
+export const getAllBoardByWorkspaceId = async (workspaceId) => {
+  const response = await apiRequest({
+    method: "GET",
+    endpoint: `/board/${workspaceId}?order=sort_number&order_by=asc`,
+  });
+
+  return response.data.data
+}
+
+export const updateBoard = async (boardId, updatedData) => {
+  return await apiRequest({
+    method: "PUT",
+    endpoint: `/board/${boardId}`,
+    body: updatedData,
+  });
+};
+
+export const deleteBoard = async (boardId) => {
+  return await apiRequest({
+    method: "DELETE",
+    endpoint: `/board/${boardId}`,
+  });
+};
+
+export const createBoard = async (boardData) => {
+  return await apiRequest({
+    method: "POST",
+    endpoint: "/board",
+    body: boardData,
+  });
+};
+
+// ==================================================================================================== //
+// TASK
+export const getAllTaskByBoardId = async (boardId) => {
+  const response = await apiRequest({
+    method: "GET",
+    endpoint: `/task/${boardId}?order=sort_number&order_by=asc`,
+  });
+
+  return response.data.data
+}
+
+export const createTask = async (taskData) => {
+  return await apiRequest({
+    method: "POST",
+    endpoint: "/task",
+    body: taskData,
+  });
+};
+
+export const getTaskById = async (taskId) => {
+  return await apiRequest({
+    method: "GET",
+    endpoint: `/task/detail/${taskId}`,
+  });
+};
+
+export const updateTask = async (taskId, updatedData) => {
+  return await apiRequest({
+    method: "PUT",
+    endpoint: `/task/${taskId}`,
+    body: updatedData,
+    contentType: "multipart/form-data"
+  });
+};
+
+export const searchTask = async (search) => {
+  const response = await apiRequest({
+    method: "GET",
+    endpoint: `/task?search=${search}`,
+  });
+
+  return response.data.data
+}

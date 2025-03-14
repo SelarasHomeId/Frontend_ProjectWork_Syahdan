@@ -2,13 +2,15 @@ import React, { useState, useEffect } from "react";
 import "../styles/Navbar.css";
 import { FaBars, FaBell, FaUser } from "react-icons/fa";
 import { Link, useNavigate } from "react-router-dom";
-import { authLogout, changePassword, fetchNotifications, markNotificationAsRead } from "../service/apiService";
+import { authLogout, changePassword, fetchNotifications, getTaskById, markNotificationAsRead, searchTask } from "../service/apiService";
 import Swal from "sweetalert2";
 import { getCookie, removeAllCookies, validatePassword } from "../utils/general";
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faEnvelopeOpen, faEnvelope } from '@fortawesome/free-solid-svg-icons';
+import LogoSelarasSidebar from "../assets/img/selarasBackground.jpg"; 
+import { debounce } from "lodash";
 
-function Navbar({ toggleSidebar }) {
+function Navbar({ showSidebar, toggleNavbar, showDetailTask }) {
   const navigate = useNavigate();
   
   const [user] = useState({
@@ -21,6 +23,9 @@ function Navbar({ toggleSidebar }) {
   const [unreadNotif, setUnreadNotif] = useState(0);
   const [showNotificationDropdown, setShowNotificationDropdown] = useState(false);
   const [showUserDropdown, setShowUserDropdown] = useState(false);
+  const [searchQuery, setSearchQuery] = useState("");
+  const [searchResults, setSearchResults] = useState([]);
+  const [showSearchDropdown, setShowSearchDropdown] = useState(false);
 
   useEffect(() => {
     loadNotifications();
@@ -162,23 +167,111 @@ function Navbar({ toggleSidebar }) {
     }
   };
 
-  const handleClickNotification = async (id) => {
+  const handleClickNotification = async (id, taskId) => {
     const response = await markNotificationAsRead(id);
     if (response.success) {
       loadNotifications();
+    }
+
+    const responseTask = await getTaskById(taskId);
+    if (responseTask.success){
+      const task = responseTask.data.data
+      if (task === null){
+        Swal.fire({
+          title: "Task not found",
+          text: "Silakan hubungi admin anda!",
+          icon: "error",
+          confirmButtonText: "OK",
+        })
+      }else{
+        showDetailTask(task)
+      }
     }
     
     setShowNotificationDropdown(false);
   };
 
+  const fetchSearchResults = async (query) => {
+    if (query.length > 0) {
+      const response = await searchTask(query);
+      setSearchResults(response);
+      setShowSearchDropdown(true);
+    } else {
+      setSearchResults([]);
+      setShowSearchDropdown(false);
+    }
+  };
+
+  const debouncedSearch = debounce(fetchSearchResults, 300);
+
+  useEffect(() => {
+    debouncedSearch(searchQuery);
+    return () => debouncedSearch.cancel();
+  }, [searchQuery, debouncedSearch]);
+
+  const handleClickResultTask = async (taskId) => {
+    setSearchResults([]);
+    setSearchQuery("");
+    setShowSearchDropdown(false);
+    const responseTask = await getTaskById(taskId);
+    if (responseTask.success){
+      const task = responseTask.data.data
+      if (task === null){
+        Swal.fire({
+          title: "Task not found",
+          text: "Silakan hubungi admin anda!",
+          icon: "error",
+          confirmButtonText: "OK",
+        })
+      }else{
+        showDetailTask(task)
+      }
+    }
+  };
+
   return (
     <nav className="navbar navbar-expand-lg navbar-dark bg-dark">
       <div className="container-fluid d-flex align-items-center justify-content-between">
-        <button className="burger-menu-btn" onClick={toggleSidebar}>
+        <button className="burger-menu-btn" onClick={toggleNavbar}>
           <FaBars />
         </button>
+        {showSidebar && (
+          <div className="sidebar-logo text-center clickable" style={{cursor: "pointer"}} >
+            {LogoSelarasSidebar ? (
+              <img src={LogoSelarasSidebar} alt="Logo" className="img-fluid sidebar-logo-img cursor-pointer"/>
+            ) : (
+              <div className="text-white">Logo Not Found</div>
+            )}
+          </div>
+        )}
 
         <div className="navbar-right d-flex align-items-center">
+          <div className="search-task-container position-relative">
+            <input
+              type="text"
+              className="form-control search-task-input"
+              placeholder="Search task..."
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+            />
+            {(showSearchDropdown && searchQuery !== "") && (
+              <div className={`dropdown-menu search-task-dropdown ${showSearchDropdown ? 'show' : ''}`}>
+                {searchResults != null ? (
+                  searchResults.map((task, index) => (
+                    <li key={index} className="dropdown-item" onClick={() => handleClickResultTask(task.id)}>
+                      {task.title}<br/>
+                      <span className="search-task-message">
+                        {task.description ? ("Has Description") : ("No Description")}
+                      </span>
+                    </li>
+                  ))
+                ) : (
+                  <li className="dropdown-item">No tasks found</li>
+                )}
+              </div>
+            )}
+          </div>
+
           <div
             className={`nav-item dropdown notification-wrapper ${showNotificationDropdown ? "active" : ""}`}
             onClick={toggleNotificationDropdown}
@@ -190,9 +283,9 @@ function Navbar({ toggleSidebar }) {
             {showNotificationDropdown && (
               <div className="dropdown-menu notification-dropdown">
                 <h6 className="dropdown-header">Notifikasi</h6>
-                {notifications.length > 0 ? (
+                {notifications != null ? (
                   notifications.map((notif, index) => (
-                    <li key={index} className="notification-item" onClick={() => handleClickNotification(notif.id)}>
+                    <li key={index} className="notification-item" onClick={() => handleClickNotification(notif.id, notif.task_id)}>
                         {notif.is_read ? (
                             <span className="mr-2">
                                 <FontAwesomeIcon icon={faEnvelopeOpen} className="notification-icon read" />

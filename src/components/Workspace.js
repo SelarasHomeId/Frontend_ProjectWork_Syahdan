@@ -1,107 +1,472 @@
-import React, { useState } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import PropTypes from "prop-types";
 import { DndProvider, useDrag, useDrop } from "react-dnd";
 import { HTML5Backend } from "react-dnd-html5-backend";
 import { motion, AnimatePresence } from "framer-motion";
 import "bootstrap/dist/css/bootstrap.min.css";
 import "../styles/Workspace.css";
+import Swal from "sweetalert2";
+import { createBoard, createTask, deleteBoard, getAllBoardByWorkspaceId, getAllTaskByBoardId, getTaskById, updateBoard, updateTask, workspaceFind } from "../service/apiService";
+import { FaCheckSquare, FaClock, FaComment, FaEye, FaFileAlt, FaPaperclip, FaTag  } from "react-icons/fa";
+import TaskDetail from "./TaskDetail";
 
 const ItemTypes = {
   TASK: "task",
+  BOARD: "board",
 };
 
-const Workspace = () => {
-  const [boards, setBoards] = useState([
-    { id: "marketing", title: "Marketing", tasks: ["Task 1", "Task 2"] },
-    { id: "legal", title: "Legal", tasks: ["Task 3", "Task 4"] },
-    { id: "accounting", title: "Accounting", tasks: ["Task 5"] },
-    { id: "technical", title: "Technical", tasks: ["Task 6", "Task 7"] },
-  ]);
+const Workspace = ({ workspaceId, toDetailTask }) => {
+  const [boards, setBoards] = useState([]);
   const [newBoardTitle, setNewBoardTitle] = useState("");
   const [isAddingBoard, setIsAddingBoard] = useState(false);
+  const inputRef = useRef(null);
+  const [selectedTask, setSelectedTask] = useState(null);
 
-  const addBoard = () => {
-    if (newBoardTitle.trim()) {
-      const newBoard = {
-        id: `board-${Date.now()}`,
-        title: newBoardTitle,
-        tasks: [],
-      };
-      setBoards([...boards, newBoard]);
-      setNewBoardTitle("");
-      setIsAddingBoard(false);
+  const handleClickTask = async (task) => {
+    const responseTask = await getTaskById(task.id);
+    if (responseTask.success){
+      const taskData = responseTask.data.data
+      if (taskData === null){
+        Swal.fire({
+          title: "Task not found",
+          text: "Silakan hubungi admin anda!",
+          icon: "error",
+          confirmButtonText: "OK",
+        })
+      }else{
+        setSelectedTask(taskData);
+      }
     }
   };
 
-  const moveTask = (task, fromBoardId, toBoardId, toIndex) => {
-    if (fromBoardId === toBoardId && toIndex === undefined) return;
-
-    setBoards((prevBoards) => {
-      let taskToMove;
-      const updatedBoards = prevBoards.map((board) => {
-        if (board.id === fromBoardId) {
-          taskToMove = board.tasks.find((t) => t === task);
-          return { ...board, tasks: board.tasks.filter((t) => t !== task) };
-        }
-        return board;
-      });
-
-      return updatedBoards.map((board) => {
-        if (board.id === toBoardId && taskToMove) {
-          const newTasks = [...board.tasks];
-          newTasks.splice(toIndex, 0, taskToMove);
-          return { ...board, tasks: newTasks };
-        }
-        return board;
-      });
-    });
+  const handleClose = () => {
+    setSelectedTask(null);
   };
 
-  const addTask = (boardId, task) => {
+  useEffect(() => {
+    loadBoardsAndTasks(workspaceId);
+  }, [workspaceId]);
+
+  useEffect(() => {
+    if (isAddingBoard) {
+      setTimeout(() => inputRef.current?.focus(), 300);
+    }
+  }, [isAddingBoard]);
+
+  useEffect(() => {
+    if (toDetailTask){
+      setSelectedTask(toDetailTask);
+    }
+  }, [toDetailTask])
+
+  const loadBoardsAndTasks = async (workspaceId) => {
+    const response = await getAllBoardByWorkspaceId(workspaceId);
+    const boardsWithTasks = await Promise.all(
+      (response || []).map(async (board) => {
+        const taskResponse = await getAllTaskByBoardId(board.id);
+        const tasks = (taskResponse || []).map((task) => ({
+          id: task.id,
+          board_id: task.board_id,
+          title: task.title,
+          assign_to_user: task.assign_to_user,
+          checklist: task.checklist,
+          comment: task.comment,
+          cover: task.cover,
+          description: task.description,
+          due_date: task.due_date,
+          file: task.file,
+          is_completed: task.is_completed,
+          label: task.label,
+          sort_number: task.sort_number,
+          watch: task.watch,
+        }));
+        return {
+          id: board.id, //
+          name: board.name, //
+          sort_number: board.sort_number, //
+          task_total: board.task_total, //
+          workspace_id: board.workspace_id, //
+          tasks: tasks, // 
+        };
+      })
+    );
+    setBoards(boardsWithTasks);
+  };
+
+  const loadTasksForBoard = async (boardId) => {
+    const taskResponse = await getAllTaskByBoardId(boardId);
+    const tasks = (taskResponse || []).map((task) => ({
+      id: task.id,
+      board_id: task.board_id,
+      title: task.title,
+      assign_to_user: task.assign_to_user,
+      checklist: task.checklist,
+      comment: task.comment,
+      cover: task.cover,
+      description: task.description,
+      due_date: task.due_date,
+      file: task.file,
+      is_completed: task.is_completed,
+      label: task.label,
+      sort_number: task.sort_number,
+      watch: task.watch,
+    }));
+  
     setBoards((prevBoards) =>
       prevBoards.map((board) =>
-        board.id === boardId ? { ...board, tasks: [...board.tasks, task] } : board
+        board.id === boardId ? { ...board, tasks } : board
       )
     );
+  };  
+
+  const addBoard = async () => {
+    if (newBoardTitle.trim()) {
+      const response = await createBoard({
+        workspace_id: parseInt(workspaceId),
+        name: newBoardTitle
+      })
+      if (response.success) {
+        const newBoard = {
+          id: response.data.id,
+          name: response.data.name,
+          sort_number: response.data.sort_number,
+          task_total: response.data.task_total,
+          workspace_id: response.data.workspace_id,
+          tasks: [],
+        };
+        setBoards([...boards, newBoard]);
+        setNewBoardTitle("");
+        setIsAddingBoard(false);
+      } else {
+        Swal.fire({
+          title: "Gagal!",
+          text: response.error.data.message || "Terjadi kesalahan.",
+          icon: "error",
+          confirmButtonText: "OK",
+        });
+      }
+    }
+  };
+
+  const cancelAddBoard = () => {
+    setIsAddingBoard(false);
+    setNewBoardTitle("");
+  }
+
+  const moveTask = async (task, fromBoardId, toBoardId, toIndex) => {
+    if (toIndex === undefined) return;
+    try {
+      if (fromBoardId === toBoardId) {
+        await updateTask(task.id, { sort_number: toIndex + 1 });
+        await loadTasksForBoard(fromBoardId);
+      } else {
+        await updateTask(task.id, { sort_number: toIndex + 1, board_id: toBoardId });
+        await loadTasksForBoard(toBoardId);
+        await loadTasksForBoard(fromBoardId);
+      }
+    } catch (error) {
+      console.error("Failed to move task:", error);
+    }
+  };
+
+  const moveBoard = async (dragIndex, hoverIndex) => {
+    let newBoards = [];
+    setBoards((prevBoards) => {
+      let updatedBoards = [...prevBoards];
+      const [movedBoard] = updatedBoards.splice(dragIndex, 1);
+      updatedBoards.splice(hoverIndex, 0, movedBoard);
+      newBoards = updatedBoards.map((board, index) => ({
+        ...board,
+        sort_number: index + 1,
+      }));
+  
+      return newBoards;
+    });
+  
+    try {
+      await Promise.all(
+        newBoards.map(({ id, sort_number }) =>
+          updateBoard(id, { sort_number })
+        )
+      );
+    } catch (error) {
+      console.error("Failed to update board sorting:", error);
+    }
+  };  
+
+  const addTask = async (boardId, task) => {
+    const response = await createTask({
+      board_id: boardId,
+      title: task
+    })
+    if (response.success) {
+      const responseDetailTask = await getTaskById(response.data.id)
+      if (!responseDetailTask.success) {
+        Swal.fire({
+          title: "Gagal!",
+          text: responseDetailTask.error?.message || "Terjadi kesalahan.",
+          icon: "error",
+          confirmButtonText: "OK",
+        });
+      }
+      const detailTask = responseDetailTask.data.data
+      setBoards((prevBoards) =>
+        prevBoards.map((board) =>
+          board.id === boardId ? { ...board, tasks: [...board.tasks, {
+            id: detailTask.id, //
+            board_id: detailTask.board_id, //
+            title: detailTask.title, //
+            assign_to_user: detailTask.assign_to_user, //
+            checklist: detailTask.checklist.data, //
+            comment: detailTask.comment.count, //
+            cover: detailTask.cover, //
+            description: false, //
+            due_date: detailTask.due_date, //
+            file: detailTask.file.count, //
+            is_completed: detailTask.is_completed, //
+            label: detailTask.label, //
+            sort_number: detailTask.sort_number, //
+            watch: detailTask.watch, //
+          }] } : board
+        )
+      );
+    } else {
+      Swal.fire({
+        title: "Gagal!",
+        text: response.error.data.message || "Terjadi kesalahan.",
+        icon: "error",
+        confirmButtonText: "OK",
+      });
+    }
+  };
+
+  const handleRenameBoard = async (board) => {
+    try {
+      const { value: formValues } = await Swal.fire({
+        title: "Rename Board",
+        html: `
+          <div style="display: flex; flex-direction: column; gap: 10px; text-align: left;">
+            <label for="swal-name">Rename:</label>
+            <input id="swal-name" type="text" class="swal2-input" placeholder="Input name" value="${board.name}">
+          </div>
+        `,
+        focusConfirm: false,
+        showCancelButton: true,
+        confirmButtonText: "Rename",
+        cancelButtonText: "Cancel",
+        preConfirm: () => {
+          const newTitle = document.getElementById("swal-name").value;
+
+          const updatedData = {};
+
+          if (newTitle !== board.name) updatedData.name = newTitle;
+
+          if (!newTitle) {
+            Swal.showValidationMessage("Nama tidak boleh kosong!");
+            return false;
+          }
+          return updatedData;
+        },
+      });
+
+      if (formValues && Object.keys(formValues).length > 0) {
+        const response = await updateBoard(board.id, formValues);
+        if (response.success) {
+          await loadBoardsAndTasks(workspaceId);
+        } else {
+          Swal.fire({
+            title: "Gagal!",
+            text: response.error.data.message || "Terjadi kesalahan.",
+            icon: "error",
+            confirmButtonText: "OK",
+          });
+        }
+      }
+    } catch (error) {
+      Swal.fire({
+        title: "Terjadi Kesalahan",
+        text: "Gagal mengambil data. Mohon coba lagi.",
+        icon: "error",
+        confirmButtonText: "OK",
+      });
+    }
+  };
+
+  const handleDeleteBoard = async (id) => {
+    try {
+      const confirmDelete = await Swal.fire({
+        title: "Konfirmasi Hapus",
+        text: "Apakah Anda yakin ingin menghapus board ini?",
+        icon: "warning",
+        showCancelButton: true,
+        confirmButtonText: "Ya, Hapus",
+        cancelButtonText: "Batal",
+      });
+
+      if (confirmDelete.isConfirmed) {
+        const response = await deleteBoard(id);
+
+        if (response.success) {
+          await loadBoardsAndTasks(workspaceId);
+        } else {
+          Swal.fire({
+            title: "Gagal!",
+            text: response.error.data.message || "Terjadi kesalahan.",
+            icon: "error",
+            confirmButtonText: "OK",
+          });
+        }
+      }
+    } catch (error) {
+      Swal.fire({
+        title: "Terjadi Kesalahan",
+        text: "Gagal menghapus user. Mohon coba lagi.",
+        icon: "error",
+        confirmButtonText: "OK",
+      });
+    }
+  };
+
+  const handleMoveBoardToWorkspace = async (board) => {
+    try {
+      const workspaceRes = await workspaceFind();
+
+      const workspaceOptions = workspaceRes.map((workspace) => 
+        `<option value="${workspace.id}" ${workspace.id === board.workspace_id ? "selected" : ""}>${workspace.name}</option>`
+      ).join("");
+
+      const { value: formValues } = await Swal.fire({
+        title: "Move To",
+        html: `
+          <div style="display: flex; flex-direction: column; gap: 10px; text-align: left;">
+            <select id="swal-workspace" class="swal2-input">
+              <option value="" disabled>Select Workspace</option>
+              ${workspaceOptions}
+            </select>
+          </div>
+        `,
+        focusConfirm: false,
+        showCancelButton: true,
+        confirmButtonText: "Move",
+        cancelButtonText: "Cancel",
+        preConfirm: () => {
+          const workspace = document.getElementById("swal-workspace").value;
+          const updatedData = {};
+          if (workspace !== board.workspace_id) updatedData.workspace_id = parseInt(workspace);
+          return updatedData;
+        },
+      });
+
+      if (formValues && Object.keys(formValues).length > 0) {
+        const response = await updateBoard(board.id, formValues);
+        if (response.success) {
+          await loadBoardsAndTasks(workspaceId);
+        } else {
+          Swal.fire({
+            title: "Gagal!",
+            text: response.error.data.message || "Terjadi kesalahan.",
+            icon: "error",
+            confirmButtonText: "OK",
+          });
+        }
+      }
+    } catch (error) {
+      Swal.fire({
+        title: "Terjadi Kesalahan",
+        text: "Gagal mengambil data. Mohon coba lagi.",
+        icon: "error",
+        confirmButtonText: "OK",
+      });
+    }
   };
 
   return (
     <DndProvider backend={HTML5Backend}>
       <div className="workspace-container">
         <div className="cards-container">
-          {boards.map((board) => (
-            <Board key={board.id} board={board} moveTask={moveTask} addTask={addTask} />
+        <AnimatePresence>
+          {boards.map((board, index) => (
+            <motion.div
+              key={board.id}
+              initial={{ opacity: 0, scale: 0.9 }}
+              animate={{ opacity: 1, scale: 1 }}
+              exit={{ opacity: 0, scale: 0.8 }}
+              transition={{ duration: 0.3 }}
+            >
+              <Board board={board} moveTask={moveTask} moveBoard={moveBoard} addTask={addTask} index={index} renameBoard={handleRenameBoard} deleteBoard={handleDeleteBoard} moveToWorkspace={handleMoveBoardToWorkspace} loadTasksForBoard={loadTasksForBoard} handleClickTask={handleClickTask} />
+            </motion.div>
           ))}
+        </AnimatePresence>
           <div className="add-board-container">
             {isAddingBoard ? (
               <div className="board-input-container">
                 <input
+                  ref={inputRef}
                   type="text"
-                  className="form-control"
+                  className="form-control w-50"
                   placeholder="Enter board title"
                   value={newBoardTitle}
                   onChange={(e) => setNewBoardTitle(e.target.value)}
                   onKeyDown={(e) => e.key === "Enter" && addBoard()}
                 />
-                <button className="btn btn-success btn-sm mt-2" onClick={addBoard}>
-                  Add Board
-                </button>
+                <div className="d-flex gap-2 mt-2 w-50">
+                  <button className="btn btn-success btn-sm flex-grow-1" onClick={addBoard}>
+                    Add Board
+                  </button>
+                  <button className="btn btn-danger btn-sm flex-grow-1" onClick={() => cancelAddBoard()}>
+                    Cancel
+                  </button>
+                </div>
               </div>
             ) : (
-              <button className="btn btn-success btn-add-board" onClick={() => setIsAddingBoard(true)}>
+              <button className="btn btn-primary btn-add-board" onClick={() => setIsAddingBoard(true)}>
                 + Add Board
               </button>
             )}
           </div>
         </div>
+        {selectedTask && <TaskDetail task={selectedTask} onClose={handleClose}/>}
       </div>
     </DndProvider>
   );
 };
 
-const Board = ({ board, moveTask, addTask }) => {
+const Board = ({ board, moveTask, moveBoard, addTask, index, renameBoard, deleteBoard, moveToWorkspace, loadTasksForBoard, handleClickTask }) => {
   const [isAdding, setIsAdding] = useState(false);
   const [newTask, setNewTask] = useState("");
+  const [showMenu, setShowMenu] = useState(false);
+  const taskContainerRef = useRef(null);
+  const inputRef = useRef(null);
+  const moveRef = useRef(null);
+  const menuRef = useRef(null);
+
+  useEffect(() => {
+    if (isAdding) {
+      taskContainerRef.current.scrollIntoView({ behavior: "smooth", block: "end" });
+      setTimeout(() => inputRef.current?.focus(), 300);
+    }
+  }, [isAdding]);
+
+  useEffect(() => {
+    const handleClickOutside = (event) => {
+      if (menuRef.current && !menuRef.current.contains(event.target)) {
+        setShowMenu(false);
+      }
+    };
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => document.removeEventListener("mousedown", handleClickOutside);
+  }, []);
+
+  const handleMenuClick = (action) => {
+    setShowMenu(false);
+    if (action === "move") {
+      moveToWorkspace(board);
+    } else if (action === "rename") {
+      renameBoard(board);
+    } else if (action === "delete") {
+      deleteBoard(board.id);
+    }
+  };
 
   const handleAddTask = () => {
     if (newTask.trim()) {
@@ -111,20 +476,75 @@ const Board = ({ board, moveTask, addTask }) => {
     }
   };
 
+  const cancelAddTask = () => {
+    setIsAdding(false);
+    setNewTask("");
+  }
+
+  const [{ isDragging }, drag] = useDrag({
+    type: ItemTypes.BOARD,
+    item: { index },
+    collect: (monitor) => ({
+      isDragging: monitor.isDragging(),
+    }),
+  });
+
+  const [, drop] = useDrop({
+    accept: ItemTypes.BOARD,
+    hover: (draggedItem) => {
+      if (draggedItem.index !== index) {
+        moveBoard(draggedItem.index, index);
+        draggedItem.index = index;
+      }
+    },
+  });
+
+  const [, dropTask] = useDrop({
+    accept: ItemTypes.TASK,
+    drop: (draggedItem) => {
+      moveTask(draggedItem.task, draggedItem.boardId, board.id, board.tasks.length);
+      draggedItem.boardId = board.id;
+      draggedItem.index = board.tasks.length;
+    },
+  });
+
+  drag(drop(moveRef));
+
   return (
-    <motion.div className="card board-card" style={{ minHeight: 100 + board.tasks.length * 30 }}>
-      <div className="card-header">
-        <h3>{board.title}</h3>
+    <motion.div ref={moveRef} className="card board-card" style={{ minHeight: "67vh", maxHeight: "67vh", opacity: isDragging ? 0.5 : 1 }}>
+      <div className="card-header d-flex justify-content-between align-items-center">
+        <h3 className="m-0 board-title-workspace">{board.name} <span style={{fontWeight:"normal", fontSize:"16px"}}>({board.task_total})</span></h3>
+        <div className="position-relative" ref={menuRef}>
+          <button className="btn btn-sm btn-light" onClick={() => setShowMenu(!showMenu)}>
+            <i className="bi bi-three-dots fs-6"></i>
+          </button>
+          {showMenu && (
+            <div className="dropdown-menu show position-absolute end-0 mt-2">
+              <button className="dropdown-item" onClick={() => handleMenuClick("move")}>Move</button>
+              <button className="dropdown-item" onClick={() => handleMenuClick("rename")}>Rename</button>
+              <button className="dropdown-item text-danger" onClick={() => handleMenuClick("delete")}>Delete</button>
+            </div>
+          )}
+        </div>
       </div>
-      <div className="card-body">
-        <AnimatePresence>
-          {board.tasks.map((task, i) => (
-            <Task key={task} task={task} boardId={board.id} index={i} moveTask={moveTask} />
-          ))}
-        </AnimatePresence>
+      <div className="card-body" ref={dropTask}>
+      <AnimatePresence>
+        {board.tasks.map((task, i) => (
+          <motion.div
+            key={task.id}
+            initial={{ opacity: 0, y: -10 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0, x: -50 }}
+            transition={{ duration: 0.2 }}
+          >
+            <Task task={task} boardId={board.id} index={i} moveTask={moveTask} loadTasksForBoard={loadTasksForBoard} handleClickTask={handleClickTask} />
+          </motion.div>
+        ))}
+      </AnimatePresence>
         {isAdding && (
-          <div className="task-input-container">
+          <div className="task-input-container" ref={taskContainerRef}>
             <input
+              ref={inputRef}
               type="text"
               className="form-control"
               placeholder="Enter task"
@@ -134,6 +554,9 @@ const Board = ({ board, moveTask, addTask }) => {
             />
             <button className="btn btn-success btn-sm mt-2" onClick={handleAddTask}>
               Add
+            </button>
+            <button className="btn btn-danger btn-sm mt-2 ms-2" onClick={cancelAddTask}>
+              Cancel
             </button>
           </div>
         )}
@@ -147,10 +570,15 @@ const Board = ({ board, moveTask, addTask }) => {
   );
 };
 
-const Task = ({ task, boardId, index, moveTask }) => {
-  const [, ref] = useDrag({
+const Task = ({ task, boardId, index, moveTask, loadTasksForBoard, handleClickTask }) => {
+  const moveRef = useRef(null);
+
+  const [{ isDragging }, drag] = useDrag({
     type: ItemTypes.TASK,
     item: { task, boardId, index },
+    collect: (monitor) => ({
+      isDragging: monitor.isDragging(),
+    }),
   });
 
   const [, drop] = useDrop({
@@ -164,9 +592,153 @@ const Task = ({ task, boardId, index, moveTask }) => {
     },
   });
 
+  const toggleTask = async (taskId, boardId, is_completed) => {
+    await updateTask(taskId, {is_completed: !is_completed})
+    await loadTasksForBoard(boardId);
+  }
+
+  let isChecklistComplete = false;
+  if (task.checklist) {
+    const [x, y] = task.checklist.split("/").map(Number);
+    isChecklistComplete = x === y;
+  }
+
+  const formatDueDate = (due_date) => {
+    if (!due_date) return null;
+  
+    const now = new Date();
+    const dueDate = new Date(due_date);
+  
+    const optionsSameYear = { month: "short", day: "numeric", timeZone: "Asia/Jakarta" };
+    const optionsDifferentYear = { month: "short", day: "numeric", year: "numeric", timeZone: "Asia/Jakarta" };
+  
+    const isSameYear = dueDate.getFullYear() === now.getFullYear();
+    const formattedDate = new Intl.DateTimeFormat("en-US", isSameYear ? optionsSameYear : optionsDifferentYear).format(dueDate);
+  
+    let dueClass = "";
+    let dueTitle = "has due date active";
+    if (task.is_completed) {
+      dueClass = "due-completed";
+      dueTitle = "the deadline has been completed"
+    } else if (dueDate < now) {
+      dueClass = "due-overdue";
+      dueTitle = "the deadline has passed"
+    }
+  
+    return (
+
+      <span className={`task-due-date ${dueClass}`} title={dueTitle} >
+        <FaClock className="task-icon" style={{color: task.is_completed || (dueDate < now) ? "white" : "inherit" }} />
+        {formattedDate}
+      </span>
+    );
+  };
+
+  const getInitials = (name) => {
+    const words = name.split(" ");
+    return words.length > 1
+      ? words[0][0].toUpperCase() + words[words.length - 1][0].toUpperCase()
+      : words[0][0].toUpperCase();
+  };
+  
+  const getColorFromInitial = (initial) => {
+    const colors = ["#FF5733", "#33FF57", "#3357FF", "#FF33A1", "#A133FF", "#33FFF5"];
+    const index = initial.charCodeAt(0) % colors.length;
+    return colors[index];
+  };
+
+  drag(drop(moveRef));
+
   return (
-    <motion.div ref={(node) => ref(drop(node))} className="task">
-      {task}
+    <motion.div 
+      ref={moveRef} 
+      className="task" 
+      style={{ 
+        opacity: isDragging ? 0.5 : 1,
+        cursor: 'pointer'
+      }}
+      title={task.title}
+    >
+      {task.cover && (
+        <img
+          src={`https://lh3.googleusercontent.com/d/${task.cover.id}=w1000-h500`} 
+          alt={task.cover.name} 
+          className="task-cover"
+          onClick={() => handleClickTask(task)}
+          onError={(e) => {
+            e.target.onerror = null;
+            e.target.src = `https://drive.google.com/thumbnail?id=${task.cover.id}&sz=w1000?authuser=0`;
+          }}
+        />
+      )}
+      <div className="task-content" onClick={() => handleClickTask(task)}>
+        <input
+          type="checkbox"
+          className="task-checkbox"
+          checked={task.is_completed}
+          onChange={() => toggleTask(task.id, boardId, task.is_completed)}
+          title="Mark to completed"
+          onClick={(e) => e.stopPropagation()}
+        />
+        <div className="task-details">
+          {task.label && (
+            <div className="task-labels">
+              {task.label.data.map((label, idx) => (
+                <span 
+                  key={idx} 
+                  className="task-label"
+                >
+                  <FaTag className="task-icon" style={{color: label.color}} title={label.title}/>
+                </span>
+              ))}
+            </div>
+          )}
+          <span className={task.is_completed ? "task-title completed" : "task-title"}>
+            {task.title}
+          </span>
+          <div className="task-icons">
+            {task.watch && <FaEye className="task-icon" title="you've seen this" />}
+            {task.description && <FaFileAlt className="task-icon" title="has a description" />}
+            {task.file > 0 && (
+              <span className="task-attachment" title="has attachments">
+                <FaPaperclip className="task-icon" />
+                <span className="attachment-count">{task.file}</span>
+              </span>
+            )}
+            {task.comment !== 0 && (
+              <span className="task-attachment" title="someone commented this task">
+                <FaComment className="task-icon" />
+                <span className="attachment-count">{task.comment}</span>
+              </span>
+            )}
+            {task.checklist && (
+              <span className="tasxk-attachment" title="has checklist"  style={{ backgroundColor: isChecklistComplete ? "green" : "inherit", padding: "3px"  }}>
+                <FaCheckSquare className="task-icon" style={{color: isChecklistComplete ? "white" : "inherit" }} />
+                <span className="attachment-count" style={{color: isChecklistComplete ? "white" : "inherit" }}>{task.checklist}</span>
+              </span>
+            )}
+            {formatDueDate(task.due_date)}
+          </div>
+          {task.assign_to_user && (
+            <div className="task-assignees">
+              {task.assign_to_user.data.map((user, idx) => {
+                const initials = getInitials(user.name);
+                const bgColor = getColorFromInitial(initials[0]);
+                return (
+                  <div
+                    key={idx}
+                    className="assignee-circle"
+                    style={{ backgroundColor: bgColor }}
+                    title={user.name}
+                  >
+                    {initials}
+                  </div>
+                );
+              })}
+            </div>
+          )}
+        </div>
+      </div>
     </motion.div>
   );
 };
@@ -174,12 +746,14 @@ const Task = ({ task, boardId, index, moveTask }) => {
 Board.propTypes = {
   board: PropTypes.object.isRequired,
   moveTask: PropTypes.func.isRequired,
+  moveBoard: PropTypes.func.isRequired,
   addTask: PropTypes.func.isRequired,
+  index: PropTypes.number.isRequired,
 };
 
 Task.propTypes = {
-  task: PropTypes.string.isRequired,
-  boardId: PropTypes.string.isRequired,
+  task: PropTypes.object.isRequired,
+  boardId: PropTypes.number.isRequired,
   index: PropTypes.number.isRequired,
   moveTask: PropTypes.func.isRequired,
 };

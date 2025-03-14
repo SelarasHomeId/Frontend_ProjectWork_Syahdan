@@ -197,6 +197,62 @@
   font-size: 12px; /* text-xs */
 }
 
+
+.sidebar-logo-img {
+  width: 170px;
+  height: 40px;
+  object-fit: cover;
+  border-radius: 8px;
+  margin-left: 30px;
+  position: relative;
+  top: 0px;
+}
+
+.search-task-container {
+  width: 300px;
+  margin-right: 30px;
+  position: relative;
+}
+
+.search-task-input {
+  width: 100%;
+  padding: 8px 12px;
+  border: 1px solid #ccc;
+  border-radius: 5px;
+  font-size: 14px;
+}
+
+.search-task-input:focus {
+  border-color: #007bff;
+  outline: none;
+}
+
+.search-task-dropdown {
+  display: block;
+  position: absolute;
+  top: 100%;
+  left: 0;
+  width: 100%;
+  background-color: white;
+  border: 1px solid #ccc;
+  z-index: 1000;
+  max-height: 200px;
+  overflow-y: auto;
+}
+
+.search-task-dropdown .dropdown-item {
+  padding: 8px;
+  cursor: pointer;
+}
+
+.search-task-dropdown .dropdown-item:hover {
+  background-color: #f0f0f0;
+}
+
+.search-task-message {
+  font-size: 12px; /* text-xs */
+}
+
 /* Responsive Design */
 @media (max-width: 768px) {
   .navbar {

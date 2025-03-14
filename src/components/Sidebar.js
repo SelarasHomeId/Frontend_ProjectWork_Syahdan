@@ -6,9 +6,9 @@ import { workspaceFind } from "../service/apiService";
 import { getCookie } from "../utils/general";
 
 // Pastikan path benar
-import logo from "../assets/img/selarasBackground.jpg"; 
+import LogoSelarasSidebar from "../assets/img/selarasBackground.jpg"; 
 
-function Sidebar({ showSidebar, toggleSidebar, onPageChange }) {
+function Sidebar({ showSidebar, onPageChange }) {
   const [showWorkspace, setShowWorkspace] = useState(false);
   const [workspaceList, setWorkspaceList] = useState([]);
   const [showMasterdata, setShowMasterdata] = useState(false);
@@ -50,8 +50,8 @@ function Sidebar({ showSidebar, toggleSidebar, onPageChange }) {
           {/* Logo hanya muncul saat sidebar terbuka */}
           {showSidebar && (
             <div className="sidebar-logo text-center mb-3 clickable" >
-              {logo ? (
-                <img src={logo} alt="Logo" className="img-fluid sidebar-logo-img cursor-pointer"/>
+              {LogoSelarasSidebar ? (
+                <img src={LogoSelarasSidebar} alt="Logo" className="img-fluid sidebar-logo-img cursor-pointer"/>
               ) : (
                 <div className="text-white">Logo Not Found</div>
               )}
@@ -71,13 +71,16 @@ function Sidebar({ showSidebar, toggleSidebar, onPageChange }) {
               className="sidebar-item clickable"
               onClick={() => toggleSubMenu(setShowWorkspace, setShowMasterdata)}
             >
-              <i className="bi bi-folder-fill"></i> Workspace
+              <span>
+                <i className="bi bi-folder-fill"></i> Workspace
+              </span>
+              <i style={{marginLeft: "59px"}} className={`bi ${showWorkspace ? "bi-chevron-up" : "bi-chevron-down"}`}></i>
             </h6>
             {showWorkspace && (
               <ul className="list-unstyled ms-1">
                 {workspaceList.map((item) => (
                   <li key={item.id}>
-                    <button className="sidebar-link" onClick={() => onPageChange(item.name.toLowerCase())}>
+                    <button className="sidebar-link" onClick={() => onPageChange(item.name.toLowerCase() + "_" + item.id)}>
                       <i className="bi bi-check2-square"></i> {item.name}
                     </button>
                   </li>
@@ -93,7 +96,10 @@ function Sidebar({ showSidebar, toggleSidebar, onPageChange }) {
                 className="sidebar-item clickable"
                 onClick={() => toggleSubMenu(setShowMasterdata, setShowWorkspace)}
               >
-                <i className="bi bi-database-fill"></i> Masterdata
+                <span>
+                  <i className="bi bi-database-fill"></i> Masterdata
+                </span>
+                <i style={{marginLeft: "59px"}} className={`bi ${showMasterdata ? "bi-chevron-up" : "bi-chevron-down"}`}></i>
               </h6>
               {showMasterdata && (
                 <ul className="list-unstyled ms-1">

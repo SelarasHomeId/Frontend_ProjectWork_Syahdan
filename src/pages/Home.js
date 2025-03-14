@@ -12,14 +12,20 @@ import "bootstrap/dist/css/bootstrap.min.css";
 function Home() {
   const [isSidebarActive, setIsSidebarActive] = useState(false);
   const [currentPage, setCurrentPage] = useState("dashboard");
+  const [toDetailTask, setToDetailTask] = useState(null)
 
-  // Menghilangkan scrollbar horizontal saat sidebar aktif
   useEffect(() => {
     document.body.style.overflowX = isSidebarActive ? "hidden" : "auto";
   }, [isSidebarActive]);
 
-  const toggleSidebar = () => {
+  const toggleNavbar = () => {
     setIsSidebarActive((prevState) => !prevState);
+  };
+
+  const showDetailTask = (task) => {
+    setCurrentPage(task.workspace.name.toLowerCase() + "_" + task.workspace.id)
+    setToDetailTask(task);
+    setIsSidebarActive(false);
   };
 
   const handlePageChange = (page) => {
@@ -44,7 +50,7 @@ function Home() {
 
   const renderPage = () => {
     return (
-      <di>
+      <div>
         <h3 
           className={`${
               ["user", "role", "division", "project"].includes(currentPage)
@@ -53,7 +59,7 @@ function Home() {
             } text-dark fw-bold display-6 mt-3`} 
           style={{ fontFamily: "'Poppins', sans-serif" }}
         >
-          {pageTitles[currentPage] || `${capitalizeWords(currentPage)}`}
+          {pageTitles[currentPage] || `${capitalizeWords(currentPage.split("_")[0])}`}
         </h3>
         {currentPage === "dashboard" ? (
           <Dashboard />
@@ -66,9 +72,9 @@ function Home() {
         ) : currentPage === "project" ? (
           <Project />
         ) : (
-          <Workspace workspaceName={currentPage} />
+          <Workspace workspaceId={currentPage.split("_")[1]} toDetailTask={toDetailTask} />
         )}
-      </di>
+      </div>
     )
   };
 
@@ -82,7 +88,7 @@ function Home() {
           zIndex: 1000, // Pastikan navbar di atas elemen lain
         }}
       >
-        <Navbar toggleSidebar={toggleSidebar} />
+        <Navbar showSidebar={isSidebarActive} toggleNavbar={toggleNavbar} showDetailTask={showDetailTask} />
       </div>
 
       <div className="d-flex flex-grow-1" style={{ marginTop: "56px" }}> 
@@ -99,7 +105,7 @@ function Home() {
             height: "100vh",
           }}
         >
-          <Sidebar showSidebar={isSidebarActive} toggleSidebar={toggleSidebar} onPageChange={handlePageChange} />
+          <Sidebar showSidebar={isSidebarActive} onPageChange={handlePageChange} />
         </div>
 
         {/* Konten full layar jika sidebar nonaktif */}

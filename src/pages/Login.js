@@ -29,7 +29,7 @@ function Login() {
 
     try {
       const response = await authLogin(email, password);
-
+      console.log(response)
       if (response && response.success === true) {
         const token = response.data.token;
         Cookies.set("token", token, { expires: 1, secure: true, sameSite: "Strict" });
@@ -47,7 +47,7 @@ function Login() {
       } else {
         Swal.fire({
           title: "Gagal Login",
-          text: "Silakan coba lagi!",
+          text: response.error.data.message || "Silakan coba lagi!",
           icon: "error",
           confirmButtonText: "OK",
         }).then(() => {

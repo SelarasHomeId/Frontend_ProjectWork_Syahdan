@@ -1,16 +1,14 @@
 import React, { useState, useEffect, useCallback  } from 'react';
 import debounce from 'lodash.debounce';
 import '../styles/Division.css';
-import { getAllDivision, addDivision, updateDivision, deleteDivision } from '../service/apiService';
+import { getAllDivision, addDivision, updateDivision, deleteDivision, getDivisionById } from '../service/apiService';
+import Swal from "sweetalert2";
 
 const Division = () => {
   const [divisi, setDivisions] = useState([]);
   const [search, setSearch] = useState('');
   const [currentPage, setCurrentPage] = useState(1);
   const [itemsPerPage] = useState(5);
-  const [modalType, setModalType] = useState(null);
-  const [selectedDivision, setSelectedDivision] = useState(null);
-  const [newDivision, setNewDivision] = useState({ name: '', email: '', role: '', division: '' });
   const [hasNextPage, setHasNextPage] = useState(false);
 
   const fetchDivisions = useCallback(async () => {
@@ -40,35 +38,167 @@ const Division = () => {
     setCurrentPage((prev) => Math.max(1, prev + direction));
   };
 
-  const openModal = (type, divisi = null) => {
-    setModalType(type);
-    setSelectedDivision(divisi);
-    setNewDivision(divisi || { name: '', email: '', role: '', division: '' });
-  };
-
-  const handleDivisionSubmit = async () => {
-    if (!newDivision.name || !newDivision.email || !newDivision.role || !newDivision.division) return;
-    try {
-      const response = modalType === 'add' ? await addDivision(newDivision) : await updateDivision(selectedDivision.id, newDivision);
-      if (response.success) {
-        fetchDivisions();
-        setModalType(null);
+  const handleAddDivision = async () => {
+      try {
+        const { value: formValues } = await Swal.fire({
+          title: "Add Division",
+          html: `
+            <div style="display: flex; flex-direction: column; gap: 10px; text-align: left;">
+              <label for="swal-name">Name:</label>
+              <input id="swal-name" type="text" class="swal2-input" placeholder="Input name">
+            </div>
+          `,
+          focusConfirm: false,
+          showCancelButton: true,
+          confirmButtonText: "Submit",
+          cancelButtonText: "Cancel",
+          preConfirm: () => {
+            const name = document.getElementById("swal-name").value;   
+            if (!name) {
+              Swal.showValidationMessage("Nama division tidak boleh kosong!");
+              return false;
+            }
+    
+            return { name };
+          },
+        });
+    
+        if (formValues) {
+          const response = await addDivision({ 
+            name: formValues.name, 
+          });
+    
+          if (response.success) {
+            Swal.fire({
+              title: "Berhasil!",
+              text: "Division berhasil ditambahkan.",
+              icon: "success",
+              confirmButtonText: "OK",
+            }).then( async () => {
+              await fetchDivisions();
+            });
+          } else {
+            Swal.fire({
+              title: "Gagal!",
+              text: response.error.data.message || "Terjadi kesalahan.",
+              icon: "error",
+              confirmButtonText: "OK",
+            });
+          }
+        }
+      } catch (error) {
+        Swal.fire({
+          title: "Terjadi Kesalahan",
+          text: "Gagal mengambil data. Mohon coba lagi.",
+          icon: "error",
+          confirmButtonText: "OK",
+        });
       }
-    } catch (error) {
-      console.error('Error submitting divisi:', error);
-    }
-  };
+    };
+
+    const handleEditDivision = async (id) => {
+        try {
+          const divisionDataRes = await getDivisionById(id);
+          const divisionData = divisionDataRes.data.data;
+    
+          const { value: formValues } = await Swal.fire({
+            title: "Edit Division",
+            html: `
+              <div style="display: flex; flex-direction: column; gap: 10px; text-align: left;">
+                <label for="swal-name">Name:</label>
+                <input id="swal-name" type="text" class="swal2-input" placeholder="Input name" value="${divisionData.name}">
+              </div>
+            `,
+            focusConfirm: false,
+            showCancelButton: true,
+            confirmButtonText: "Update",
+            cancelButtonText: "Cancel",
+            preConfirm: () => {
+              const name = document.getElementById("swal-name").value;
+              const updatedData = {};
+    
+              if (name !== divisionData.name) updatedData.name = name;
+              if (!name) {
+                Swal.showValidationMessage("Nama division tidak boleh kosong!");
+                return false;
+              }
+
+              return updatedData;
+            },
+          });
+    
+          if (formValues && Object.keys(formValues).length > 0) {
+            const response = await updateDivision(id, formValues);
+    
+            if (response.success) {
+              Swal.fire({
+                title: "Berhasil!",
+                text: "Division berhasil diperbarui.",
+                icon: "success",
+                confirmButtonText: "OK",
+              }).then(async () => {
+                await fetchDivisions();
+              });
+            } else {
+              Swal.fire({
+                title: "Gagal!",
+                text: response.error.data.message || "Terjadi kesalahan.",
+                icon: "error",
+                confirmButtonText: "OK",
+              });
+            }
+          }
+        } catch (error) {
+          Swal.fire({
+            title: "Terjadi Kesalahan",
+            text: "Gagal mengambil data. Mohon coba lagi.",
+            icon: "error",
+            confirmButtonText: "OK",
+          });
+        }
+      };
 
   const handleDeleteDivision = async (id) => {
-    if (window.confirm('Are you sure you want to delete this divisi?')) {
-      try {
-        const response = await deleteDivision(id);
-        if (response.success) fetchDivisions();
-      } catch (error) {
-        console.error('Error deleting divisi:', error);
-      }
-    }
-  };
+        try {
+          const confirmDelete = await Swal.fire({
+            title: "Konfirmasi Hapus",
+            text: "Apakah Anda yakin ingin menghapus Division ini?",
+            icon: "warning",
+            showCancelButton: true,
+            confirmButtonText: "Ya, Hapus",
+            cancelButtonText: "Batal",
+          });
+    
+          if (confirmDelete.isConfirmed) {
+            const response = await deleteDivision(id);
+    
+            if (response.success) {
+              Swal.fire({
+                title: "Berhasil!",
+                text: "Division berhasil dihapus.",
+                icon: "success",
+                confirmButtonText: "OK",
+              }).then(async () => {
+                await fetchDivisions();
+              });
+            } else {
+              Swal.fire({
+                title: "Gagal!",
+                text: response.error.data.message || "Terjadi kesalahan.",
+                icon: "error",
+                confirmButtonText: "OK",
+              });
+            }
+          }
+        } catch (error) {
+          Swal.fire({
+            title: "Terjadi Kesalahan",
+            text: "Gagal menghapus Division. Mohon coba lagi.",
+            icon: "error",
+            confirmButtonText: "OK",
+          });
+        }
+      };
 
   return (
     <div className="divisi-container">
@@ -79,7 +209,7 @@ const Division = () => {
           placeholder="Search by division name" 
           onChange={(e) => handleSearchChange(e.target.value)} 
         />
-        <button className="add-button" onClick={() => openModal('add')}>Add Division</button>
+        <button className="add-button" onClick={() => handleAddDivision()}>Add Division</button>
       </div>
 
       <table className="divisi-table">
@@ -92,7 +222,7 @@ const Division = () => {
           </tr>
         </thead>
         <tbody>
-          {divisi.length === 0 ? (
+          {divisi == null ? (
             <tr>
               <td colSpan="7">No divisi found</td>
             </tr>
@@ -101,9 +231,9 @@ const Division = () => {
               <tr key={divisi.id}>
                 <td>{(currentPage - 1) * itemsPerPage + index + 1}</td>
                 <td>{divisi.name}</td>
-                <td>{divisi.created_at}</td>
+                <td>{divisi.created_at.replace("T", " ").replace("Z", "")}</td>
                 <td>
-                  <button className="action-button btn btn-warning" onClick={() => openModal('edit', divisi)}>Edit</button>
+                  <button className="action-button btn btn-warning" onClick={() => handleEditDivision(divisi.id)}>Edit</button>
                   <button className="action-button btn btn-danger" onClick={() => handleDeleteDivision(divisi.id)}>Delete</button>
                 </td>
               </tr>
@@ -116,22 +246,6 @@ const Division = () => {
         <button onClick={() => handlePagination(-1)} className="pagination-button" disabled={currentPage === 1}>Prev</button>
         <button onClick={() => handlePagination(1)} className="pagination-button" disabled={!hasNextPage}>Next</button>
       </div>
-
-      {modalType && (
-        <div className="modal">
-          <div className="modal-content">
-            <h3>{modalType === 'add' ? 'Add Division' : 'Edit Division'}</h3>
-            <input type="text" value={newDivision.name} onChange={(e) => setNewDivision({ ...newDivision, name: e.target.value })} placeholder="Enter name" className="modal-input" />
-            <input type="email" value={newDivision.email} onChange={(e) => setNewDivision({ ...newDivision, email: e.target.value })} placeholder="Enter email" className="modal-input" />
-            <input type="text" value={newDivision.role} onChange={(e) => setNewDivision({ ...newDivision, role: e.target.value })} placeholder="Enter role" className="modal-input" />
-            <input type="text" value={newDivision.division} onChange={(e) => setNewDivision({ ...newDivision, division: e.target.value })} placeholder="Enter division" className="modal-input" />
-            <div className="modal-actions">
-              <button className="save-button" onClick={handleDivisionSubmit}>Save</button>
-              <button className="cancel-button" onClick={() => setModalType(null)}>Cancel</button>
-            </div>
-          </div>
-        </div>
-      )}
     </div>
   );
 };

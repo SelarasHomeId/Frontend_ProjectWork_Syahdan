@@ -66,7 +66,7 @@ const Role = () => {
           </tr>
         </thead>
         <tbody>
-          {roles.length > 0 ? (
+          {roles != null ? (
             roles.map((role, index) => (
               <tr key={role.id}>
                 <td>{(currentPage - 1) * itemsPerPage + index + 1}</td>
