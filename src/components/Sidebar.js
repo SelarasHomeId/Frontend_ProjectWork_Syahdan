@@ -8,7 +8,7 @@ import { getCookie } from "../utils/general";
 // Pastikan path benar
 import LogoSelarasSidebar from "../assets/img/selarasBackground.jpg"; 
 
-function Sidebar({ showSidebar, onPageChange }) {
+function Sidebar({ showSidebar, onPageChange, thisHasCover }) {
   const [showWorkspace, setShowWorkspace] = useState(false);
   const [workspaceList, setWorkspaceList] = useState([]);
   const [showMasterdata, setShowMasterdata] = useState(false);
@@ -60,7 +60,10 @@ function Sidebar({ showSidebar, onPageChange }) {
 
           {/* Dashboard */}
           <div>
-            <h6 className="sidebar-item clickable" onClick={() => onPageChange("dashboard")}>
+            <h6 className="sidebar-item clickable" onClick={() => {
+                onPageChange("dashboard");
+                thisHasCover(null);
+              }}>
               <i className="bi bi-house-door-fill"></i> Dashboard
             </h6>
           </div>
@@ -80,7 +83,10 @@ function Sidebar({ showSidebar, onPageChange }) {
               <ul className="list-unstyled ms-1">
                 {workspaceList.map((item) => (
                   <li key={item.id}>
-                    <button className="sidebar-link" onClick={() => onPageChange(item.name.toLowerCase() + "_" + item.id)}>
+                    <button className="sidebar-link" onClick={() => {
+                      onPageChange(item.name.toLowerCase() + "_" + item.id); 
+                      thisHasCover(item.cover);
+                    }}>
                       <i className="bi bi-check2-square"></i> {item.name}
                     </button>
                   </li>
@@ -104,22 +110,34 @@ function Sidebar({ showSidebar, onPageChange }) {
               {showMasterdata && (
                 <ul className="list-unstyled ms-1">
                   <li>
-                    <button className="sidebar-link" onClick={() => onPageChange("project")}>
+                    <button className="sidebar-link" onClick={() => {
+                        onPageChange("project");
+                        thisHasCover(null);
+                      }}>
                       <i className="bi bi-kanban"></i> Project
                     </button>
                   </li>
                   <li>
-                    <button className="sidebar-link" onClick={() => onPageChange("user")}>
+                    <button className="sidebar-link" onClick={() => {
+                        onPageChange("user")
+                        thisHasCover(null);
+                      }}>
                       <i className="bi bi-person-lines-fill"></i> User
                     </button>
                   </li>
                   <li>
-                    <button className="sidebar-link" onClick={() => onPageChange("role")}>
+                    <button className="sidebar-link" onClick={() => {
+                        onPageChange("role")
+                        thisHasCover(null);
+                      }}>
                       <i className="bi bi-person-badge-fill"></i> Role
                     </button>
                   </li>
                   <li>
-                    <button className="sidebar-link" onClick={() => onPageChange("division")}>
+                    <button className="sidebar-link" onClick={() => {
+                        onPageChange("division")
+                        thisHasCover(null);
+                      }}>
                       <i className="bi bi-people-fill"></i> Division
                     </button>
                   </li>

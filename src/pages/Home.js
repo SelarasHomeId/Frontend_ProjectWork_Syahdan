@@ -12,7 +12,8 @@ import "bootstrap/dist/css/bootstrap.min.css";
 function Home() {
   const [isSidebarActive, setIsSidebarActive] = useState(false);
   const [currentPage, setCurrentPage] = useState("dashboard");
-  const [toDetailTask, setToDetailTask] = useState(null)
+  const [toDetailTask, setToDetailTask] = useState(null);
+  const [cover, setCover] = useState(null);
 
   useEffect(() => {
     document.body.style.overflowX = isSidebarActive ? "hidden" : "auto";
@@ -31,6 +32,16 @@ function Home() {
   const handlePageChange = (page) => {
     setCurrentPage(page);
     setIsSidebarActive(false);
+  };
+
+  const handleHasCover = (cover) => {
+    if (cover != null){
+      console.log("masuk cover:",cover)
+      setCover(cover);
+    }else{
+      console.log("ga masuk cover");
+      setCover(null);
+    }
   };
 
   const pageTitles = {
@@ -105,7 +116,7 @@ function Home() {
             height: "100vh",
           }}
         >
-          <Sidebar showSidebar={isSidebarActive} onPageChange={handlePageChange} />
+          <Sidebar showSidebar={isSidebarActive} onPageChange={handlePageChange} thisHasCover={handleHasCover} />
         </div>
 
         {/* Konten full layar jika sidebar nonaktif */}
@@ -115,6 +126,10 @@ function Home() {
             transition: "margin-left 0.3s ease",
             marginLeft: isSidebarActive ? "250px" : "0",
             width: isSidebarActive ? "calc(100% - 250px)" : "100%",
+            backgroundImage: cover ? `url(https://drive.google.com/thumbnail?id=${cover.id}&sz=w1000?authuser=0)` : "none",
+            backgroundSize: "100% 100%",
+            backgroundPosition: "center",
+            backgroundRepeat: "no-repeat",
           }}
         >
           {renderPage()}

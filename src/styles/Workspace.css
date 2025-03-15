@@ -1,6 +1,6 @@
 /* Workspace Container */
 .workspace-container {
-  background-color: #ffffff;
+  background-color: transparent;
   min-height: 73vh;
   max-height: 73vh;
   display: flex;
