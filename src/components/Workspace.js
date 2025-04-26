@@ -9,6 +9,7 @@ import Swal from "sweetalert2";
 import { createBoard, createTask, deleteBoard, getAllBoardByWorkspaceId, getAllTaskByBoardId, getTaskById, updateBoard, updateTask, workspaceFind } from "../service/apiService";
 import { FaCheckSquare, FaClock, FaComment, FaEye, FaFileAlt, FaPaperclip, FaTag  } from "react-icons/fa";
 import TaskDetail from "./TaskDetail";
+import { decimalToHexColor, getColorFromInitial, getInitials } from "../utils/general";
 
 const ItemTypes = {
   TASK: "task",
@@ -21,21 +22,35 @@ const Workspace = ({ workspaceId, toDetailTask }) => {
   const [isAddingBoard, setIsAddingBoard] = useState(false);
   const inputRef = useRef(null);
   const [selectedTask, setSelectedTask] = useState(null);
+  const [isLoadingTask, setIsLoadingTask] = useState(false);
 
   const handleClickTask = async (task) => {
-    const responseTask = await getTaskById(task.id);
-    if (responseTask.success){
-      const taskData = responseTask.data.data
-      if (taskData === null){
-        Swal.fire({
-          title: "Task not found",
-          text: "Silakan hubungi admin anda!",
-          icon: "error",
-          confirmButtonText: "OK",
-        })
-      }else{
-        setSelectedTask(taskData);
+    setIsLoadingTask(true);
+    try {
+      const responseTask = await getTaskById(task.id);
+      if (responseTask.success){
+        const taskData = responseTask.data.data;
+        if (taskData === null){
+          Swal.fire({
+            title: "Task not found",
+            text: "Silakan hubungi admin anda!",
+            icon: "error",
+            confirmButtonText: "OK",
+          });
+        } else {
+          setSelectedTask(taskData);
+        }
       }
+    } catch (error) {
+      console.error("Error saat mengambil task:", error);
+      Swal.fire({
+        title: "Terjadi kesalahan",
+        text: "Gagal mengambil data task",
+        icon: "error",
+        confirmButtonText: "OK",
+      });
+    } finally {
+      setIsLoadingTask(false);
     }
   };
 
@@ -154,15 +169,55 @@ const Workspace = ({ workspaceId, toDetailTask }) => {
   }
 
   const moveTask = async (task, fromBoardId, toBoardId, toIndex) => {
-    if (toIndex === undefined) return;
-    try {
+    setBoards((prevBoards) => {
+      const updatedBoards = [...prevBoards];
+  
+      const fromBoard = updatedBoards.find((b) => b.id === fromBoardId);
+      const toBoard = updatedBoards.find((b) => b.id === toBoardId);
+  
+      const movedTaskIndex = fromBoard.tasks.findIndex((t) => t.id === task.id);
+      const [movedTask] = fromBoard.tasks.splice(movedTaskIndex, 1);
+  
       if (fromBoardId === toBoardId) {
-        await updateTask(task.id, { sort_number: toIndex + 1 });
-        await loadTasksForBoard(fromBoardId);
+        fromBoard.tasks.splice(toIndex, 0, movedTask);
+        fromBoard.tasks = fromBoard.tasks.map((t, i) => ({
+          ...t,
+          sort_number: i + 1,
+        }));
       } else {
-        await updateTask(task.id, { sort_number: toIndex + 1, board_id: toBoardId });
-        await loadTasksForBoard(toBoardId);
-        await loadTasksForBoard(fromBoardId);
+        toBoard.tasks.splice(toIndex, 0, movedTask);
+        toBoard.tasks = toBoard.tasks.map((t, i) => ({
+          ...t,
+          board_id: toBoardId,
+          sort_number: i + 1,
+        }));
+        fromBoard.tasks = fromBoard.tasks.map((t, i) => ({
+          ...t,
+          sort_number: i + 1,
+        }));
+      }
+  
+      return updatedBoards;
+    });
+  
+    try {
+      const affectedBoard = fromBoardId === toBoardId ? [fromBoardId] : [fromBoardId, toBoardId];
+      const affectedTasks = boards
+        .filter((b) => affectedBoard.includes(b.id))
+        .flatMap((b) => b.tasks);
+  
+      await Promise.all(
+        affectedTasks.map((t) =>
+          updateTask(t.id, {
+            board_id: t.board_id,
+            sort_number: t.sort_number,
+          })
+        )
+      );
+
+      await loadTasksForBoard(fromBoardId)
+      if (fromBoardId !== toBoardId){
+        await loadTasksForBoard(toBoardId)
       }
     } catch (error) {
       console.error("Failed to move task:", error);
@@ -382,6 +437,11 @@ const Workspace = ({ workspaceId, toDetailTask }) => {
 
   return (
     <DndProvider backend={HTML5Backend}>
+      {isLoadingTask && (
+          <div className="loading-overlay">
+            <div className="spinner" />
+          </div>
+      )}
       <div className="workspace-container">
         <div className="cards-container">
         <AnimatePresence>
@@ -634,19 +694,6 @@ const Task = ({ task, boardId, index, moveTask, loadTasksForBoard, handleClickTa
     );
   };
 
-  const getInitials = (name) => {
-    const words = name.split(" ");
-    return words.length > 1
-      ? words[0][0].toUpperCase() + words[words.length - 1][0].toUpperCase()
-      : words[0][0].toUpperCase();
-  };
-  
-  const getColorFromInitial = (initial) => {
-    const colors = ["#FF5733", "#33FF57", "#3357FF", "#FF33A1", "#A133FF", "#33FFF5"];
-    const index = initial.charCodeAt(0) % colors.length;
-    return colors[index];
-  };
-
   drag(drop(moveRef));
 
   return (
@@ -688,7 +735,7 @@ const Task = ({ task, boardId, index, moveTask, loadTasksForBoard, handleClickTa
                   key={idx} 
                   className="task-label"
                 >
-                  <FaTag className="task-icon" style={{color: label.color}} title={label.title}/>
+                  <FaTag className="task-icon" style={{color: decimalToHexColor(label.color)}} title={label.title}/>
                 </span>
               ))}
             </div>
@@ -712,7 +759,7 @@ const Task = ({ task, boardId, index, moveTask, loadTasksForBoard, handleClickTa
               </span>
             )}
             {task.checklist && (
-              <span className="tasxk-attachment" title="has checklist"  style={{ backgroundColor: isChecklistComplete ? "green" : "inherit", padding: "3px"  }}>
+              <span className="task-checklist" title="has checklist"  style={{ backgroundColor: isChecklistComplete ? "green" : "inherit", padding: "3px", borderRadius: "8px" }}>
                 <FaCheckSquare className="task-icon" style={{color: isChecklistComplete ? "white" : "inherit" }} />
                 <span className="attachment-count" style={{color: isChecklistComplete ? "white" : "inherit" }}>{task.checklist}</span>
               </span>
@@ -723,7 +770,7 @@ const Task = ({ task, boardId, index, moveTask, loadTasksForBoard, handleClickTa
             <div className="task-assignees">
               {task.assign_to_user.data.map((user, idx) => {
                 const initials = getInitials(user.name);
-                const bgColor = getColorFromInitial(initials[0]);
+                const bgColor = getColorFromInitial(initials);
                 return (
                   <div
                     key={idx}

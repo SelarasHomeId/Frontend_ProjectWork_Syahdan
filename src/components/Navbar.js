@@ -277,7 +277,7 @@ function Navbar({ showSidebar, toggleNavbar, showDetailTask }) {
             onClick={toggleNotificationDropdown}
           >
             <FaBell className="icon notification-icon" />
-            {notifications.length > 0 && (
+            {(notifications != null && notifications.length > 0) && (
               <span className="notification-badge">{unreadNotif}</span>
             )}
             {showNotificationDropdown && (

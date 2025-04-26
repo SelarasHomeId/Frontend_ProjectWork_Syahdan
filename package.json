@@ -8,10 +8,18 @@
     "@testing-library/jest-dom": "^5.17.0",
     "@testing-library/react": "^13.4.0",
     "@testing-library/user-event": "^13.5.0",
+    "@tiptap/extension-image": "^2.11.5",
+    "@tiptap/extension-placeholder": "^2.11.5",
+    "@tiptap/extension-task-item": "^2.11.7",
+    "@tiptap/extension-task-list": "^2.11.7",
+    "@tiptap/extension-underline": "^2.11.5",
+    "@tiptap/react": "^2.11.5",
+    "@tiptap/starter-kit": "^2.11.5",
     "axios": "^1.7.9",
     "bootstrap": "^5.3.3",
     "bootstrap-icons": "^1.11.3",
     "chart.js": "^4.4.7",
+    "date-fns": "^4.1.0",
     "framer-motion": "^12.4.7",
     "js-cookie": "^3.0.5",
     "lucide-react": "^0.481.0",
@@ -19,6 +27,7 @@
     "react-beautiful-dnd": "^13.1.1",
     "react-bootstrap": "^2.10.8",
     "react-chartjs-2": "^5.3.0",
+    "react-datepicker": "^8.3.0",
     "react-dnd": "^16.0.1",
     "react-dnd-html5-backend": "^16.0.1",
     "react-dom": "^18.3.1",
@@ -28,6 +37,7 @@
     "react-scripts": "5.0.1",
     "react-trello": "^2.2.11",
     "recharts": "^2.15.1",
+    "styled-components": "^6.1.17",
     "sweetalert2": "^11.16.0",
     "sweetalert2-react-content": "^5.1.0",
     "swiper": "^11.1.14",
@@ -59,8 +69,8 @@
     ]
   },
   "devDependencies": {
-    "autoprefixer": "^10.4.20",
-    "postcss": "^8.4.49",
-    "tailwindcss": "^3.4.14"
+    "autoprefixer": "^10.4.21",
+    "postcss": "^8.5.3",
+    "tailwindcss": "^3.4.17"
   }
 }

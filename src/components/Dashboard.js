@@ -4,6 +4,7 @@ import { FaClipboard } from "react-icons/fa";
 import "../styles/Dashboard.css";
 import { getAllCalculateTask, getAllContactAndAffiliate, getAllCountAccess } from "../service/apiService";
 import * as XLSX from 'xlsx';
+import { formatDate } from "../utils/general";
 
 function Dashboard() {
   const [countAccess, setCountAccess] = useState({});
@@ -54,22 +55,14 @@ function Dashboard() {
     const [accessRes, taskRes, contactRes, affiliateRes] = await Promise.all([
       getAllCountAccess(),
       getAllCalculateTask(),
-      getAllContactAndAffiliate("/crm/contact"),
-      getAllContactAndAffiliate("/crm/affiliate"),
+      getAllContactAndAffiliate("/crm/contact?no_paging=yes"),
+      getAllContactAndAffiliate("/crm/affiliate?no_paging=yes"),
     ]);
 
     if (accessRes.success) setCountAccess(accessRes.data);
     if (taskRes.success) setCountCalculateTask(taskRes.data.data);
-
-    if (contactRes.success) {
-      const fullContactRes = await getAllContactAndAffiliate(`/crm/contact?offset=0&limit=${contactRes.data.count}`);
-      if (fullContactRes.success) setContactData(fullContactRes.data.data);
-    }
-
-    if (affiliateRes.success) {
-      const fullAffiliateRes = await getAllContactAndAffiliate(`/crm/affiliate?offset=0&limit=${affiliateRes.data.count}`);
-      if (fullAffiliateRes.success) setAffiliateData(fullAffiliateRes.data.data);
-    }
+    if (contactRes.success) setContactData(contactRes.data.data);
+    if (affiliateRes.success) setAffiliateData(affiliateRes.data.data);
   };
 
   const handleExportData = async (tableIndex) => {
@@ -168,6 +161,7 @@ function Dashboard() {
                 </div>
                 <span className="count">{boardItem.count_task}</span>
                 <p>{boardItem.name}</p>
+                {formatDate(boardItem.updated_at)}
               </div>
             ))}
           </div>

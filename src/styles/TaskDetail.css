@@ -1,43 +1,472 @@
+/* ================== Animations ================== */
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+@keyframes slideIn {
+  from { transform: translateY(-10px); opacity: 0; }
+  to { transform: translateY(0); opacity: 1; }
+}
+
+/* ================== Modal Overlay ================== */
 .modal-overlay {
-    position: fixed;
-    top: 0;
-    left: 0;
-    width: 100vw;
-    height: 100vh;
-    background: rgba(0, 0, 0, 0.5);
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    z-index: 1000;
-  }
-  
-  .modal-content {
-    background: white;
-    padding: 20px;
-    border-radius: 12px;
-    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
-    width: 1000px;
-    height: 600px;
-    position: relative;
-    text-align: center;
-    overflow-y: auto; 
-    max-height: 80vh;
-  }
-  
-  .close-button {
-    position: absolute;
-    top: 12px;
-    right: 12px;
-    background: none;
-    border: none;
-    cursor: pointer;
-  }
-  
-  .close-button svg {
-    color: #333;
-  }
-  
-  .close-button:hover svg {
-    color: #ff4d4d;
-  }
-  
+  position: fixed;
+  inset: 0;
+  background-color: rgba(0, 0, 0, 0.5);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 50;
+  animation: fadeIn 0.3s ease-in-out;
+}
+
+/* ================== Modal Container ================== */
+.modal-container {
+  background: #fff;
+  width: 900px;
+  display: flex;
+  border-radius: 12px;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+  padding: 24px;
+  position: relative;
+  animation: slideIn 0.3s ease-in-out;
+  max-height: 80vh;
+  overflow-y: auto;
+}
+
+.modal-container::-webkit-scrollbar {
+  display: none;
+}
+
+/* ================== Close Button ================== */
+.close-btn {
+  position: absolute;
+  top: 16px;
+  right: 16px;
+  background: none;
+  border: none;
+  cursor: pointer;
+  transition: transform 0.2s ease;
+}
+
+.close-btn:hover {
+  transform: scale(1.2);
+  color: #333;
+}
+
+/* ================== Sidebar ================== */
+.sidebar {
+  width: 250px;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.sidebar-btn {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 14px;
+  background: #f8f9fa;
+  padding: 10px;
+  border-radius: 6px;
+  cursor: pointer;
+  transition: background 0.2s;
+}
+
+.sidebar-btn:hover {
+  background: #dadcde;
+}
+
+/* ================== Modal Content ================== */
+.modal-content {
+  flex: 1;
+  padding: 20px 16px 20px 20px;
+  position: relative;
+}
+
+/* ================== Judul ================== */
+.title-input {
+  font-size: 24px;
+  font-weight: bold;
+  width: 100%;
+  border: none;
+  border-bottom: 2px solid #ccc;
+  outline: none;
+}
+
+/* ================== Section Titles ================== */
+.modal-title {
+  font-size: 20px;
+  font-weight: 600;
+  color: #333;
+  margin-top: 0;
+}
+
+.modal-subtitle {
+  font-size: 14px;
+  color: #777;
+}
+
+.section-title {
+  font-size: 18px;
+  font-weight: 600;
+  margin-top: 20px;
+}
+
+/* ================== Tag ================== */
+.tag {
+  background: #ddd;
+  padding: 3px 8px;
+  border-radius: 4px;
+  font-size: 12px;
+}
+
+/* ================== Description Box ================== */
+.description-box {
+  background: #f8f8f8;
+  padding: 10px;
+  border-radius: 6px;
+}
+
+/* ================== Watch Button ================== */
+.watch-btn {
+  padding: 8px 12px;
+  max-width: 120px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  font-size: 14px;
+  border-radius: 8px;
+  border: 1px solid #ccc;
+  background-color: #f0f0f0;
+  transition: background-color 0.3s;
+}
+
+.watch-btn:hover {
+  background-color: #e0e0e0;
+}
+
+.watch-btn.watching {
+  background: #007bff;
+  color: white;
+}
+
+/* ================== Comment Section ================== */
+.comment-input {
+  width: 100%;
+  background: #f8f8f8;
+  border: 1px solid #ddd;
+  padding: 8px;
+  border-radius: 6px;
+  font-size: 14px;
+}
+
+.add-comment-btn {
+  margin-top: 10px;
+  padding: 8px 12px;
+  background: #d9534f;
+  color: white;
+  border-radius: 6px;
+  cursor: pointer;
+}
+
+/* ================== Activity Section ================== */
+.activity-user {
+  font-weight: bold;
+  color: #000;
+}
+
+.activity-list {
+  margin-top: 10px;
+}
+
+.activity-item {
+  display: flex;
+  align-items: center;
+  margin-top: 5px;
+}
+
+.avatar {
+  width: 32px;
+  height: 32px;
+  background: #007bff;
+  color: white;
+  font-weight: bold;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.activity-text {
+  margin-left: 10px;
+  font-size: 14px;
+}
+
+.activity-time {
+  font-size: 12px;
+  color: gray;
+}
+
+/* ================== Task Detail Content ================== */
+.task-detail {
+  max-height: 400px;
+  overflow-y: auto;
+  padding-right: 8px;
+}
+
+.task-detail::-webkit-scrollbar {
+  width: 6px;
+}
+
+.task-detail::-webkit-scrollbar-thumb {
+  background-color: #aaa;
+  border-radius: 3px;
+}
+
+.task-detail::-webkit-scrollbar-track {
+  background: #f1f1f1;
+}
+
+/* ================== Dropdown ================== */
+.dropdown-btn {
+  background: none;
+  border: none;
+  cursor: pointer;
+  font-size: 18px;
+  color: #333;
+  margin-left: 10px;
+  position: relative;
+}
+
+.dropdown-menu {
+  position: absolute;
+  top: 100%;
+  right: 0;
+  width: 200px;
+  background-color: #fff;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+  padding: 10px;
+  border-radius: 4px;
+  display: none;
+  z-index: 9999;
+}
+
+.dropdown-menu button {
+  width: 100%;
+  padding: 8px;
+  background-color: #f1f1f1;
+  border: none;
+  text-align: left;
+  cursor: pointer;
+  margin-bottom: 5px;
+}
+
+.dropdown-menu button:hover {
+  background-color: #e0e0e0;
+}
+
+.dropdown-menu textarea {
+  width: 100%;
+  padding: 8px;
+  margin-top: 10px;
+  font-size: 14px;
+  border-radius: 4px;
+  border: 1px solid #ccc;
+  resize: none;
+}
+
+/* ================== Popup ================== */
+.popup-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.4);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 9999;
+}
+
+.popup-box {
+  background: #fff;
+  padding: 24px;
+  border-radius: 10px;
+  text-align: center;
+  max-width: 400px;
+  width: 90%;
+  box-shadow: 0 8px 16px rgba(0, 0, 0, 0.2);
+}
+
+.popup-box h3 {
+  margin-bottom: 20px;
+  font-size: 18px;
+}
+
+.popup-buttons {
+  display: flex;
+  justify-content: space-between;
+  gap: 10px;
+}
+
+.popup-btn {
+  padding: 10px 20px;
+  border: none;
+  border-radius: 8px;
+  font-weight: bold;
+  cursor: pointer;
+  transition: background 0.2s ease;
+}
+
+.popup-btn.confirm {
+  background-color: #dc2626;
+  color: white;
+}
+
+.popup-btn.confirm:hover {
+  background-color: #b91c1c;
+}
+
+.popup-btn.cancel {
+  background-color: #e5e7eb;
+  color: #111827;
+}
+
+.popup-btn.cancel:hover {
+  background-color: #d1d5db;
+}
+
+/* ================== Check Circle & Tooltip ================== */
+.check-circle-wrapper {
+  position: absolute;
+  top: 0;
+  left: 0;
+  margin: 0;
+  z-index: 10;
+}
+
+.check-circle {
+  width: 28px;
+  height: 28px;
+  border-radius: 50%;
+  border: 2px solid #ccc;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: bold;
+  font-size: 16px;
+  background-color: white;
+  transition: background-color 0.3s ease, border-color 0.3s ease;
+}
+
+.check-circle.checked {
+  background-color: #4caf50;
+  color: white;
+  border-color: #4caf50;
+}
+
+.popup-text {
+  position: absolute;
+  top: 50%;
+  left: 35px;
+  transform: translateY(-50%);
+  background-color: #333;
+  color: #fff;
+  padding: 3px 8px;
+  border-radius: 5px;
+  font-size: 12px;
+  white-space: nowrap;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.3s ease;
+}
+
+.check-circle-wrapper:hover .popup-text {
+  opacity: 1;
+}
+
+/* ================== Date Picker ================== */
+.date-picker-container {
+  position: absolute;
+  top: 100px;
+  right: 40px;
+  background: #fff;
+  padding: 16px;
+  border: 1px solid #e5e7eb;
+  border-radius: 10px;
+  box-shadow: 0 8px 16px rgba(0, 0, 0, 0.1);
+  z-index: 999;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  min-width: 220px;
+  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+}
+
+.date-picker-container label {
+  font-size: 14px;
+  color: #444;
+  margin-bottom: 4px;
+}
+
+.date-picker-container input[type="date"] {
+  padding: 10px;
+  border: 1px solid #ccc;
+  border-radius: 8px;
+  font-size: 14px;
+  background-color: #f9fafb;
+  transition: border 0.3s ease, background 0.3s ease;
+}
+
+.date-picker-container input[type="date"]:hover {
+  border-color: #999;
+  background-color: #f1f5f9;
+}
+
+.date-picker-container input[type="date"]:focus {
+  border-color: #007bff;
+  background-color: #fff;
+  outline: none;
+  box-shadow: 0 0 0 2px rgba(0, 123, 255, 0.2);
+}
+
+.checklist-section {
+  padding: 10px;
+}
+
+.checklist-section {
+  margin-top: 1rem;
+}
+
+.checklist-input-wrapper {
+  display: flex;
+  gap: 0.5rem;
+  margin-bottom: 0.5rem;
+}
+
+.checklist-input {
+  flex: 1;
+  padding: 0.5rem;
+}
+
+.add-checklist-btn {
+  padding: 0.5rem 1rem;
+}
+
+.checklist-list {
+  list-style: none;
+  padding: 0;
+}
+
+.checklist-item {
+  margin-bottom: 0.5rem;
+}
+
+.checked-text {
+  text-decoration: line-through;
+  color: gray;
+}
