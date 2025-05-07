@@ -89,6 +89,7 @@ export const authLogout = async () => {
   return await apiRequest({
     method: "POST",
     endpoint: "/auth/logout",
+    body: { logout_from: "web" },
   });
 };
 

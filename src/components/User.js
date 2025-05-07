@@ -11,7 +11,7 @@ const User = () => {
   const [itemsPerPage] = useState(5);
   const [hasNextPage, setHasNextPage] = useState(false);
 
-  const capitalize = (str) => str.charAt(0).toUpperCase() + str.slice(1);
+  const capitalize = (str) => str.split(" ").map((word) => word.charAt(0).toUpperCase() + word.slice(1)).join(" ");
 
   const fetchUsers = useCallback(async () => {
     try {

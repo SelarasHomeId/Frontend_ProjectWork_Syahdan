@@ -149,11 +149,11 @@ function Dashboard() {
         </div>
       </div>
 
-      {countCalculateTask.map((workspaceData, index) => (
+      {(countCalculateTask ?? []).map((workspaceData, index) => (
         <div className="board-section" key={index}>
           <h2 className="board-title">{workspaceData.workspace}</h2>
           <div className="board-container">
-            {workspaceData.board.map((boardItem) => (
+            {(workspaceData.board ?? []).map((boardItem) => (
               <div className="board" key={boardItem.id || boardItem.name}>
                 <div className="board-icon-wrapper">
                   <FaClipboard className="board-icon" />

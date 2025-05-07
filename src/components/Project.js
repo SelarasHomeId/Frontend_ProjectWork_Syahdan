@@ -231,6 +231,15 @@ const handleEditProject = async (id) => {
         });
       }
     };
+      // Fungsi isValidUrl untuk memvalidasi URL
+      const isValidUrl = (string) => {
+        try {
+          new URL(string); // Mencoba membuat URL dari string
+          return true;
+        } catch (e) {
+          return false; // Jika gagal, bukan URL
+        }
+      };
 
   return (
     <div className="project-container">
@@ -255,27 +264,41 @@ const handleEditProject = async (id) => {
             <th>Actions</th>
           </tr>
         </thead>
-        <tbody>
-          {projects == null ? (
-            <tr>
-              <td colSpan="7">No projects found</td>
-            </tr>
-          ) : (
-            projects.map((project, index) => (
-              <tr key={project.id}>
-                <td>{(currentPage - 1) * itemsPerPage + index + 1}</td>
-                <td>{project.name}</td>
-                <td>{project.location}</td>
-                <td>{project.cover != null ? "Yes" : "No"}</td>
-                <td>{project.created_at.replace("T", " ").replace("Z", "")}</td>
-                <td>
-                  <button className="action-button btn btn-warning" onClick={() => handleEditProject(project.id)}>Edit</button>
-                  <button className="action-button btn btn-danger" onClick={() => handleDeleteProject(project.id)}>Delete</button>
-                </td>
-              </tr>
-            ))
-          )}
-        </tbody>
+            <tbody>
+                    {projects.length === 0 ? (
+                    <tr>
+                      <td colSpan="7">No projects found</td>
+                     </tr>
+                    ) : (
+                  projects.map((project, index) => (
+                    <tr key={project.id}>
+                      <td>{(currentPage - 1) * itemsPerPage + index + 1}</td>
+                      <td>{project.name}</td>
+                      <td>
+                        {
+                          isValidUrl(project.location) ? (
+                            <a 
+                              href={`https://www.google.com/maps?q=${project.location}`} 
+                              target="_blank" 
+                              rel="noopener noreferrer"
+                            >
+                              {project.location}
+                            </a>
+                          ) : (
+                            project.location
+                          )
+                        }
+                      </td>
+                      <td>{project.cover != null ? "Yes" : "No"}</td>
+                      <td>{project.created_at.replace("T", " ").replace("Z", "")}</td>
+                      <td>
+                        <button className="action-button btn btn-warning" onClick={() => handleEditProject(project.id)}>Edit</button>
+                        <button className="action-button btn btn-danger" onClick={() => handleDeleteProject(project.id)}>Delete</button>
+                      </td>
+                    </tr>
+                  ))
+                )}
+          </tbody>
       </table>
 
       <div className="pagination">

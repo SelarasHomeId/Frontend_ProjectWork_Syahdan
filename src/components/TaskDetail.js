@@ -1,6 +1,6 @@
 import React, { useState, useRef, useCallback } from "react";
 import {
-  X, Eye, Users, Tag, CheckSquare, Calendar, Paperclip, Image, Grid
+  X, Eye, Users, Tag, CheckSquare, Paperclip, Image, Grid
 } from "lucide-react";
 import { EditorContent, useEditor } from "@tiptap/react";
 import StarterKit from "@tiptap/starter-kit";
@@ -29,10 +29,17 @@ const TaskDetail = ({ task, onClose, onDelete }) => {
   const [isEditingTitle, setIsEditingTitle] = useState(false);
   const [title, setTitle] = useState(task.title || "");
 
-  const [showDatePicker, setShowDatePicker] = useState(false);
-  const [selectedDate, setSelectedDate] = useState("");
+  const [coverImage, setCoverImage] = useState(null);
 
   const fileInputRef = useRef(null);
+
+  const handleCoverImageChange = (event) => {
+    const file = event.target.files[0];
+    if (file) {
+      const imageUrl = URL.createObjectURL(file);
+      setCoverImage(imageUrl);
+    }
+  };
 
   const handleAddChecklistItem = () => {
     if (newChecklistItem.trim()) {
@@ -72,20 +79,6 @@ const TaskDetail = ({ task, onClose, onDelete }) => {
     }
   };
 
-  const handleFileUpload = (event) => {
-    const files = Array.from(event.target.files);
-    setAttachments((prev) => [
-      ...prev,
-      ...files.map((file) => ({
-        file,
-        name: file.name,
-        comments: [],
-        showDropdown: false,
-      }))
-    ]);
-    setAttachmentMessage("Attachment has been uploaded.");
-  };
-
   const handleFileDownload = (file) => {
     const url = URL.createObjectURL(file);
     const link = document.createElement("a");
@@ -121,6 +114,7 @@ const TaskDetail = ({ task, onClose, onDelete }) => {
   }, []);
 
   const toggleDropdown = (index) => {
+    setAttachmentMessage("file uploaded")
     setAttachments((prev) =>
       prev.map((att, idx) =>
         idx === index ? { ...att, showDropdown: !att.showDropdown } : att
@@ -142,9 +136,15 @@ const TaskDetail = ({ task, onClose, onDelete }) => {
   ];
 
   return (
-    <div className="modal-overlay">
-      <div className="modal-container wider">
+    <div className="modal-overlay" onClick={onClose}>
+      <div className="modal-container wider" onClick={(e) => e.stopPropagation()}>
         <div className="modal-content">
+
+          {coverImage && (
+            <div className="cover-image-container">
+              <img src={coverImage} alt="Cover" className="cover-image" />
+            </div>
+          )}
 
           <div className="check-circle-wrapper">
             <div
@@ -191,6 +191,34 @@ const TaskDetail = ({ task, onClose, onDelete }) => {
               <EditorContent editor={editor} />
             </div>
           </div>
+
+          {showChecklist && (
+            <div className="checklist-section">
+              <h3 className="section-title">Checklist</h3>
+              <div className="checklist-input">
+                <input
+                  type="text"
+                  placeholder="Add new item..."
+                  value={newChecklistItem}
+                  onChange={(e) => setNewChecklistItem(e.target.value)}
+                />
+                <button onClick={handleAddChecklistItem}>Add</button>
+              </div>
+              <ul className="checklist-list">
+                {checklistItems.map((item, index) => (
+                  <li key={index} className="checklist-item">
+                    <input
+                      type="checkbox"
+                      checked={item.checked}
+                      onChange={() => toggleChecklistItem(index)}
+                    />
+                    {item.text}
+                  </li>
+                ))}
+              </ul>
+            </div>
+          )}
+
 
           {attachmentMessage && (
             <div className="attachment-section">
@@ -247,46 +275,31 @@ const TaskDetail = ({ task, onClose, onDelete }) => {
               </div>
             ))}
           </div>
-
-          {showDatePicker && (
-            <div className="date-picker-section">
-              <h3 className="section-title">Select a Date</h3>
-              <input
-                type="date"
-                value={selectedDate}
-                onChange={(e) => setSelectedDate(e.target.value)}
-              />
-              {selectedDate && (
-                <p className="selected-date">Selected Date: {selectedDate}</p>
-              )}
-            </div>
-          )}
         </div>
 
         <div className="sidebar">
-  {[ 
-    { icon: Users, label: "Members" },
-    { icon: Tag, label: "Labels" },
-    { icon: CheckSquare, label: "Checklist", action: () => setShowChecklist(true) },
-    { icon: Calendar, label: "Dates", action: () => setShowDatePicker((prev) => !prev) },
-    { icon: Paperclip, label: "Attachment", action: triggerFileUpload },
-    { icon: Image, label: "Cover" },
-    { icon: Grid, label: "Delete Task", action: () => setShowDeleteConfirm(true) }
-  ].map(({ icon: Icon, label, action }, idx) => (
-    <button key={idx} className="sidebar-btn" onClick={action || (() => alert(`${label} clicked!`))}>
-      <Icon size={16} className="icon" /> {label}
-      {label === "Attachment" && (
-        <input
-          ref={fileInputRef}
-          type="file"
-          multiple
-          onChange={handleFileUpload}
-          style={{ display: 'none' }}
-        />
-      )}
-    </button>
-  ))}
-</div>
+          {[ 
+            { icon: Users, label: "Members" },
+            { icon: Tag, label: "Labels" },
+            { icon: CheckSquare, label: "Checklist", action: () => setShowChecklist(true) },
+            { icon: Paperclip, label: "Attachment", action: triggerFileUpload },
+            { icon: Image, label: "Cover", action: () => fileInputRef.current?.click() },
+            { icon: Grid, label: "Delete Task", action: () => setShowDeleteConfirm(true) }
+          ].map(({ icon: Icon, label, action }, idx) => (
+            <button key={idx} className="sidebar-btn" onClick={action || (() => alert(`${label} clicked!`))}>
+              <Icon size={16} className="icon" /> {label}
+              {label === "Cover" && (
+                <input
+                  ref={fileInputRef}
+                  type="file"
+                  accept="image/*"
+                  onChange={handleCoverImageChange}
+                  style={{ display: 'none' }}
+                />
+              )}
+            </button>
+          ))}
+        </div>
 
       </div>
 
