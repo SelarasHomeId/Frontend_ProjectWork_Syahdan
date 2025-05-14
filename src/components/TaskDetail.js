@@ -1,4 +1,4 @@
-import React, { useState, useRef, useCallback } from "react";
+import React, { useState, useRef } from "react";
 import {
   X, Eye, Users, Tag, CheckSquare, Paperclip, Image, Grid
 } from "lucide-react";
@@ -12,11 +12,14 @@ import ListItem from "@tiptap/extension-list-item";
 import BulletList from "@tiptap/extension-bullet-list";
 import OrderedList from "@tiptap/extension-ordered-list";
 import "../styles/TaskDetail.css";
+import { Move } from 'lucide-react';
+
 
 const TaskDetail = ({ task, onClose, onDelete }) => {
   const [showChecklist, setShowChecklist] = useState(false);
   const [checklistItems, setChecklistItems] = useState([]);
   const [newChecklistItem, setNewChecklistItem] = useState("");
+  //const [percentage, setPercentage] = useState(0);
 
   const [comment, setComment] = useState("");
   const [activity, setActivity] = useState(task.activity || []);
@@ -28,6 +31,14 @@ const TaskDetail = ({ task, onClose, onDelete }) => {
   const [isCompleted, setIsCompleted] = useState(false);
   const [isEditingTitle, setIsEditingTitle] = useState(false);
   const [title, setTitle] = useState(task.title || "");
+  const [dropdownOpenIndex, setDropdownOpenIndex] = useState(null);
+  const fileInputAttachmentRef = useRef(null);
+  const fileInputCoverRef = useRef(null);
+  const [showMoveModal, setShowMoveModal] = useState(false);
+  const [selectedBoard, setSelectedBoard] = useState('');
+  const [selectedWorkspace, setSelectedWorkspace] = useState('');
+
+
 
   const [coverImage, setCoverImage] = useState(null);
 
@@ -40,6 +51,8 @@ const TaskDetail = ({ task, onClose, onDelete }) => {
       setCoverImage(imageUrl);
     }
   };
+
+  
 
   const handleAddChecklistItem = () => {
     if (newChecklistItem.trim()) {
@@ -109,17 +122,37 @@ const TaskDetail = ({ task, onClose, onDelete }) => {
     });
   };
 
-  const triggerFileUpload = useCallback(() => {
-    fileInputRef.current?.click();
-  }, []);
+  const triggerFileUpload = () => {
+    fileInputAttachmentRef.current?.click();
+  };
+  
+
+  const handleAttachmentUpload = (e) => {
+    const file = e.target.files[0];
+    if (file) {
+      const newAttachment = {
+        name: file.name,
+        file: file,
+        showDropdown: false,
+      };
+      setAttachments((prev) => [...prev, newAttachment]);
+      setAttachmentMessage("Uploaded files:");
+    }
+  };  
 
   const toggleDropdown = (index) => {
-    setAttachmentMessage("file uploaded")
+    // Update attachmentMessage
+    setAttachmentMessage("file uploaded");
+  
+    // Update attachments state dengan showDropdown
     setAttachments((prev) =>
       prev.map((att, idx) =>
         idx === index ? { ...att, showDropdown: !att.showDropdown } : att
       )
     );
+  
+    // Toggle dropdown untuk file yang sesuai dengan index
+    setDropdownOpenIndex(dropdownOpenIndex === index ? null : index);
   };
 
   const toolbarButtons = [
@@ -134,6 +167,19 @@ const TaskDetail = ({ task, onClose, onDelete }) => {
         editor?.chain().focus().setImage({ src: "https://via.placeholder.com/150" }).run()
     }
   ];
+
+  // Fungsi untuk menghapus file
+  // const handleRemoveFile = (index) => {
+  //   const updatedAttachments = attachments.filter((_, i) => i !== index);
+  //   setAttachments(updatedAttachments);
+  // };
+
+  const handleMoveTask = (taskId, targetListId) => {
+  // logika untuk memindahkan task ke list lain
+  console.log(`Pindahkan task ${taskId} ke list ${targetListId}`);
+  // Lanjutkan sesuai kebutuhan
+};
+
 
   return (
     <div className="modal-overlay" onClick={onClose}>
@@ -207,122 +253,188 @@ const TaskDetail = ({ task, onClose, onDelete }) => {
               <ul className="checklist-list">
                 {checklistItems.map((item, index) => (
                   <li key={index} className="checklist-item">
-                    <input
-                      type="checkbox"
-                      checked={item.checked}
-                      onChange={() => toggleChecklistItem(index)}
-                    />
-                    {item.text}
+                    <label>
+                      <input
+                        type="checkbox"
+                        checked={item.checked}
+                        onChange={() => toggleChecklistItem(index)}
+                      />
+                      {item.text}
+                    </label>
                   </li>
                 ))}
               </ul>
             </div>
           )}
 
+  {attachmentMessage && (
+    <div className="attachment-section">
+      <h3 className="section-title">Attachment</h3>
+      <p>{attachmentMessage}</p>
 
-          {attachmentMessage && (
-            <div className="attachment-section">
-              <h3 className="section-title">Attachment</h3>
-              <p>{attachmentMessage}</p>
-              <ul className="attachment-list">
-                {attachments.map((attachment, index) => (
-                  <li key={index} className="attachment-item">
-                    <div className="attachment-info">
-                      <span>{attachment.name}</span>
-                      <button className="dropdown-btn" onClick={() => toggleDropdown(index)}>...</button>
-                      {attachment.showDropdown && (
-                        <div className="dropdown-menu">
-                          <button onClick={() => handleFileDownload(attachment.file)}>Download</button>
-                          <button onClick={() => handleFileDelete(index)}>Delete</button>
-                          <button onClick={() => {
-                            const newName = prompt("Enter new file name:", attachment.name);
-                            if (newName) handleEditFileName(index, newName);
-                          }}>Edit Name</button>
-                          <textarea
-                            placeholder="Add a comment..."
-                            value={attachmentComments[index] || ""}
-                            onChange={(e) => handleFileCommentChange(index, e.target.value)}
-                          />
-                        </div>
-                      )}
-                    </div>
-                  </li>
-                ))}
-              </ul>
-            </div>
-          )}
+      {/* Menampilkan daftar lampiran jika ada */}
+      {attachments.length > 0 && (
+        <ul className="attachment-list">
+          {attachments.map((attachment, index) => (
+            <li key={index} className="attachment-item">
+              <div className="attachment-info">
+                <span>{attachment.name}</span>
+                <button className="dropdown-btn" onClick={() => toggleDropdown(index)}>...</button>
 
-          <h3 className="section-title">Activity</h3>
-          <div className="comment-wrapper">
-            <input
-              type="text"
-              className="comment-input"
-              placeholder="Write a comment..."
-              value={comment}
-              onChange={(e) => setComment(e.target.value)}
-            />
-            <button onClick={handleAddComment} className="add-comment-btn">Add</button>
-          </div>
-
-          <div className="activity-list">
-            {activity.map((act, index) => (
-              <div key={index} className="activity-item">
-                <div className="avatar">YS</div>
-                <p className="activity-text">
-                  <span className="activity-user">{act.user}</span> {act.text} <br />
-                  <span className="activity-time">{act.timestamp}</span>
-                </p>
+                {/* Menampilkan Dropdown ketika tombol titik tiga diklik */}
+                {attachment.showDropdown && (
+                  <div className="dropdown-menu">
+                  <button onClick={() => handleFileDownload(attachment.file)}>Download</button>
+                  <button onClick={() => handleFileDelete(index)}>Delete</button>
+                  <button onClick={() => {
+                    const newName = prompt("Enter new file name:", attachment.name);
+                    if (newName?.trim()) handleEditFileName(index, newName.trim());
+                  }}>Edit Name</button>
+                  <textarea
+                    placeholder="Add a comment..."
+                    value={attachmentComments[index] || ""}
+                    onChange={(e) => handleFileCommentChange(index, e.target.value)}
+                    className="attachment-comment"
+                  />
+                </div>              
+                )}
               </div>
-            ))}
-          </div>
-        </div>
-
-        <div className="sidebar">
-          {[ 
-            { icon: Users, label: "Members" },
-            { icon: Tag, label: "Labels" },
-            { icon: CheckSquare, label: "Checklist", action: () => setShowChecklist(true) },
-            { icon: Paperclip, label: "Attachment", action: triggerFileUpload },
-            { icon: Image, label: "Cover", action: () => fileInputRef.current?.click() },
-            { icon: Grid, label: "Delete Task", action: () => setShowDeleteConfirm(true) }
-          ].map(({ icon: Icon, label, action }, idx) => (
-            <button key={idx} className="sidebar-btn" onClick={action || (() => alert(`${label} clicked!`))}>
-              <Icon size={16} className="icon" /> {label}
-              {label === "Cover" && (
-                <input
-                  ref={fileInputRef}
-                  type="file"
-                  accept="image/*"
-                  onChange={handleCoverImageChange}
-                  style={{ display: 'none' }}
-                />
-              )}
-            </button>
+            </li>
           ))}
-        </div>
-
-      </div>
-
-      {showDeleteConfirm && (
-        <div className="popup-overlay">
-          <div className="popup-box">
-            <h3>Are you sure you want to delete this task?</h3>
-            <div className="popup-buttons">
-              <button className="popup-btn confirm" onClick={() => {
-                onDelete?.(task.id);
-                onClose();
-              }}>
-                Yes, Delete
-              </button>
-              <button className="popup-btn cancel" onClick={() => setShowDeleteConfirm(false)}>
-                Cancel
-              </button>
-            </div>
-          </div>
+        </ul>
+      )}
+      
+      {/* Menampilkan tombol untuk upload file */}
+        <input
+            ref={fileInputRef}
+            type="file"
+            accept="*/*"
+            onChange={handleAttachmentUpload}
+            style={{ display: 'none' }}
+          />
+          <button onClick={triggerFileUpload}>Upload File</button>
         </div>
       )}
-    </div>
-  );
-};
+
+            <h3 className="section-title">Activity</h3>
+            <div className="comment-wrapper">
+              <input
+                type="text"
+                className="comment-input"
+                placeholder="Write a comment..."
+                value={comment}
+                onChange={(e) => setComment(e.target.value)}
+              />
+              <button onClick={handleAddComment} className="add-comment-btn">Add</button>
+            </div>
+
+            <div className="activity-list">
+              {activity.map((act, index) => (
+                <div key={index} className="activity-item">
+                  <div className="avatar">
+                    {act.user.split(' ').map(word => word[0]).join('').toUpperCase()}
+                  </div>
+                  <p className="activity-text">
+                    <span className="activity-user">{act.user}</span> {act.text} <br />
+                    <span className="activity-time">{act.timestamp}</span>
+                  </p>
+                </div>
+              ))}
+            </div>
+          </div>
+
+          <div className="sidebar">
+              {[ 
+                { icon: Users, label: "Members" },
+                { icon: Tag, label: "Labels" },
+                { icon: CheckSquare, label: "Checklist", action: () => setShowChecklist(true) },
+                { icon: Paperclip, label: "Attachment", action: () => fileInputAttachmentRef.current?.click() },
+                { icon: Image, label: "Cover", action: () => fileInputCoverRef.current?.click() },
+                { icon: Grid, label: "Delete Task", action: () => setShowDeleteConfirm(true) },
+                { icon: Move, label: "Move", action: () => setShowMoveModal(true) },
+              ].map(({ icon: Icon, label, action }, idx) => (
+                <button key={idx} className="sidebar-btn" onClick={action || (() => alert(`${label} clicked!`))}>
+                  <Icon size={16} className="icon" /> {label}
+
+                  {/* Input file untuk Cover */}
+                  {label === "Cover" && (
+                    <input
+                      ref={fileInputCoverRef}
+                      type="file"
+                      accept="image/*"
+                      onChange={handleCoverImageChange}
+                      style={{ display: 'none' }}
+                    />
+                  )}
+
+                  {/* Input file untuk Attachment */}
+                  {label === "Attachment" && (
+                    <input
+                      ref={fileInputAttachmentRef}
+                      type="file"
+                      accept="*/*"
+                      onChange={handleAttachmentUpload}
+                      style={{ display: 'none' }}
+                    />
+                  )}
+                </button>
+              ))}
+            </div>
+        </div>
+
+                {showMoveModal && (
+          <div className="popup-overlay">
+            <div className="popup-box">
+              <h3>Move Task</h3>
+              <div className="popup-section">
+                <label>Choose Workspace:</label>
+                <select value={selectedWorkspace} onChange={(e) => setSelectedWorkspace(e.target.value)}>
+                  <option value="">Select Workspace</option>
+                  <option value="workspace-1">Workspace 1</option>
+                  <option value="workspace-2">Workspace 2</option>
+                </select>
+              </div>
+              <div className="popup-section">
+                <label>Choose Board:</label>
+                <select value={selectedBoard} onChange={(e) => setSelectedBoard(e.target.value)}>
+                  <option value="">Select Board</option>
+                  <option value="board-1">Board 1</option>
+                  <option value="board-2">Board 2</option>
+                </select>
+              </div>
+              <div className="popup-buttons">
+                <button className="popup-btn confirm" onClick={() => handleMoveTask()}>
+                  Move
+                </button>
+                <button className="popup-btn cancel" onClick={() => setShowMoveModal(false)}>
+                  Cancel
+                </button>
+              </div>
+            </div>
+          </div>
+        )}
+
+
+        {showDeleteConfirm && (
+          <div className="popup-overlay">
+            <div className="popup-box">
+              <h3>Are you sure you want to delete this task?</h3>
+              <div className="popup-buttons">
+                <button className="popup-btn confirm" onClick={() => {
+                  onDelete?.(task.id);
+                  onClose();
+                }}>
+                  Yes, Delete
+                </button>
+                <button className="popup-btn cancel" onClick={() => setShowDeleteConfirm(false)}>
+                  Cancel
+                </button>
+              </div>
+            </div>
+          </div>
+        )}
+        </div>
+      );
+  };
 
 export default TaskDetail;

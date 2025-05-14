@@ -41,103 +41,126 @@ const User = () => {
   };
 
   const handleAddUser = async () => {
-    try {
-      const [rolesRes, divisiRes] = await Promise.all([
-        getAllRole("/role"),
-        getAllDivision("/divisi"),
-      ]);
-  
-      const roles = rolesRes.data.data || [];
-      const divisions = divisiRes.data.data || [];
+  try {
+    const [rolesRes, divisiRes] = await Promise.all([
+      getAllRole("/role"),
+      getAllDivision("/divisi"),
+    ]);
 
-      const roleOptions = roles.map((role) => `<option value="${role.id}">${role.name}</option>`).join("");
-      const divisionOptions = divisions.map((div) => `<option value="${div.id}">${div.name}</option>`).join("");
-  
-      const { value: formValues } = await Swal.fire({
-        title: "Add User",
-        html: `
-          <div style="display: flex; flex-direction: column; gap: 10px; text-align: left;">
-            <label for="swal-name">Name:</label>
-            <input id="swal-name" type="text" class="swal2-input" placeholder="Input name">
-            
-            <label for="swal-email">Email:</label>
-            <input id="swal-email" type="email" class="swal2-input" placeholder="Input email">
-            
-            <label for="swal-role">Role:</label>
-            <select id="swal-role" class="swal2-input">
-              <option value="" disabled selected>Select Role</option>
-              ${roleOptions}
-            </select>
-            
-            <label for="swal-division">Division:</label>
-            <select id="swal-division" class="swal2-input">
-              <option value="" disabled selected>Select Division  </option>
-              ${divisionOptions}
-            </select>
+    const roles = rolesRes.data.data || [];
+    const divisions = divisiRes.data.data || [];
+
+    const roleOptions = roles
+      .map((role) => `<option value="${role.id}">${role.name}</option>`)
+      .join("");
+    const divisionOptions = divisions
+      .map((div) => `<option value="${div.id}">${div.name}</option>`)
+      .join("");
+
+    const { value: formValues } = await Swal.fire({
+      title: "Add User",
+      html: `
+        <div class="container-fluid" style="max-width: 500px;">
+          <div class="row g-3 align-items-start">
+            <div class="col-12">
+              <div class="d-flex flex-column align-items-start">
+                <label for="swal-name" class="form-label">Name</label>
+                <input id="swal-name" type="text" class="form-control" placeholder="Input name" style="width: 100%;">
+              </div>
+            </div>
+
+            <div class="col-12">
+              <div class="d-flex flex-column align-items-start">
+                <label for="swal-email" class="form-label">Email</label>
+                <input id="swal-email" type="email" class="form-control" placeholder="Input email" style="width: 100%;">
+              </div>
+            </div>
+
+            <div class="col-md-6">
+              <div class="d-flex flex-column align-items-start">
+                <label for="swal-role" class="form-label">Role</label>
+                <select id="swal-role" class="form-select" style="width: 100%;">
+                  <option value="" disabled selected>Select Role</option>
+                  ${roleOptions}
+                </select>
+              </div>
+            </div>
+
+            <div class="col-md-6">
+              <div class="d-flex flex-column align-items-start">
+                <label for="swal-division" class="form-label">Division</label>
+                <select id="swal-division" class="form-select" style="width: 100%;">
+                  <option value="" disabled selected>Select Division</option>
+                  ${divisionOptions}
+                </select>
+              </div>
+            </div>
           </div>
-        `,
-        focusConfirm: false,
-        showCancelButton: true,
-        confirmButtonText: "Submit",
-        cancelButtonText: "Cancel",
-        preConfirm: () => {
-          const name = document.getElementById("swal-name").value;
-          const email = document.getElementById("swal-email").value;
-          const role = document.getElementById("swal-role").value;
-          const division = document.getElementById("swal-division").value;
-  
-          if (!name) {
-            Swal.showValidationMessage("Nama tidak boleh kosong!");
-            return false;
-          }
-          if (!email) {
-            Swal.showValidationMessage("Email tidak boleh kosong!");
-            return false;
-          }
-          const emailPattern = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-          if (!emailPattern.test(email)) {
-            Swal.showValidationMessage("Format email tidak valid!");
-            return false;
-          }
-          if (!role) {
-            Swal.showValidationMessage("Role harus dipilih!");
-            return false;
-          }
-          if (!division) {
-            Swal.showValidationMessage("Divisi harus dipilih!");
-            return false;
-          }
-  
-          return { name, email, role, division };
-        },
-      });
-  
-      if (formValues) {
-        const response = await addUser({ 
-          name: formValues.name, 
-          email: formValues.email,
-          role_id: parseInt(formValues.role, 10),
-          divisi_id: parseInt(formValues.division, 10)
-        });
-  
-        if (response.success) {
-          Swal.fire({
-            title: "Berhasil!",
-            text: "User berhasil ditambahkan, mohon cek email untuk mendapatkan akses aplikasi.",
-            icon: "success",
-            confirmButtonText: "OK",
-          }).then( async () => {
-            await fetchUsers();
-          });
-        } else {
-          Swal.fire({
-            title: "Gagal!",
-            text: response.error.data.message || "Terjadi kesalahan.",
-            icon: "error",
-            confirmButtonText: "OK",
-          });
+        </div>
+      `,
+      focusConfirm: false,
+      showCancelButton: true,
+      confirmButtonText: "Submit",
+      confirmButtonColor:'#28a745',
+      cancelButtonText: "Cancel",
+      preConfirm: () => {
+        const name = document.getElementById("swal-name").value;
+        const email = document.getElementById("swal-email").value;
+        const role = document.getElementById("swal-role").value;
+        const division = document.getElementById("swal-division").value;
+
+        if (!name) {
+          Swal.showValidationMessage("Nama tidak boleh kosong!");
+          return false;
         }
+        if (!email) {
+          Swal.showValidationMessage("Email tidak boleh kosong!");
+          return false;
+        }
+        const emailPattern = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+        if (!emailPattern.test(email)) {
+          Swal.showValidationMessage("Format email tidak valid!");
+          return false;
+        }
+        if (!role) {
+          Swal.showValidationMessage("Role harus dipilih!");
+          return false;
+        }
+        if (!division) {
+          Swal.showValidationMessage("Divisi harus dipilih!");
+          return false;
+        }
+
+        return { name, email, role, division };
+      },
+    });
+
+    if (formValues) {
+      const response = await addUser({
+        name: formValues.name,
+        email: formValues.email,
+        role_id: parseInt(formValues.role, 10),
+        divisi_id: parseInt(formValues.division, 10),
+      });
+
+      if (response.success) {
+        Swal.fire({
+          title: "Berhasil!",
+          text: "User berhasil ditambahkan, mohon cek email untuk mendapatkan akses aplikasi.",
+          icon: "success",
+          confirmButtonText: "OK",
+        }).then(async () => {
+          await fetchUsers();
+        });
+      } else {
+        Swal.fire({
+          title: "Gagal!",
+          text: response.error.data.message || "Terjadi kesalahan.",
+          icon: "error",
+          confirmButtonText: "OK",
+        });
       }
+    }
     } catch (error) {
       Swal.fire({
         title: "Terjadi Kesalahan",
@@ -170,111 +193,106 @@ const User = () => {
       ).join("");
 
       const { value: formValues } = await Swal.fire({
-        title: "Edit User",
-        html: `
-          <div style="display: flex; flex-direction: column; gap: 10px; text-align: left;">
-            <label for="swal-name">Name:</label>
-            <input id="swal-name" type="text" class="swal2-input" placeholder="Input name" value="${userData.name}">
-            
-            <label for="swal-email">Email:</label>
-            <input id="swal-email" type="email" class="swal2-input" placeholder="Input email" value="${userData.email}">
-            
-            <label for="swal-role">Role:</label>
-            <select id="swal-role" class="swal2-input">
-              <option value="" disabled>Select Role</option>
-              ${roleOptions}
-            </select>
-            
-            <label for="swal-division">Division:</label>
-            <select id="swal-division" class="swal2-input">
-              <option value="" disabled>Select Division</option>
-              ${divisionOptions}
-            </select>
-
-            <label for="swal-is-locked">Status Locked:</label>
-            <label class="switch">
-              <input id="swal-is-locked" type="checkbox" ${userData.is_locked ? "checked" : ""}>
-              <span class="slider round"></span>
-            </label>
+      title: "Edit User",
+      html: `
+        <div class="container-fluid">
+          <div class="row mb-3">
+            <label for="swal-name" class="form-label col-12 text-sm-start">Name:</label>
+            <div class="col-12">
+              <input id="swal-name" type="text" class="form-control" placeholder="Input name" value="${userData.name}">
+            </div>
           </div>
-          <style>
-            .switch {
-              position: relative;
-              display: inline-block;
-              width: 34px;
-              height: 20px;
-            }
-            .switch input {
-              opacity: 0;
-              width: 0;
-              height: 0;
-            }
-            .slider {
-              position: absolute;
-              cursor: pointer;
-              top: 0;
-              left: 0;
-              right: 0;
-              bottom: 0;
-              background-color: #ccc;
-              transition: .4s;
-              border-radius: 34px;
-            }
-            .slider:before {
-              position: absolute;
-              content: "";
-              height: 14px;
-              width: 14px;
-              left: 3px;
-              bottom: 3px;
-              background-color: white;
-              transition: .4s;
-              border-radius: 50%;
-            }
-            input:checked + .slider {
-              background-color: #2196F3;
-            }
-            input:checked + .slider:before {
-              transform: translateX(14px);
-            }
-          </style>
-        `,
-        focusConfirm: false,
-        showCancelButton: true,
-        confirmButtonText: "Update",
-        cancelButtonText: "Cancel",
-        preConfirm: () => {
-          const name = document.getElementById("swal-name").value;
-          const email = document.getElementById("swal-email").value;
-          const role = document.getElementById("swal-role").value;
-          const division = document.getElementById("swal-division").value;
-          const isLocked = document.getElementById("swal-is-locked").checked;
-
-          const updatedData = {};
-
-          if (name !== userData.name) updatedData.name = name;
-          if (email !== userData.email) updatedData.email = email;
-          if (role && parseInt(role, 10) !== userData.role_id) updatedData.role_id = parseInt(role, 10);
-          if (division && parseInt(division, 10) !== userData.divisi_id) updatedData.divisi_id = parseInt(division, 10);
-          if (isLocked !== userData.is_locked) updatedData.is_locked = isLocked;
-
-          if (!name) {
-            Swal.showValidationMessage("Nama tidak boleh kosong!");
-            return false;
+          <div class="row mb-3">
+            <label for="swal-email" class="form-label col-12 text-sm-start">Email:</label>
+            <div class="col-12">
+              <input id="swal-email" type="email" class="form-control" placeholder="Input email" value="${userData.email}">
+            </div>
+          </div>
+          <div class="row mb-3">
+            <label for="swal-role" class="form-label col-12 text-sm-start">Role:</label>
+            <div class="col-12">
+              <select id="swal-role" class="form-select">
+                <option value="" disabled>Select Role</option>
+                ${roleOptions}
+              </select>
+            </div>
+          </div>
+          <div class="row mb-3">
+            <label for="swal-division" class="form-label col-12 text-sm-start">Division:</label>
+            <div class="col-12">
+              <select id="swal-division" class="form-select">
+                <option value="" disabled>Select Division</option>
+                ${divisionOptions}
+              </select>
+            </div>
+          </div>
+          <div class="row align-items-center">
+            <label for="swal-is-locked" class="form-label col-6 text-sm-start">Status Locked:</label>
+            <div class="col-6">
+              <div class="form-check form-switch d-flex justify-content-end">
+                <input id="swal-is-locked" type="checkbox" class="form-check-input" ${userData.is_locked ? "checked" : ""}>
+              </div>
+            </div>
+          </div>
+        </div>
+        <style>
+          .swal2-popup {
+            max-width: 600px;
+            width: 100%;
+            padding: 1.5rem;
           }
-          if (!email) {
-            Swal.showValidationMessage("Email tidak boleh kosong!");
-            return false;
+          .form-label {
+            font-weight: bold;
+            font-size: 0.9rem;
           }
-          const emailPattern = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-          if (!emailPattern.test(email)) {
-            Swal.showValidationMessage("Format email tidak valid!");
-            return false;
+          @media (max-width: 768px) {
+            .swal2-popup {
+              padding: 1rem;
+            }
+            .form-label {
+              font-size: 0.85rem;
+            }
           }
+        </style>
+      `,
+      focusConfirm: false,
+      showCancelButton: true,
+      confirmButtonText: "Update",
+      confirmButtonColor:'#28a745',
+      cancelButtonText: "Cancel",
+      preConfirm: () => {
+        const name = document.getElementById("swal-name").value;
+        const email = document.getElementById("swal-email").value;
+        const role = document.getElementById("swal-role").value;
+        const division = document.getElementById("swal-division").value;
+        const isLocked = document.getElementById("swal-is-locked").checked;
 
-          return updatedData;
-        },
-      });
+        const updatedData = {};
+
+        if (name !== userData.name) updatedData.name = name;
+        if (email !== userData.email) updatedData.email = email;
+        if (role && parseInt(role, 10) !== userData.role_id) updatedData.role_id = parseInt(role, 10);
+        if (division && parseInt(division, 10) !== userData.divisi_id) updatedData.divisi_id = parseInt(division, 10);
+        if (isLocked !== userData.is_locked) updatedData.is_locked = isLocked;
+
+        if (!name) {
+          Swal.showValidationMessage("Nama tidak boleh kosong!");
+          return false;
+        }
+        if (!email) {
+          Swal.showValidationMessage("Email tidak boleh kosong!");
+          return false;
+        }
+        const emailPattern = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+        if (!emailPattern.test(email)) {
+          Swal.showValidationMessage("Format email tidak valid!");
+          return false;
+        }
+
+        return updatedData;
+      },
+    });
+
 
       if (formValues && Object.keys(formValues).length > 0) {
         const response = await updateUser(id, formValues);
@@ -313,9 +331,11 @@ const User = () => {
         title: "Konfirmasi Hapus",
         text: "Apakah Anda yakin ingin menghapus user ini?",
         icon: "warning",
+        iconColor:'#dc3545',
         showCancelButton: true,
         confirmButtonText: "Ya, Hapus",
         cancelButtonText: "Batal",
+        confirmButtonColor: "#dc3545",
       });
 
       if (confirmDelete.isConfirmed) {
@@ -327,6 +347,7 @@ const User = () => {
             text: "User berhasil dihapus.",
             icon: "success",
             confirmButtonText: "OK",
+            confirmButtonColor: "#28a745",
           }).then(async () => {
             await fetchUsers();
           });
@@ -336,6 +357,7 @@ const User = () => {
             text: response.error.data.message || "Terjadi kesalahan.",
             icon: "error",
             confirmButtonText: "OK",
+            confirmButtonColor: "#dc3545",
           });
         }
       }
@@ -345,6 +367,7 @@ const User = () => {
         text: "Gagal menghapus user. Mohon coba lagi.",
         icon: "error",
         confirmButtonText: "OK",
+        confirmButtonColor: "#ffc107",
       });
     }
   };
@@ -355,8 +378,10 @@ const User = () => {
         title: "Konfirmasi Reset Password",
         text: "Apakah Anda yakin ingin reset password untuk user ini?",
         icon: "warning",
+        iconColor:'#dc3545',
         showCancelButton: true,
         confirmButtonText: "Ya, Reset",
+        confirmButtonColor:'#dc3545',
         cancelButtonText: "Batal",
       });
 
@@ -435,10 +460,38 @@ const User = () => {
                   <td className={user.is_locked ? 'text-danger' : 'text-success'}>{user.is_locked ? "Locked" : "Unlocked"}</td>
                   <td>{user.created_at.replace("T", " ").replace("Z", "")}</td>
                   <td>
-                    <button className="action-button btn btn-warning" onClick={() => handleEditUser(user.id)}>Edit</button>
-                    <button className="action-button btn btn-danger" onClick={() => handleDeleteUser(user.id)}>Delete</button>
-                    <button className="action-button btn btn-secondary" onClick={() => handleResetPassword(user.id)}>Reset Password</button>
-                  </td>
+                  <div className="d-flex align-items-center gap-2">
+                    {/* Edit Button */}
+                    <button 
+                      className="btn btn-warning btn-sm p-2 d-flex align-items-center justify-content-center" 
+                      onClick={() => handleEditUser(user.id)}
+                      style={{ width: '38px', height: '38px' }}
+                      title="Edit"
+                    >
+                      <i className="fas fa-edit fa-fw"></i>
+                    </button>
+
+                    {/* Delete Button */}
+                    <button 
+                      className="btn btn-danger btn-sm p-2 d-flex align-items-center justify-content-center"
+                      onClick={() => handleDeleteUser(user.id)}
+                      style={{ width: '38px', height: '38px' }}
+                      title="Delete"
+                    >
+                      <i className="fas fa-trash-alt fa-fw"></i>
+                    </button>
+
+                    {/* Reset Password Button */}
+                    <button 
+                      className="btn btn-secondary btn-sm p-2 d-flex align-items-center justify-content-center"
+                      onClick={() => handleResetPassword(user.id)}
+                      style={{ width: '38px', height: '38px' }}
+                      title="Reset Password"
+                    >
+                      <i className="fas fa-key fa-fw"></i>
+                    </button>
+                  </div>
+                </td>
                 </tr>
               ))
             )}

@@ -60,8 +60,14 @@
   padding: 10px;
   display: none;
   z-index: 100;
-  max-height: 300px; /* Atur tinggi maksimum */
+  max-height: 300px; 
   overflow-y: auto;
+}
+
+.notification-dropdown.show {
+  display: block;
+  opacity: 1;
+  transform: translateY(0);
 }
 
 /* Show dropdown when active */
@@ -142,6 +148,12 @@
   transition: all 0.3s ease;
 }
 
+.user-dropdown.show {
+  display: block;
+  opacity: 1;
+  transform: translateY(0);
+}
+
 /* Show dropdown when active */
 .user-section.active .user-dropdown {
   display: block;
@@ -209,10 +221,13 @@
 }
 
 .search-task-container {
-  width: 300px;
-  margin-right: 30px;
-  position: relative;
+  position: absolute;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 400px;
+  z-index: 10;
 }
+
 
 .search-task-input {
   width: 100%;
@@ -238,6 +253,12 @@
   z-index: 1000;
   max-height: 200px;
   overflow-y: auto;
+}
+
+.search-task-dropdown.show{
+  display: block;
+  opacity: 1;
+  transform: translateY(0);
 }
 
 .search-task-dropdown .dropdown-item {

@@ -36,6 +36,10 @@
   background: #0056b3;
 }
 
+button:hover .fa-image {
+  color: #007bff;
+}
+
 /* Styling tabel */
 .project-table {
   width: 100%;

@@ -3,6 +3,8 @@ import debounce from 'lodash.debounce';
 import '../styles/Project.css';
 import { getAllProject, addProject, updateProject, deleteProject, getProjectById } from '../service/apiService';
 import Swal from "sweetalert2";
+import { Modal } from 'react-bootstrap';
+import { FaEdit, FaTrash } from 'react-icons/fa';
 
 const Project = () => {
   const [projects, setProjects] = useState([]);
@@ -10,6 +12,7 @@ const Project = () => {
   const [currentPage, setCurrentPage] = useState(1);
   const [itemsPerPage] = useState(5);
   const [hasNextPage, setHasNextPage] = useState(false);
+  const [showImagePreview, setShowImagePreview] = useState(false);
 
   const fetchProjects = useCallback(async () => {
     try {
@@ -39,79 +42,96 @@ const Project = () => {
   };
 
 const handleAddProject = async () => {
-    try {
-      const { value: formValues } = await Swal.fire({
-        title: "Add Project",
-        html: `
-          <div style="display: flex; flex-direction: column; gap: 10px; text-align: left;">
-            <label for="swal-name">Name:</label>
-            <input id="swal-name" type="text" class="swal2-input" placeholder="Input name">
-            
-            <label for="swal-location">Location:</label>
-            <input id="swal-location" type="text" class="swal2-input" placeholder="Input location">
+  try {
+    const { value: formValues } = await Swal.fire({
+      title: "Add Project",
+      html: `
+        <div class="container-fluid" style="max-width: 500px;">
+          <div class="row g-3 align-items-start">
+            <div class="col-12">
+              <div class="d-flex flex-column align-items-start">
+                <label for="swal-name" class="form-label">Name</label>
+                <input id="swal-name" type="text" class="form-control" placeholder="Input name" style="width: 100%;">
+              </div>
+            </div>
 
-            <label for="swal-cover">Cover:</label>
-            <input id="swal-cover" type="file" class="swal2-input" accept="image/*">
+            <div class="col-12">
+              <div class="d-flex flex-column align-items-start">
+                <label for="swal-location" class="form-label">Location</label>
+                <input id="swal-location" type="text" class="form-control" placeholder="Input location" style="width: 100%;">
+              </div>
+            </div>
+
+            <div class="col-12">
+              <div class="d-flex flex-column align-items-start">
+                <label for="swal-cover" class="form-label">Cover</label>
+                <input id="swal-cover" type="file" class="form-control" accept="image/*" style="width: 100%;">
+              </div>
+            </div>
           </div>
-        `,
-        focusConfirm: false,
-        showCancelButton: true,
-        confirmButtonText: "Submit",
-        cancelButtonText: "Cancel",
-        preConfirm: () => {
-          const name = document.getElementById("swal-name").value;
-          const location = document.getElementById("swal-location").value;
-          const coverInput = document.getElementById("swal-cover").files[0];
-          if (!name) {
-            Swal.showValidationMessage("Nama project tidak boleh kosong!");
-            return false;
-          }
-          if (!location) {
-            Swal.showValidationMessage("Location tidak boleh kosong!");
-            return false;
-          }
-          return { name, location, coverInput};
-        },
-      });
-  
-      if (formValues) {
-        let cover = null;
-        if ( formValues.coverInput) {
-            cover = formValues.coverInput;
+        </div>
+      `,
+      focusConfirm: false,
+      showCancelButton: true,
+      confirmButtonText: "Submit",
+      confirmButtonColor:'#28a745',
+      cancelButtonText: "Cancel",
+      preConfirm: () => {
+        const name = document.getElementById("swal-name").value;
+        const location = document.getElementById("swal-location").value;
+        const coverInput = document.getElementById("swal-cover").files[0];
+
+        if (!name) {
+          Swal.showValidationMessage("Nama project tidak boleh kosong!");
+          return false;
         }
-        const response = await addProject({ 
-          name: formValues.name, 
-          location: formValues.location,
-          cover: cover, 
-        });
-  
-        if (response.success) {
-          Swal.fire({
-            title: "Berhasil!",
-            text: "Project berhasil ditambahkan.",
-            icon: "success",
-            confirmButtonText: "OK",
-          }).then( async () => {
-            await fetchProjects();
-          });
-        } else {
-          Swal.fire({
-            title: "Gagal!",
-            text: response.error.data.message || "Terjadi kesalahan.",
-            icon: "error",
-            confirmButtonText: "OK",
-          });
+        if (!location) {
+          Swal.showValidationMessage("Location tidak boleh kosong!");
+          return false;
         }
+        return { name, location, coverInput };
+      },
+    });
+
+    if (formValues) {
+      let cover = null;
+      if (formValues.coverInput) {
+        cover = formValues.coverInput;
       }
-    } catch (error) {
-      Swal.fire({
-        title: "Terjadi Kesalahan",
-        text: "Gagal mengambil data. Mohon coba lagi.",
-        icon: "error",
-        confirmButtonText: "OK",
+      const response = await addProject({
+        name: formValues.name,
+        location: formValues.location,
+        cover: cover,
       });
+
+      if (response.success) {
+        Swal.fire({
+          title: "Berhasil!",
+          text: "Project berhasil ditambahkan.",
+          icon: "success",
+          confirmButtonText: "OK",
+        }).then(async () => {
+          await fetchProjects();
+        });
+      } else {
+        Swal.fire({
+          title: "Gagal!",
+          text: response.error.data.message || "Terjadi kesalahan.",
+          icon: "error",
+          confirmButtonText: "OK",
+        });
+      }
     }
-  };
+  } catch (error) {
+    Swal.fire({
+      title: "Terjadi Kesalahan",
+      text: "Gagal mengambil data. Mohon coba lagi.",
+      icon: "error",
+      confirmButtonText: "OK",
+    });
+  }
+};
+
 
 const handleEditProject = async (id) => {
     try {
@@ -135,6 +155,7 @@ const handleEditProject = async (id) => {
         focusConfirm: false,
         showCancelButton: true,
         confirmButtonText: "Update",
+        confirmButtonColor:'#28a745',
         cancelButtonText: "Cancel",
         preConfirm: () => {
           const name = document.getElementById("swal-name").value;
@@ -274,26 +295,87 @@ const handleEditProject = async (id) => {
                     <tr key={project.id}>
                       <td>{(currentPage - 1) * itemsPerPage + index + 1}</td>
                       <td>{project.name}</td>
-                      <td>
+                      <td className="text-center">
                         {
                           isValidUrl(project.location) ? (
                             <a 
-                              href={`https://www.google.com/maps?q=${project.location}`} 
+                              href={`${project.location}`} 
                               target="_blank" 
                               rel="noopener noreferrer"
                             >
-                              {project.location}
+                               <i className="fas fa-map-marker-alt fa-2x"></i>
                             </a>
                           ) : (
-                            project.location
+                            "No Location"
                           )
                         }
                       </td>
-                      <td>{project.cover != null ? "Yes" : "No"}</td>
+                      <td className='text-center'>
+                        {project.cover ? (
+                          <>
+                            <button 
+                              onClick={() => {
+                                console.log('Memulai preview untuk:', project.cover);
+                                setShowImagePreview(true);
+                              }}
+                              style={{ 
+                                background: 'none', 
+                                border: 'none', 
+                                padding: 0,
+                                cursor: 'pointer'
+                              }}
+                            >
+                              <i 
+                                className="fas fa-image" 
+                                style={{ 
+                                  fontSize: '1.5rem', 
+                                  color: '#6c757d',
+                                  transition: 'color 0.3s ease'
+                                }}
+                                title="Preview Gambar"
+                                aria-label="Preview Gambar"
+                              />
+                            </button>
+
+                            <Modal show={showImagePreview} onHide={() => setShowImagePreview(false)}>
+                            <Modal.Header closeButton>
+                              <Modal.Title>Preview Cover</Modal.Title>
+                            </Modal.Header>
+                            <Modal.Body>
+                              {console.log('URL saat preview:', project.cover)}
+                              
+                              {project.cover ? (
+                                <img 
+                                  src={project.cover.view_saved} 
+                                  alt="Project Cover Preview" 
+                                  style={{ width: '100%' }}
+                                />
+                              ) : (
+                                <p>URL gambar tidak valid</p>
+                              )}
+                            </Modal.Body>
+                          </Modal>
+                          </>
+                        ) : (
+                          "No"
+                        )}
+                      </td>
                       <td>{project.created_at.replace("T", " ").replace("Z", "")}</td>
                       <td>
-                        <button className="action-button btn btn-warning" onClick={() => handleEditProject(project.id)}>Edit</button>
-                        <button className="action-button btn btn-danger" onClick={() => handleDeleteProject(project.id)}>Delete</button>
+                        <button 
+                          className="action-button btn btn-warning" 
+                          onClick={() => handleEditProject(project.id)}
+                          aria-label="Edit"
+                        >
+                          <FaEdit />
+                        </button>
+                        <button 
+                          className="action-button btn btn-danger ms-2" 
+                          onClick={() => handleDeleteProject(project.id)}
+                          aria-label="Delete"
+                        >
+                          <FaTrash />
+                        </button>
                       </td>
                     </tr>
                   ))

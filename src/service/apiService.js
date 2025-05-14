@@ -1,7 +1,8 @@
 import axios from "axios";
 import { BASE_URL } from "../utils/constant";
-import { getCookie } from "../utils/general";
+import { removeAllCookies } from "../utils/general";
 import Cookies from "js-cookie";
+import Swal from "sweetalert2";
 
 // ==================================================================================================== //
 // Fungsi utama untuk melakukan request API
@@ -16,10 +17,38 @@ export const apiRequest = async ({
   let headers = { "Content-Type": contentType };
 
   if (!token) {
-    token = getCookie("token");
+    token = Cookies.get("token");
   }
-  if (token) {
+
+  if (token != null) {
     headers["Authorization"] = `Bearer ${token}`;
+  }
+
+  const id = Cookies.get('id');
+  if (token != null && (id === undefined || id === null)){
+    try {
+      const response = await authLogout();
+      if (response.success) {
+        Swal.fire({
+          title: "Logout",
+          text: "Sesi Anda Telah Berakhir, Silahkan Login Ulang",
+          icon: "warning",	
+          iconColor: "#dc3545",
+          timer: 2500,
+          showConfirmButton: false,
+        }).then(() => {
+          removeAllCookies();
+          window.location.replace('/');
+        });
+      }
+    } catch (error) {
+      Swal.fire({
+        title: "Gagal Logout, hubungi admin anda",
+        text: error,
+        icon: "error",
+        confirmButtonText: "OK",
+      });
+    }
   }
 
   if (contentType === "multipart/form-data" && (method.toUpperCase() === "POST" || method.toUpperCase() === "PUT" )) {
@@ -49,7 +78,7 @@ export const apiRequest = async ({
     let response = await hitAPI();
     return response.data;
   } catch (error) {
-    if (error.status === 401 && endpoint !== "/auth/login") {
+    if (error.status === 401 && (endpoint !== "/auth/login" && endpoint !== "/auth/send-email/forgot-password")) {
       const newToken = await refreshToken();
       if (newToken) {
         headers["Authorization"] = `Bearer ${newToken}`;
@@ -58,6 +87,29 @@ export const apiRequest = async ({
       } else {
         throw new Error("Gagal memperbarui token");
       }
+    }else if(error.status === 422 && (endpoint !== "/auth/login" && endpoint !== "/auth/send-email/forgot-password")){
+        try {
+          const response = await authLogout();
+          if (response.success) {
+            Swal.fire({
+              title: "Logout",
+              text: "Akun Dikunci atau password telah berubah",
+              icon: "success",
+              timer: 2500,
+              showConfirmButton: false,
+            }).then(() => {
+              removeAllCookies();
+              window.location.replace('/');
+            });
+          }
+        } catch (error) {
+          Swal.fire({
+            title: "Gagal Logout, hubungi admin anda",
+            text: error,
+            icon: "error",
+            confirmButtonText: "OK",
+          });
+        }
     }
     console.error(`Error pada request ${method} ${endpoint}:`, error);
     return { success: false, error: error.response?.data || error.message };
@@ -71,7 +123,7 @@ const refreshToken = async () => {
     method: "POST",
     endpoint: "/auth/refresh-token",
   })
-  Cookies.set("token", response.data.token, { expires: 1, secure: true, sameSite: "Strict" });
+  Cookies.set("token", response.data.token, { expires: 36500, secure: true, sameSite: "Strict" });
   return response.data.token;
 };
 
@@ -89,7 +141,7 @@ export const authLogout = async () => {
   return await apiRequest({
     method: "POST",
     endpoint: "/auth/logout",
-    body: { logout_from: "web" },
+    body: { logout_from: "web"},
   });
 };
 
@@ -102,7 +154,7 @@ export const sendEmailForgotPassword = async (email) => {
 };
 
 export const changePassword = async (oldPassword, newPassword) => {
-  const id = getCookie("id");
+  const id = Cookies.get("id");
   return await apiRequest({
     method: "PATCH",
     endpoint: `/user/change-password/${id}`,

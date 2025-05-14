@@ -3,9 +3,7 @@ import "bootstrap/dist/css/bootstrap.min.css";
 import "bootstrap-icons/font/bootstrap-icons.css";
 import "../styles/Sidebar.css";
 import { workspaceFind } from "../service/apiService";
-import { getCookie } from "../utils/general";
-
-// Pastikan path benar
+import Cookies from "js-cookie";
 import LogoSelarasSidebar from "../assets/img/selarasBackground.jpg"; 
 
 function Sidebar({ showSidebar, onPageChange, thisHasCover }) {
@@ -13,7 +11,7 @@ function Sidebar({ showSidebar, onPageChange, thisHasCover }) {
   const [workspaceList, setWorkspaceList] = useState([]);
   const [showMasterdata, setShowMasterdata] = useState(false);
 
-  const roleId = getCookie("roleId");
+  const roleId = Cookies.get("roleId");
   const shouldShowMasterdata = roleId === "1";
 
   const toggleSubMenu = (submenuSetter, resetSubmenu) => {
@@ -80,7 +78,15 @@ function Sidebar({ showSidebar, onPageChange, thisHasCover }) {
               <i style={{marginLeft: "59px"}} className={`bi ${showWorkspace ? "bi-chevron-up" : "bi-chevron-down"}`}></i>
             </h6>
             {showWorkspace && (
-              <ul className="list-unstyled ms-1">
+              <ul
+                className={`list-unstyled ms-1 transition-submenu ${showWorkspace ? "d-block" : "d-none"}`}
+                style={{
+                  maxHeight: showWorkspace ? '500px' : '0',
+                  opacity: showWorkspace ? 1 : 0,
+                  overflow: 'hidden',
+                  transition: 'all 0.4s ease',
+                }}
+              >
                 {workspaceList.map((item) => (
                   <li key={item.id}>
                     <button className="sidebar-link" onClick={() => {
@@ -108,7 +114,15 @@ function Sidebar({ showSidebar, onPageChange, thisHasCover }) {
                 <i style={{marginLeft: "59px"}} className={`bi ${showMasterdata ? "bi-chevron-up" : "bi-chevron-down"}`}></i>
               </h6>
               {showMasterdata && (
-                <ul className="list-unstyled ms-1">
+                <ul
+                  className={`list-unstyled ms-1 transition-submenu ${showMasterdata ? "d-block" : "d-none"}`}
+                  style={{
+                    maxHeight: showMasterdata ? '500px' : '0',
+                    opacity: showMasterdata ? 1 : 0,
+                    overflow: 'hidden',
+                    transition: 'all 0.4s ease',
+                  }}
+                >
                   <li>
                     <button className="sidebar-link" onClick={() => {
                         onPageChange("project");

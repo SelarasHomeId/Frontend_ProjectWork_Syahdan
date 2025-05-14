@@ -1,7 +1,7 @@
 import Cookies from "js-cookie";
 
 export const validatePassword = (password) => {
-  const minLength = 10;
+  const minLength = 8;
   const uppercaseRegex = /[A-Z]/;
   const lowercaseRegex = /[a-z]/;
   const numberRegex = /[0-9]/;
@@ -42,17 +42,6 @@ export const setAllCookiesUserData = (response) => {
   Cookies.set("roleName", roleName, { expires: 1, secure: true, sameSite: "Strict" });
   Cookies.set("divisiName", divisiName, { expires: 1, secure: true, sameSite: "Strict" });
 };
-
-export const getCookie = (name) => {
-  const cookies = document.cookie.split("; ");
-  for (const cookie of cookies) {
-    const [key, value] = cookie.split("=");
-    if (key === name) {
-      return decodeURIComponent(value);
-    }
-  }
-  return null;
-}
 
 export const removeAllCookies = () => {
   const allCookies = Cookies.get();

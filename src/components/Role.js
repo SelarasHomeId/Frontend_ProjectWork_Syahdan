@@ -1,95 +1,90 @@
 import React, { useState, useEffect } from 'react';
-import '../styles/Role.css';
+import 'bootstrap/dist/css/bootstrap.min.css';
 import { getAllRole } from '../service/apiService';
 
 const Role = () => {
-  // State untuk menyimpan data role, pagination, dan pencarian
   const [roles, setRoles] = useState([]);
-  const [currentPage, setCurrentPage] = useState(1);
-  const [searchQuery, setSearchQuery] = useState('');
-  const [totalPages, setTotalPages] = useState(1);
-  const itemsPerPage = 5; // Batas data per halaman
+ 
 
-  // Fetch data dari API dengan pagination dan search query
-  const fetchRoles = async (page = 1, query = '') => {
+  const fetchRoles = async () => {
     try {
-      const response = await getAllRole(`/role?page=${page}&limit=${itemsPerPage}&search=${query}`);
-      setRoles(response.data.data); // Sesuaikan dengan struktur respons dari API
-      
-      // Hitung total halaman
-      const totalData = response.data.count; // Total data dari API
-      setTotalPages(Math.ceil(totalData / itemsPerPage)); // Hitung total halaman
+      const response = await getAllRole(`/role`);
+      setRoles(response.data.data);
+     
     } catch (error) {
       console.error('Error fetching roles:', error);
     }
   };
 
-  // Panggil fetchRoles saat komponen pertama kali dimuat atau saat currentPage / searchQuery berubah
   useEffect(() => {
-    fetchRoles(currentPage, searchQuery);
-  }, [currentPage, searchQuery]);
+    fetchRoles();
+  }, []);
 
-  // Fungsi untuk navigasi halaman
-  const nextPage = () => {
-    if (currentPage < totalPages) {
-      setCurrentPage(currentPage + 1);
-    }
-  };
-
-  const prevPage = () => {
-    if (currentPage > 1) {
-      setCurrentPage(currentPage - 1);
-    }
-  };
-
+  
   return (
-    <div className="role-table-container">
-      {/* Fitur pencarian */}
-      <input
-        type="text"
-        placeholder="Search by Role Name"
-        value={searchQuery}
-        onChange={e => {
-          setSearchQuery(e.target.value);
-          setCurrentPage(1); // Reset ke halaman pertama saat mencari
-        }}
-        className="search-bar"
-      />
+    <div className="container-fluid px-3 py-4">
+     {/* Header Section */}
+      <header className="text-center mb-5" style={{ padding: '2rem ', background: 'linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%)' }}>
+      <p className="lead" style={{
+          fontSize: '1.25rem',
+          color: '#6c757d',
+          maxWidth: '800px',
+          margin: '0 auto',
+          lineHeight: '1'
+        }}>
+          "Pengelolaan akses pengguna yang terintegrasi dengan pembagian role berdasarkan wewenang dan tanggung jawab masing-masing posisi."
+        </p>
+      </header>
 
-      {/* Tabel */}
-      <table className="role-table">
-        <thead>
-          <tr>
-            <th>No</th>
-            <th>Role Name</th>
-            <th>Description</th>
-          </tr>
-        </thead>
-        <tbody>
-          {roles != null ? (
-            roles.map((role, index) => (
-              <tr key={role.id}>
-                <td>{(currentPage - 1) * itemsPerPage + index + 1}</td>
-                <td>{role.name}</td>
-                <td>{role.description}</td>
-              </tr>
-            ))
-          ) : (
-            <tr>
-              <td colSpan="3">No roles found</td>
-            </tr>
-          )}
-        </tbody>
-      </table>
-
-      {/* Tombol prev dan next */}
-      <div className="pagination">
-        <button onClick={prevPage} disabled={currentPage === 1}>
-          Prev
-        </button>
-        <button onClick={nextPage} disabled={currentPage >= totalPages}>
-          Next
-        </button>
+      {/* Grid Roles */}
+      <div className="row justify-content-center">
+        {roles.map((role) => (
+          <div 
+            key={role.id}
+            className="col-12 col-md-8 col-lg-6 col-xl-4 mb-4"
+          >
+            <div 
+              className="h-100 p-4 rounded-3 shadow-lg text-center"
+              style={{
+                backgroundColor: '#ffffff',
+                border: '1px solid #e9ecef',
+                transition: 'all 0.3s ease',
+                cursor: 'pointer'
+              }}
+              onMouseEnter={(e) => {
+                e.currentTarget.style.transform = 'translateY(-5px)';
+                e.currentTarget.style.boxShadow = '0 8px 15px rgba(0,0,0,0.1)';
+              }}
+              onMouseLeave={(e) => {
+                e.currentTarget.style.transform = 'translateY(0)';
+                e.currentTarget.style.boxShadow = '0 2px 4px rgba(0,0,0,0.05)';
+              }}
+            >
+              <h2 
+                className="mb-3"
+                style={{
+                  color: '#2b2d42',
+                  fontSize: '1.75rem',
+                  fontWeight: '700',
+                  letterSpacing: '0.5px'
+                }}
+              >
+                {role.name}
+              </h2>
+              <p
+                className="mx-auto"
+                style={{
+                  color: '#6c757d',
+                  fontSize: '1rem',
+                  lineHeight: '1.6',
+                  maxWidth: '300px'
+                }}
+              >
+                {role.description}
+              </p>
+            </div>
+          </div>
+        ))}
       </div>
     </div>
   );

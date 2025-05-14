@@ -102,16 +102,17 @@ const Division = () => {
           const divisionData = divisionDataRes.data.data;
     
           const { value: formValues } = await Swal.fire({
-            title: "Edit Division",
+            title: "Edit Divisi",
             html: `
               <div style="display: flex; flex-direction: column; gap: 10px; text-align: left;">
-                <label for="swal-name">Name:</label>
                 <input id="swal-name" type="text" class="swal2-input" placeholder="Input name" value="${divisionData.name}">
               </div>
             `,
+            icon:'info',
             focusConfirm: false,
             showCancelButton: true,
             confirmButtonText: "Update",
+            confirmButtonColor:'#28a745',
             cancelButtonText: "Cancel",
             preConfirm: () => {
               const name = document.getElementById("swal-name").value;
@@ -164,8 +165,10 @@ const Division = () => {
             title: "Konfirmasi Hapus",
             text: "Apakah Anda yakin ingin menghapus Division ini?",
             icon: "warning",
+            iconColor:'#dc3545',
             showCancelButton: true,
             confirmButtonText: "Ya, Hapus",
+            confirmButtonColor: '#dc3545',
             cancelButtonText: "Batal",
           });
     
@@ -233,8 +236,19 @@ const Division = () => {
                 <td>{divisi.name}</td>
                 <td>{divisi.created_at.replace("T", " ").replace("Z", "")}</td>
                 <td>
-                  <button className="action-button btn btn-warning" onClick={() => handleEditDivision(divisi.id)}>Edit</button>
-                  <button className="action-button btn btn-danger" onClick={() => handleDeleteDivision(divisi.id)}>Delete</button>
+                  <button 
+                    className="action-button btn btn-warning me-2" 
+                    onClick={() => handleEditDivision(divisi.id)}
+                  >
+                    <i className="fas fa-edit"></i>
+                  </button>
+
+                  <button 
+                    className="action-button btn btn-danger" 
+                    onClick={() => handleDeleteDivision(divisi.id)}
+                  >
+                    <i className="fas fa-trash-alt"></i>
+                  </button>
                 </td>
               </tr>
             ))

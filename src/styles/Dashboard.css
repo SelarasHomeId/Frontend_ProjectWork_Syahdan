@@ -4,6 +4,9 @@
   font-family: "Arial", sans-serif;
 }
 
+/* Start Card task summary */
+
+/* End Card task summary */
 .charts {
   display: flex;
   justify-content: center;
@@ -13,19 +16,22 @@
 
 .chart {
   flex: 1;
-  max-width: 450px; /* Ukuran lebih besar tapi tetap proporsional */
+  max-width: 1000px; /* naikin dari 450px ke 600px—ubah di sini kalau masih ingin lebih besar */
+  min-width: 1000px; /* naikin dari 450px ke 600px—ubah di sini kalau masih ingin lebih besar */
   text-align: center;
   background: #ffffff;
   padding: 20px;
   border-radius: 8px;
   box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
   transition: transform 0.3s ease, box-shadow 0.3s ease;
+  margin: 0 auto; /* pastikan centering */
 }
 
 .chart canvas {
   width: 100% !important;
-  height: 100% !important;
-  max-width: 600px; /* Ukuran chart sedikit diperkecil */
+  height: auto !important;
+  max-width: 2000px;  /* naikin sesuai kebutuhan */
+  margin: 0 auto;
 }
 
 .chart:hover {
@@ -51,96 +57,8 @@ h5 {
   }
 }
 
-/* Section Board Task */
-.board-section {
-  text-align: center;
-  margin: 40px 0;
-}
 
-.board-title {
-  font-size: 28px;
-  font-weight: bold;
-  margin-bottom: 20px;
-}
 
-.board-container {
-  display: flex;
-  justify-content: center;
-  gap: 50px;
-  flex-wrap: wrap;
-}
-
-/* Board Task */
-.board {
-  position: relative;
-  text-align: center;
-  padding: 20px;
-  border-radius: 10px;
-  background: #ffffff;
-  width: 200px;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
-  transition: transform 0.3s ease, box-shadow 0.3s ease;
-}
-
-.board:hover {
-  transform: scale(1.05);
-  box-shadow: 0 6px 10px rgba(0, 0, 0, 0.15);
-}
-
-/* Icon Board */
-.board-icon {
-  font-size: 120px;
-  color: #4a90e2;
-  position: relative;
-}
-
-.board-icon-wrapper {
-  display: flex;
-  align-items: center;
-  gap: 5px;
-  position: relative;
-}
-
-.new-label {
-  background-color: #ff4757;
-  color: white;
-  font-size: 0.8rem;
-  font-weight: bold;
-  padding: 2px 6px;
-  border-radius: 4px;
-  position: absolute;
-  top: -10px;
-  right: -15px;
-}
-
-/* Angka di tengah icon */
-.count {
-  position: absolute;
-  top: 40%;
-  left: 50%;
-  transform: translate(-50%, -50%);
-  font-size: 32px;
-  font-weight: bold;
-  color: white;
-  background: rgba(0, 0, 0, 0.7);
-  border-radius: 50%;
-  width: 60px;
-  height: 60px;
-  display: flex;
-  justify-content: center;
-  align-items: center;
-}
-
-/* Nama Board */
-.board p {
-  margin-top: 10px;
-  font-size: 22px;
-  font-weight: bold;
-  color: #333;
-}
 
 /* Role Table */
 .role-table-container {
@@ -186,7 +104,7 @@ h5 {
 
 .pagination {
   display: flex;
-  justify-content: space-between;
+  justify-content: space-evenly;
   margin-top: 10px;
 }
 
@@ -217,7 +135,7 @@ h5 {
 }
 
 .export-button {
-  background-color: #28a745; /* Warna hijau */
+  background-color: #28a745; 
   color: white;
   border: none;
   padding: 8px 12px;
@@ -231,3 +149,12 @@ h5 {
 .export-button:hover {
   background-color: #218838;
 }
+
+.table-button:hover {
+  background-color: #0f0f6b;
+}
+
+.focus-border-active {
+  transition: border-color 0.3s ease, box-shadow 0.3s ease;
+}
+

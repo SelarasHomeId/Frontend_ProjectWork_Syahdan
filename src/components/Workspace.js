@@ -708,14 +708,10 @@ const Task = ({ task, boardId, index, moveTask, loadTasksForBoard, handleClickTa
     >
       {task.cover && (
         <img
-          src={`https://lh3.googleusercontent.com/d/${task.cover.id}=w1000-h500`} 
+          src={`${task.cover.view_saved}`} 
           alt={task.cover.name} 
           className="task-cover"
           onClick={() => handleClickTask(task)}
-          onError={(e) => {
-            e.target.onerror = null;
-            e.target.src = `https://drive.google.com/thumbnail?id=${task.cover.id}&sz=w1000?authuser=0`;
-          }}
         />
       )}
       <div className="task-content" onClick={() => handleClickTask(task)}>

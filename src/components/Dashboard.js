@@ -1,18 +1,25 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect,useCallback  } from "react";
 import PieChart from "../components/PieChart";
-import { FaClipboard } from "react-icons/fa";
 import "../styles/Dashboard.css";
-import { getAllCalculateTask, getAllContactAndAffiliate, getAllCountAccess } from "../service/apiService";
+import "../styles/Navbar.css";
+import { getAllCalculateTask, getAllContactAndAffiliate, getAllCountAccess,searchTask, getTaskById } from "../service/apiService";
 import * as XLSX from 'xlsx';
 import { formatDate } from "../utils/general";
+import Swal from "sweetalert2";
+import { debounce } from "lodash";
 
-function Dashboard() {
+
+function Dashboard(showDetailTask) {
   const [countAccess, setCountAccess] = useState({});
   const [countCalculateTask, setCountCalculateTask] = useState([]);
   const [contactData, setContactData] = useState([]);
   const [affiliateData, setAffiliateData] = useState([]);
   const [tableState, setTableState] = useState([]);
+  const [searchQuery, setSearchQuery] = useState("");
+  const [searchResults, setSearchResults] = useState([]);
+  const [showSearchDropdown, setShowSearchDropdown] = useState(false);
 
+  
   const socialMediaData = {
     instagram: countAccess.count_instagram,
     whatsapp: countAccess.count_whatsapp,
@@ -51,19 +58,19 @@ function Dashboard() {
     );
   };
 
-  const loadData = async () => {
-    const [accessRes, taskRes, contactRes, affiliateRes] = await Promise.all([
-      getAllCountAccess(),
-      getAllCalculateTask(),
-      getAllContactAndAffiliate("/crm/contact?no_paging=yes"),
-      getAllContactAndAffiliate("/crm/affiliate?no_paging=yes"),
-    ]);
+  const loadData = useCallback(async () => { 
+  const [accessRes, taskRes, contactRes, affiliateRes] = await Promise.all([
+    getAllCountAccess(),
+    getAllCalculateTask(),
+    getAllContactAndAffiliate("/crm/contact?no_paging=yes"),
+    getAllContactAndAffiliate("/crm/affiliate?no_paging=yes"),
+  ]);
 
-    if (accessRes.success) setCountAccess(accessRes.data);
-    if (taskRes.success) setCountCalculateTask(taskRes.data.data);
-    if (contactRes.success) setContactData(contactRes.data.data);
-    if (affiliateRes.success) setAffiliateData(affiliateRes.data.data);
-  };
+  if (accessRes.success) setCountAccess(accessRes.data);
+  if (taskRes.success) setCountCalculateTask(taskRes.data.data);
+  if (contactRes.success) setContactData(contactRes.data.data);
+  if (affiliateRes.success) setAffiliateData(affiliateRes.data.data);
+}, []);
 
   const handleExportData = async (tableIndex) => {
     const table = tableState[tableIndex];
@@ -121,9 +128,27 @@ function Dashboard() {
     XLSX.writeFile(wb,`${exportFileName}.xlsx`);
   };
 
+  const fetchSearchResults = async (query) => {
+      if (query.length > 0) {
+        const response = await searchTask(query);
+        setSearchResults(response);
+        setShowSearchDropdown(true);
+      } else {
+        setSearchResults([]);
+        setShowSearchDropdown(false);
+      }
+    };
+
+  const debouncedSearch = debounce(fetchSearchResults, 300);
+
+  useEffect(() => {
+      debouncedSearch(searchQuery);
+      return () => debouncedSearch.cancel();
+    }, [searchQuery, debouncedSearch]);
+
   useEffect(() => {
     loadData();
-  }, []);
+  },[loadData] );
 
   useEffect(() => {
     if (contactData.length || affiliateData.length) {
@@ -135,38 +160,139 @@ function Dashboard() {
   }, [contactData, affiliateData]);
 
   if (tableState.length < 2) return null;
+    const handleClickResultTask = async (taskId) => {
+      setSearchResults([]);
+      setSearchQuery("");
+      setShowSearchDropdown(false);
+      const responseTask = await getTaskById(taskId);
+      if (responseTask.success){
+        const task = responseTask.data.data
+        if (task === null){
+          Swal.fire({
+            title: "Task not found",
+            text: "Silakan hubungi admin anda!",
+            icon: "error",
+            confirmButtonText: "OK",
+          })
+        }else{
+          showDetailTask(task)
+        }
+      }
+    };
 
   return (
     <div className="dashboard">
-      <div className="charts">
-        <div className="chart">
-          <h5>Instagram, WhatsApp, TikTok, Facebook</h5>
-          <PieChart data={socialMediaData} />
+      
+      <div className="container-fluid" style={{ padding: '1rem' }}>
+        <div className="row justify-content-center mb-4">
+          <div
+            className="col-12 col-sm-12 col-md-10 col-lg-8 col-xl-6"
+            style={{
+              position: 'relative',
+              width: '100%',
+              maxWidth: '600px',
+              margin: '0 auto',
+              padding: '0 1rem'
+            }}
+          >
+            <input
+              type="text"
+              className="form-control"
+              placeholder="Search task..."
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+              style={{
+                height: '2.5rem',
+                width: '90%',
+                minHeight: '2rem',
+                maxHeight: '3rem',
+                marginLeft: 'auto',
+                marginRight: 'auto',
+                color:'#000000',
+                backgroundColor:'#EEEEEE',
+                fontWeight:'bold'
+              }}
+            />
+            {showSearchDropdown && searchQuery !== '' && (
+              <ul
+                className="list-unstyled"
+                style={{
+                  position: 'absolute',
+                  top: '100%',
+                  left: 0,
+                  right: 0,
+                  zIndex: 2000,
+                  background: '#fff',
+                  border: '2px solid #1564C0',
+                  borderRadius: '0.25rem',
+                  boxShadow: '0 4px 8px rgba(0, 0, 0, 0.2)',
+                  maxHeight: '200px',
+                  overflowY: 'auto',
+                }}
+              >
+                {searchResults && searchResults.length > 0 ? (
+                  searchResults.map((task, idx) => (
+                    <li
+                      key={idx}
+                      className="dropdown-item"
+                      onClick={() => handleClickResultTask(task.id)}
+                      style={{ cursor: 'pointer' }}
+                    >
+                      {task.title}
+                      <br />
+                      <small className="text-muted">
+                        {task.description ? 'Has Description' : 'No Description'}
+                      </small>
+                    </li>
+                  ))
+                ) : (
+                  <li className="dropdown-item">No tasks found</li>
+                )}
+              </ul>
+            )}
+          </div>
         </div>
-        <div className="chart">
-          <h5>Contact & Affiliate</h5>
-          <PieChart data={contactAffiliateData} />
+
+        <div className="row">
+          <div className="col">
+            <WorkspaceBoard
+              workspaceData={countCalculateTask}
+              formatDate={formatDate}
+            />
+            </div>
+          </div>
+      </div>
+
+
+      <div className="charts">
+        <div className="row gap-x-5 justify-content-center">
+          <div className="col-12 col-sm-10 col-md-8 col-lg-6 mb-4 d-flex flex-column align-items-center"
+            style={{
+            width: '100%',
+            maxWidth: '500px',
+            margin: '0 auto'
+          }}
+          >
+            <h2 style={{ whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
+              Social Media Click
+            </h2>
+            <PieChart data={socialMediaData} />
+          </div>
+          <div className="col-12 col-sm-10 col-md-8 col-lg-6 mb-4 d-flex flex-column align-items-center"
+            style={{
+            width: '100%',
+            maxWidth: '500px',
+            margin: '0 auto'
+          }}
+          >
+            <h2 style={{ whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
+              Contact & Affiliate
+            </h2>
+            <PieChart data={contactAffiliateData} />
+          </div>
         </div>
       </div>
 
-      {(countCalculateTask ?? []).map((workspaceData, index) => (
-        <div className="board-section" key={index}>
-          <h2 className="board-title">{workspaceData.workspace}</h2>
-          <div className="board-container">
-            {(workspaceData.board ?? []).map((boardItem) => (
-              <div className="board" key={boardItem.id || boardItem.name}>
-                <div className="board-icon-wrapper">
-                  <FaClipboard className="board-icon" />
-                  {boardItem.has_new && <span className="new-label">Has New!</span>}
-                </div>
-                <span className="count">{boardItem.count_task}</span>
-                <p>{boardItem.name}</p>
-                {formatDate(boardItem.updated_at)}
-              </div>
-            ))}
-          </div>
-        </div>
-      ))}
 
       {tableState.map((table, tableIndex) => {
         const { currentPage, searchQuery, name, data } = table;
@@ -184,18 +310,18 @@ function Dashboard() {
         return (
           <div className="role-table-container" key={tableIndex}>
             <div className="role-table-header">
-              <h3>{name}</h3>
+              <h3 className="fw-bold">{name}</h3>
+              <input
+                type="text"
+                placeholder="Search by Name, Email, or Phone"
+                value={searchQuery}
+                onChange={(e) => handleSearchChange(tableIndex, e.target.value)}
+                className="form-control px-3 py-2 w-75 w-md-65 w-lg-50 border border-dark shadow-sm"
+              />
               <button className="export-button" onClick={() => handleExportData(tableIndex)}>
                 Export Data
               </button>
             </div>
-            <input
-              type="text"
-              placeholder="Search by Name, Email, or Phone"
-              value={searchQuery}
-              onChange={(e) => handleSearchChange(tableIndex, e.target.value)}
-              className="search-bar"
-            />
 
             {/* Tambahkan div pembungkus dengan overflow-x: auto */}
             <div className="table-wrapper">
@@ -243,13 +369,17 @@ function Dashboard() {
               </table>
             </div>
 
-            <div className="pagination">
-              <button onClick={() => changePage(tableIndex, "prev")} disabled={currentPage === 1}>
-                Prev
-              </button>
-              <button onClick={() => changePage(tableIndex, "next")} disabled={currentPage >= Math.ceil(data.length / itemsPerPage)}>
-                Next
-              </button>
+            <div className="pagination d-flex justify-content-center mt-4">
+              <div className="me-3">
+                <button className="table-button" onClick={() => changePage(tableIndex, "prev")} disabled={currentPage === 1}>
+                  Prev
+                </button>
+              </div>
+              <div className="me-3 ">
+                <button className="table-button" onClick={() => changePage(tableIndex, "next")} disabled={currentPage >= Math.ceil(data.length / itemsPerPage)}>
+                  Next
+                </button>
+              </div>
             </div>
           </div>
         );
@@ -257,5 +387,167 @@ function Dashboard() {
     </div>
   );
 }
+
+const WorkspaceBoard = ({ workspaceData, formatDate }) => {
+  // default ke workspace pertama
+  const [activeWorkspace, setActiveWorkspace] = useState(
+    workspaceData?.[0]?.id ?? null
+  );
+
+  const handleWorkspaceClick = (workspaceId) => {
+    setActiveWorkspace(workspaceId);
+  };
+
+  const boards =
+    workspaceData.find((ws) => ws.id === activeWorkspace)?.board ?? [];
+
+  return (
+    <div
+      className="wbs-container container mb-5"
+      style={{
+        border: '2px solid #ced4da',
+        borderRadius: '0.5rem',
+        padding: '1rem',
+        backgroundColor: '#f8f9fa',
+      }}
+    >
+    {/* tombol workspace */}
+    <div
+      className="d-flex flex-nowrap mb-4 "
+      role="group"
+      style={{
+        width: '100%',
+        overflowX: 'auto',      
+        WebkitOverflowScrolling: 'touch', 
+        padding: '0 0.5rem',
+        paddingBottom: '1 rem',
+      }}
+    >
+      {workspaceData.map((ws) => {
+        const isActive = activeWorkspace === ws.id;
+        return (
+          <button
+            key={ws.id}
+            type="button"
+            className="btn flex-shrink-0"
+            onClick={() => handleWorkspaceClick(ws.id)}
+            style={{
+              margin: '0 0.25rem',
+              padding: '0.4rem 0.8rem',
+              minWidth: '20%',       
+              maxWidth: '45%',      
+              minHeight: '2.5rem',    
+              height: 'auto',
+              backgroundColor: isActive ? '#1564C0' : '#F2FAFC',
+              color: isActive ? '#FFFFFF' : '#01008A',
+              border: `1px solid ${isActive ? '#1564C0' : '#CCCCCC'}`,
+              borderRadius: '0.5rem',
+              whiteSpace: 'wrap',   
+              textAlign: 'center',
+            }}
+          >
+            {ws.workspace}
+          </button>
+        );
+      })}
+    </div>
+
+      {/* board cards — scrollable horizontal */}
+      <div
+        className="wbs-boards"
+        style={{
+          display: 'flex',
+          overflowX: 'auto',
+          gap: '1rem',
+          paddingBottom: '0.5rem',
+        }}
+      >
+        {boards.map((boardItem) => (
+          <div
+            key={boardItem.id || boardItem.name}
+            style={{ minWidth: '200px', flex: '0 0 auto' }}
+          >
+            <div
+              className="card"
+              style={{
+                minHeight: 'auto',      
+                maxHeight: '120px',     
+                overflow: 'hidden',     
+                borderRadius: '0.5rem',
+                boxShadow: '0 1px 4px rgba(0,0,0,0.1)'
+              }}
+            >
+              <div
+                className="card-body"
+                style={{ padding: '0.5rem', lineHeight: 1.2 }}
+              >
+              {/* title + badges */}
+              <div
+                className="d-flex align-items-center mb-1"
+                style={{ justifyContent: 'flex-end' }}
+              >
+                {boardItem.has_new && (
+                  <span
+                    className="badge"
+                    style={{
+                      backgroundColor: '#dc3545',
+                      color: '#fff',
+                      fontSize: '0.75rem',
+                      padding: '0.25em 0.5em',
+                      marginRight: '0.4rem',
+                    }}
+                  >
+                    Has New!
+                  </span>
+                )}
+                <span
+                  className="badge"
+                  style={{
+                    backgroundColor: '#198754',
+                    color: '#fff',
+                    fontSize: '0.85rem',
+                    padding: '0.35em 0.6em',
+                  }}
+                >
+                  {boardItem.count_task}
+                </span>
+              </div>
+
+              {/* 2. Title lebih tebal */}
+              <h6
+                className="mb-1"
+                style={{ fontWeight: '700', fontSize: '1rem', margin: 0 }}
+              >
+                {boardItem.name}
+              </h6>
+
+                {/* tanggal */}
+                <p
+                  className="card-text"
+                  style={{
+                    fontSize: '0.75rem',
+                    color: '#6c757d',
+                    margin: 0,
+                  }}
+                >
+                  {formatDate(boardItem.updated_at)}
+                </p>
+              </div>
+            </div>
+          </div>
+        ))}
+
+        {/* fallback */}
+        {activeWorkspace && boards.length === 0 && (
+          <div style={{ minWidth: '200px', flex: '0 0 auto' }}>
+            <p className="text-muted mb-0">No boards available.</p>
+          </div>
+        )}
+      </div>
+    </div>
+  );
+};
+
+
 
 export default Dashboard;

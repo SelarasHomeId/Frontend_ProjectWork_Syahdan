@@ -2,34 +2,31 @@ import React, { useState, useEffect } from "react";
 import "../styles/Navbar.css";
 import { FaBars, FaBell, FaUser } from "react-icons/fa";
 import { Link, useNavigate } from "react-router-dom";
-import { authLogout, changePassword, fetchNotifications, getTaskById, markNotificationAsRead, searchTask } from "../service/apiService";
+import { authLogout, changePassword, fetchNotifications, getTaskById, markNotificationAsRead, } from "../service/apiService";
 import Swal from "sweetalert2";
-import { getCookie, removeAllCookies, validatePassword } from "../utils/general";
+import { removeAllCookies, validatePassword } from "../utils/general";
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faEnvelopeOpen, faEnvelope } from '@fortawesome/free-solid-svg-icons';
 import LogoSelarasSidebar from "../assets/img/selarasBackground.jpg"; 
-import { debounce } from "lodash";
+import Cookies from "js-cookie";
 
 function Navbar({ showSidebar, toggleNavbar, showDetailTask }) {
   const navigate = useNavigate();
   
   const [user] = useState({
-    name: getCookie("name") || "",
-    role: getCookie("roleName") || "",
-    divisi: getCookie("divisiName") || "",
+    name: Cookies.get("name") || "",
+    role: Cookies.get("roleName") || "",
+    divisi: Cookies.get("divisiName") || "",
   });
 
   const [notifications, setNotifications] = useState([]);
   const [unreadNotif, setUnreadNotif] = useState(0);
   const [showNotificationDropdown, setShowNotificationDropdown] = useState(false);
   const [showUserDropdown, setShowUserDropdown] = useState(false);
-  const [searchQuery, setSearchQuery] = useState("");
-  const [searchResults, setSearchResults] = useState([]);
-  const [showSearchDropdown, setShowSearchDropdown] = useState(false);
-
+ 
   useEffect(() => {
     loadNotifications();
-    if (!getCookie("id")) {
+    if (!Cookies.get("id")) {
       Swal.fire({
         title: "Session anda telah berakhir.",
         text: "Sampai jumpa kembali...",
@@ -73,7 +70,7 @@ function Navbar({ showSidebar, toggleNavbar, showDetailTask }) {
     setShowUserDropdown(false);
   };
 
-  const toggleUserDropdown = () => {
+  const toggleUserDropdown = async () => {
     setShowUserDropdown(!showUserDropdown);
     setShowNotificationDropdown(false);
   };
@@ -105,18 +102,59 @@ function Navbar({ showSidebar, toggleNavbar, showDetailTask }) {
 
   const handleChangePassword = async () => {
     const { value: formValues } = await Swal.fire({
+      iconHtml: '<i class="fas fa-lock" style="font-size: 64px; color: #444;"></i>',
+      
       title: "Change Password",
-      html:
-        '<input id="swal-oldPassword" type="oldPassword" class="swal2-input" placeholder="Masukkan password lama">' +
-        '<input id="swal-newPassword" type="newPassword" class="swal2-input" placeholder="Masukkan password baru">',
+      html: `
+        <div class="input-group mb-3" style="width: 100%;">
+          <input id="swal-oldPassword" type="password" class="form-control" placeholder="Masukkan password lama">
+          <span class="input-group-text" id="toggle-old" style="cursor: pointer;">
+            <i class="bi bi-eye"></i>
+          </span>
+        </div>
+        <div class="input-group mb-3" style="width: 100%;">
+          <input id="swal-newPassword" type="password" class="form-control" placeholder="Masukkan password baru">
+          <span class="input-group-text" id="toggle-new" style="cursor: pointer;">
+            <i class="bi bi-eye"></i>
+          </span>
+        </div>
+        <div class="input-group mb-3" style="width: 100%;">
+          <input id="swal-confirmPassword" type="password" class="form-control" placeholder="Konfirmasi password baru">
+          <span class="input-group-text" id="toggle-confirm" style="cursor: pointer;">
+            <i class="bi bi-eye"></i>
+          </span>
+        </div>
+      `,
       focusConfirm: false,
       showCancelButton: true,
       confirmButtonText: "Submit",
+      confirmButtonColor: '#218838',
       cancelButtonText: "Cancel",
+
+      didOpen: () => {
+      const setupToggle = (toggleId, inputId) => {
+        const toggle = document.getElementById(toggleId);
+        const input = document.getElementById(inputId);
+        toggle.addEventListener("click", () => {
+          if (input.type === "password") {
+            input.type = "text";
+            toggle.querySelector("i").classList.replace("bi-eye", "bi-eye-slash");
+          } else {
+            input.type = "password";
+            toggle.querySelector("i").classList.replace("bi-eye-slash", "bi-eye");
+          }
+        });
+      };
+      setupToggle("toggle-old", "swal-oldPassword");
+      setupToggle("toggle-new", "swal-newPassword");
+      setupToggle("toggle-confirm", "swal-confirmPassword");
+      },
+
       preConfirm: () => {
         const oldPassword = document.getElementById("swal-oldPassword").value;
         const newPassword = document.getElementById("swal-newPassword").value;
-  
+        const confirmPassword = document.getElementById("swal-confirmPassword").value;
+
         if (!oldPassword) {
           Swal.showValidationMessage("Password lama tidak boleh kosong!");
           return false;
@@ -127,6 +165,10 @@ function Navbar({ showSidebar, toggleNavbar, showDetailTask }) {
         }
         if (oldPassword === newPassword) {
           Swal.showValidationMessage("Password baru tidak boleh sama dengan password lama!");
+          return false;
+        }
+        if (newPassword !== confirmPassword) {
+          Swal.showValidationMessage("Password baru dan konfirmasi password tidak sama!");
           return false;
         }
         const validationResult = validatePassword(newPassword);
@@ -142,12 +184,18 @@ function Navbar({ showSidebar, toggleNavbar, showDetailTask }) {
       try {
         const response = await changePassword(formValues.oldPassword, formValues.newPassword);
         if (response.success) {
-          Swal.fire({
-            title: "Berhasil!",
-            text: "Password anda telah diubah.",
-            icon: "success",
-            confirmButtonText: "OK",
-          });
+          const logoutRes = await authLogout();
+          if (logoutRes.success) {
+            Swal.fire({
+              title: "Berhasil!",
+              text: "Password anda telah diubah.",
+              icon: "success",
+              confirmButtonText: "OK",
+            }).then(() => {
+              removeAllCookies();
+              navigate("/");
+            });
+          }
         } else {
           Swal.fire({
             title: "Gagal mengubah password",
@@ -156,7 +204,7 @@ function Navbar({ showSidebar, toggleNavbar, showDetailTask }) {
             confirmButtonText: "OK",
           });
         }
-      } catch (error) {
+      } catch {
         Swal.fire({
           title: "Terjadi Kesalahan",
           text: "Mohon coba lagi nanti atau hubungi admin.",
@@ -176,7 +224,14 @@ function Navbar({ showSidebar, toggleNavbar, showDetailTask }) {
     const responseTask = await getTaskById(taskId);
     if (responseTask.success){
       const task = responseTask.data.data
-      if (task === null){
+      if (taskId === 1 && task === null){
+        Swal.fire({
+          title: "For your information",
+          text: "Notifikasi ini hanya sekedar informasi.",
+          icon: "info",
+          confirmButtonText: "OK",
+        })
+      } else if (task === null){
         Swal.fire({
           title: "Task not found",
           text: "Silakan hubungi admin anda!",
@@ -191,97 +246,48 @@ function Navbar({ showSidebar, toggleNavbar, showDetailTask }) {
     setShowNotificationDropdown(false);
   };
 
-  const fetchSearchResults = async (query) => {
-    if (query.length > 0) {
-      const response = await searchTask(query);
-      setSearchResults(response);
-      setShowSearchDropdown(true);
-    } else {
-      setSearchResults([]);
-      setShowSearchDropdown(false);
-    }
-  };
-
-  const debouncedSearch = debounce(fetchSearchResults, 300);
-
-  useEffect(() => {
-    debouncedSearch(searchQuery);
-    return () => debouncedSearch.cancel();
-  }, [searchQuery, debouncedSearch]);
-
-  const handleClickResultTask = async (taskId) => {
-    setSearchResults([]);
-    setSearchQuery("");
-    setShowSearchDropdown(false);
-    const responseTask = await getTaskById(taskId);
-    if (responseTask.success){
-      const task = responseTask.data.data
-      if (task === null){
-        Swal.fire({
-          title: "Task not found",
-          text: "Silakan hubungi admin anda!",
-          icon: "error",
-          confirmButtonText: "OK",
-        })
-      }else{
-        showDetailTask(task)
-      }
-    }
-  };
-
   return (
-    <nav className="navbar navbar-expand-lg navbar-dark bg-dark">
+    <nav className="navbar navbar-expand-lg navbar-dark bg-dark" style={{ height: '90px', minHeight: '80px', maxHeight: '60px' }}>
       <div className="container-fluid d-flex align-items-center justify-content-between">
-        <button className="burger-menu-btn" onClick={toggleNavbar}>
-          <FaBars />
+        <button
+          className="burger-menu-btn"
+          onClick={toggleNavbar}
+          style={{
+            height: '48px',
+            minHeight: '48px',
+            maxHeight: '48px',
+            padding: '0.5rem'
+          }}
+        >
+        <FaBars />
         </button>
         {showSidebar && (
-          <div className="sidebar-logo text-center clickable" style={{cursor: "pointer"}} >
+          <div
+            className="sidebar-logo text-center clickable d-none d-lg-block"
+            style={{ cursor: 'pointer' }}
+          >
             {LogoSelarasSidebar ? (
-              <img src={LogoSelarasSidebar} alt="Logo" className="img-fluid sidebar-logo-img cursor-pointer"/>
+              <img
+                src={LogoSelarasSidebar}
+                alt="Logo"
+                className="img-fluid sidebar-logo-img"
+                style={{ height: '40px', minHeight: '40px', maxHeight: '40px' }}
+              />
             ) : (
               <div className="text-white">Logo Not Found</div>
             )}
           </div>
         )}
-
         <div className="navbar-right d-flex align-items-center">
-          <div className="search-task-container position-relative">
-            <input
-              type="text"
-              className="form-control search-task-input"
-              placeholder="Search task..."
-              value={searchQuery}
-              onChange={(e) => setSearchQuery(e.target.value)}
-            />
-            {(showSearchDropdown && searchQuery !== "") && (
-              <div className={`dropdown-menu search-task-dropdown ${showSearchDropdown ? 'show' : ''}`}>
-                {searchResults != null ? (
-                  searchResults.map((task, index) => (
-                    <li key={index} className="dropdown-item" onClick={() => handleClickResultTask(task.id)}>
-                      {task.title}<br/>
-                      <span className="search-task-message">
-                        {task.description ? ("Has Description") : ("No Description")}
-                      </span>
-                    </li>
-                  ))
-                ) : (
-                  <li className="dropdown-item">No tasks found</li>
-                )}
-              </div>
-            )}
-          </div>
-
           <div
-            className={`nav-item dropdown notification-wrapper ${showNotificationDropdown ? "active" : ""}`}
+            className={`nav-item notification-wrapper ${showNotificationDropdown ? "active" : ""}`}
             onClick={toggleNotificationDropdown}
           >
             <FaBell className="icon notification-icon" />
             {(notifications != null && notifications.length > 0) && (
               <span className="notification-badge">{unreadNotif}</span>
             )}
-            {showNotificationDropdown && (
-              <div className="dropdown-menu notification-dropdown">
+              <div className={`notification-dropdown ${showNotificationDropdown?'show':''}`}>
                 <h6 className="dropdown-header">Notifikasi</h6>
                 {notifications != null ? (
                   notifications.map((notif, index) => (
@@ -307,11 +313,10 @@ function Navbar({ showSidebar, toggleNavbar, showDetailTask }) {
                   <div className="dropdown-item">Tidak ada notifikasi</div>
                 )}
               </div>
-            )}
           </div>
 
           <div
-            className={`nav-item dropdown user-section ${showUserDropdown ? "active" : ""}`}
+            className={`nav-item user-section ${showUserDropdown ? "active" : ""}`}
             onClick={toggleUserDropdown}
           >
             <FaUser className="user-icon" />
@@ -321,8 +326,7 @@ function Navbar({ showSidebar, toggleNavbar, showDetailTask }) {
                 <span>{user.role}</span> - <span>{user.divisi}</span>
               </div>
             </div>
-            {showUserDropdown && (
-              <div className="dropdown-menu user-dropdown">
+              <div className={`user-dropdown ${showUserDropdown?'show':''}`}>
                 <Link className="dropdown-item" onClick={handleChangePassword}>
                   Change Password
                 </Link>
@@ -330,7 +334,6 @@ function Navbar({ showSidebar, toggleNavbar, showDetailTask }) {
                   Log Out
                 </div>
               </div>
-            )}
           </div>
         </div>
       </div>
