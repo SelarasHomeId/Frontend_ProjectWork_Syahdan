@@ -89,11 +89,23 @@ function Sidebar({ showSidebar, onPageChange, thisHasCover }) {
               >
                 {workspaceList.map((item) => (
                   <li key={item.id}>
-                    <button className="sidebar-link" onClick={() => {
-                      onPageChange(item.name.toLowerCase() + "_" + item.id); 
-                      thisHasCover(item.cover);
-                    }}>
-                      <i className="bi bi-check2-square"></i> {item.name}
+                    <button 
+                      className="sidebar-link" 
+                      style={{
+                        display: 'flex',
+                        alignItems: 'flex-start',
+                        gap: '8px',              
+                        whiteSpace: 'normal',
+                        wordBreak: 'break-word', 
+                        textAlign: 'left',
+                        width: '100%',
+                      }} 
+                      onClick={() => {
+                        onPageChange(item.name.toLowerCase() + "_" + item.id); 
+                        thisHasCover(item.cover);
+                      }}
+                    >
+                      <i className="bi bi-check2-square"></i> <span style={{ flex: 1 }}>{item.name}</span>
                     </button>
                   </li>
                 ))}

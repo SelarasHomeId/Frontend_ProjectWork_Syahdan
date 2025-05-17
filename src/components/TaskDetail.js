@@ -175,17 +175,20 @@ const TaskDetail = ({ task, onClose, onDelete }) => {
   // };
 
   const handleMoveTask = (taskId, targetListId) => {
-  // logika untuk memindahkan task ke list lain
-  console.log(`Pindahkan task ${taskId} ke list ${targetListId}`);
-  // Lanjutkan sesuai kebutuhan
-};
-
+    // logika untuk memindahkan task ke list lain
+    console.log(`Pindahkan task ${taskId} ke list ${targetListId}`);
+    // Lanjutkan sesuai kebutuhan
+  };
 
   return (
     <div className="modal-overlay" onClick={onClose}>
-      <div className="modal-container wider" onClick={(e) => e.stopPropagation()}>
-        <div className="modal-content">
+      <div
+        className="modal-container d-flex"
+        style={{ gap: "1rem", maxHeight: "90vh", overflowY: "auto" }}
+        onClick={(e) => e.stopPropagation()}
+      >
 
+        <div className="modal-content flex-grow-1">
           {coverImage && (
             <div className="cover-image-container">
               <img src={coverImage} alt="Cover" className="cover-image" />
@@ -202,7 +205,9 @@ const TaskDetail = ({ task, onClose, onDelete }) => {
             {isCompleted && <div className="popup-text">Completed</div>}
           </div>
 
-          <button className="close-btn" onClick={onClose}><X size={24} /></button>
+          <button className="close-btn" onClick={onClose}>
+            <X size={24} />
+          </button>
 
           {isEditingTitle ? (
             <input
@@ -222,8 +227,11 @@ const TaskDetail = ({ task, onClose, onDelete }) => {
             </h2>
           )}
 
-          <button className={`watch-btn ${isWatched ? 'watching' : ''}`} onClick={() => setIsWatched(!isWatched)}>
-            <Eye size={16} className="icon" /> {isWatched ? 'Watching' : 'Watch'}
+          <button
+            className={`watch-btn ${isWatched ? "watching" : ""}`}
+            onClick={() => setIsWatched(!isWatched)}
+          >
+            <Eye size={16} className="icon" /> {isWatched ? "Watching" : "Watch"}
           </button>
 
           <h3 className="section-title">Description</h3>
@@ -231,7 +239,9 @@ const TaskDetail = ({ task, onClose, onDelete }) => {
             <div className="description-box">
               <div className="toolbar">
                 {toolbarButtons.map((btn, idx) => (
-                  <button key={idx} onClick={btn.action}>{btn.label}</button>
+                  <button key={idx} onClick={btn.action}>
+                    {btn.label}
+                  </button>
                 ))}
               </div>
               <EditorContent editor={editor} />
@@ -267,174 +277,185 @@ const TaskDetail = ({ task, onClose, onDelete }) => {
             </div>
           )}
 
-  {attachmentMessage && (
-    <div className="attachment-section">
-      <h3 className="section-title">Attachment</h3>
-      <p>{attachmentMessage}</p>
+          {attachmentMessage && (
+            <div className="attachment-section">
+              <h3 className="section-title">Attachment</h3>
+              <p>{attachmentMessage}</p>
 
-      {/* Menampilkan daftar lampiran jika ada */}
-      {attachments.length > 0 && (
-        <ul className="attachment-list">
-          {attachments.map((attachment, index) => (
-            <li key={index} className="attachment-item">
-              <div className="attachment-info">
-                <span>{attachment.name}</span>
-                <button className="dropdown-btn" onClick={() => toggleDropdown(index)}>...</button>
+              {attachments.length > 0 && (
+                <ul className="attachment-list">
+                  {attachments.map((attachment, index) => (
+                    <li key={index} className="attachment-item">
+                      <div className="attachment-info">
+                        <span>{attachment.name}</span>
+                        <button className="dropdown-btn" onClick={() => toggleDropdown(index)}>
+                          ...
+                        </button>
 
-                {/* Menampilkan Dropdown ketika tombol titik tiga diklik */}
-                {attachment.showDropdown && (
-                  <div className="dropdown-menu">
-                  <button onClick={() => handleFileDownload(attachment.file)}>Download</button>
-                  <button onClick={() => handleFileDelete(index)}>Delete</button>
-                  <button onClick={() => {
-                    const newName = prompt("Enter new file name:", attachment.name);
-                    if (newName?.trim()) handleEditFileName(index, newName.trim());
-                  }}>Edit Name</button>
-                  <textarea
-                    placeholder="Add a comment..."
-                    value={attachmentComments[index] || ""}
-                    onChange={(e) => handleFileCommentChange(index, e.target.value)}
-                    className="attachment-comment"
-                  />
-                </div>              
-                )}
-              </div>
-            </li>
-          ))}
-        </ul>
-      )}
-      
-      {/* Menampilkan tombol untuk upload file */}
-        <input
-            ref={fileInputRef}
-            type="file"
-            accept="*/*"
-            onChange={handleAttachmentUpload}
-            style={{ display: 'none' }}
-          />
-          <button onClick={triggerFileUpload}>Upload File</button>
-        </div>
-      )}
+                        {attachment.showDropdown && (
+                          <div className="dropdown-menu">
+                            <button onClick={() => handleFileDownload(attachment.file)}>Download</button>
+                            <button onClick={() => handleFileDelete(index)}>Delete</button>
+                            <button onClick={() => {
+                              const newName = prompt("Enter new file name:", attachment.name);
+                              if (newName?.trim()) handleEditFileName(index, newName.trim());
+                            }}>
+                              Edit Name
+                            </button>
+                            <textarea
+                              placeholder="Add a comment..."
+                              value={attachmentComments[index] || ""}
+                              onChange={(e) => handleFileCommentChange(index, e.target.value)}
+                              className="attachment-comment"
+                            />
+                          </div>
+                        )}
+                      </div>
+                    </li>
+                  ))}
+                </ul>
+              )}
 
-            <h3 className="section-title">Activity</h3>
-            <div className="comment-wrapper">
               <input
-                type="text"
-                className="comment-input"
-                placeholder="Write a comment..."
-                value={comment}
-                onChange={(e) => setComment(e.target.value)}
+                ref={fileInputRef}
+                type="file"
+                accept="*/*"
+                onChange={handleAttachmentUpload}
+                style={{ display: "none" }}
               />
-              <button onClick={handleAddComment} className="add-comment-btn">Add</button>
+              <button onClick={triggerFileUpload}>Upload File</button>
             </div>
+          )}
 
-            <div className="activity-list">
-              {activity.map((act, index) => (
-                <div key={index} className="activity-item">
-                  <div className="avatar">
-                    {act.user.split(' ').map(word => word[0]).join('').toUpperCase()}
-                  </div>
-                  <p className="activity-text">
-                    <span className="activity-user">{act.user}</span> {act.text} <br />
-                    <span className="activity-time">{act.timestamp}</span>
-                  </p>
-                </div>
-              ))}
-            </div>
+          <h3 className="section-title">Activity</h3>
+          <div className="comment-wrapper">
+            <input
+              type="text"
+              className="comment-input"
+              placeholder="Write a comment..."
+              value={comment}
+              onChange={(e) => setComment(e.target.value)}
+            />
+            <button onClick={handleAddComment} className="add-comment-btn">
+              Add
+            </button>
           </div>
 
-          <div className="sidebar">
-              {[ 
-                { icon: Users, label: "Members" },
-                { icon: Tag, label: "Labels" },
-                { icon: CheckSquare, label: "Checklist", action: () => setShowChecklist(true) },
-                { icon: Paperclip, label: "Attachment", action: () => fileInputAttachmentRef.current?.click() },
-                { icon: Image, label: "Cover", action: () => fileInputCoverRef.current?.click() },
-                { icon: Grid, label: "Delete Task", action: () => setShowDeleteConfirm(true) },
-                { icon: Move, label: "Move", action: () => setShowMoveModal(true) },
-              ].map(({ icon: Icon, label, action }, idx) => (
-                <button key={idx} className="sidebar-btn" onClick={action || (() => alert(`${label} clicked!`))}>
-                  <Icon size={16} className="icon" /> {label}
-
-                  {/* Input file untuk Cover */}
-                  {label === "Cover" && (
-                    <input
-                      ref={fileInputCoverRef}
-                      type="file"
-                      accept="image/*"
-                      onChange={handleCoverImageChange}
-                      style={{ display: 'none' }}
-                    />
-                  )}
-
-                  {/* Input file untuk Attachment */}
-                  {label === "Attachment" && (
-                    <input
-                      ref={fileInputAttachmentRef}
-                      type="file"
-                      accept="*/*"
-                      onChange={handleAttachmentUpload}
-                      style={{ display: 'none' }}
-                    />
-                  )}
-                </button>
-              ))}
-            </div>
+          <div className="activity-list">
+            {activity.map((act, index) => (
+              <div key={index} className="activity-item">
+                <div className="avatar">
+                  {act.user.split(" ").map((word) => word[0]).join("").toUpperCase()}
+                </div>
+                <p className="activity-text">
+                  <span className="activity-user">{act.user}</span> {act.text} <br />
+                  <span className="activity-time">{act.timestamp}</span>
+                </p>
+              </div>
+            ))}
+          </div>
         </div>
 
-                {showMoveModal && (
-          <div className="popup-overlay">
-            <div className="popup-box">
-              <h3>Move Task</h3>
-              <div className="popup-section">
-                <label>Choose Workspace:</label>
-                <select value={selectedWorkspace} onChange={(e) => setSelectedWorkspace(e.target.value)}>
-                  <option value="">Select Workspace</option>
-                  <option value="workspace-1">Workspace 1</option>
-                  <option value="workspace-2">Workspace 2</option>
-                </select>
-              </div>
-              <div className="popup-section">
-                <label>Choose Board:</label>
-                <select value={selectedBoard} onChange={(e) => setSelectedBoard(e.target.value)}>
-                  <option value="">Select Board</option>
-                  <option value="board-1">Board 1</option>
-                  <option value="board-2">Board 2</option>
-                </select>
-              </div>
-              <div className="popup-buttons">
-                <button className="popup-btn confirm" onClick={() => handleMoveTask()}>
-                  Move
-                </button>
-                <button className="popup-btn cancel" onClick={() => setShowMoveModal(false)}>
-                  Cancel
-                </button>
-              </div>
+        <div
+          className="sidebar d-flex flex-column"
+          style={{ width: "200px", flexShrink: 0, gap: "0.5rem" }}
+        >
+          {[
+            { icon: Users, label: "Members" },
+            { icon: Tag, label: "Labels" },
+            { icon: CheckSquare, label: "Checklist", action: () => setShowChecklist(true) },
+            { icon: Paperclip, label: "Attachment", action: () => fileInputAttachmentRef.current?.click() },
+            { icon: Image, label: "Cover", action: () => fileInputCoverRef.current?.click() },
+            { icon: Grid, label: "Delete Task", action: () => setShowDeleteConfirm(true) },
+            { icon: Move, label: "Move", action: () => setShowMoveModal(true) },
+          ].map(({ icon: Icon, label, action }, idx) => (
+            <button
+              key={idx}
+              className="btn btn-outline-secondary d-flex align-items-center gap-2"
+              onClick={action || (() => alert(`${label} clicked!`))}
+              type="button"
+            >
+              <Icon size={16} className="icon" /> {label}
+
+              {label === "Cover" && (
+                <input
+                  ref={fileInputCoverRef}
+                  type="file"
+                  accept="image/*"
+                  onChange={handleCoverImageChange}
+                  style={{ display: "none" }}
+                />
+              )}
+
+              {label === "Attachment" && (
+                <input
+                  ref={fileInputAttachmentRef}
+                  type="file"
+                  accept="*/*"
+                  onChange={handleAttachmentUpload}
+                  style={{ display: "none" }}
+                />
+              )}
+            </button>
+          ))}
+        </div>
+      </div>
+
+      {showMoveModal && (
+        <div className="popup-overlay">
+          <div className="popup-box">
+            <h3>Move Task</h3>
+            <div className="popup-section">
+              <label>Choose Workspace:</label>
+              <select value={selectedWorkspace} onChange={(e) => setSelectedWorkspace(e.target.value)}>
+                <option value="">Select Workspace</option>
+                <option value="workspace-1">Workspace 1</option>
+                <option value="workspace-2">Workspace 2</option>
+              </select>
+            </div>
+            <div className="popup-section">
+              <label>Choose Board:</label>
+              <select value={selectedBoard} onChange={(e) => setSelectedBoard(e.target.value)}>
+                <option value="">Select Board</option>
+                <option value="board-1">Board 1</option>
+                <option value="board-2">Board 2</option>
+              </select>
+            </div>
+            <div className="popup-buttons">
+              <button className="popup-btn confirm" onClick={handleMoveTask}>
+                Move
+              </button>
+              <button className="popup-btn cancel" onClick={() => setShowMoveModal(false)}>
+                Cancel
+              </button>
             </div>
           </div>
-        )}
+        </div>
+      )}
 
-
-        {showDeleteConfirm && (
-          <div className="popup-overlay">
-            <div className="popup-box">
-              <h3>Are you sure you want to delete this task?</h3>
-              <div className="popup-buttons">
-                <button className="popup-btn confirm" onClick={() => {
+      {showDeleteConfirm && (
+        <div className="popup-overlay">
+          <div className="popup-box">
+            <h3>Are you sure you want to delete this task?</h3>
+            <div className="popup-buttons">
+              <button
+                className="popup-btn confirm"
+                onClick={() => {
                   onDelete?.(task.id);
                   onClose();
-                }}>
-                  Yes, Delete
-                </button>
-                <button className="popup-btn cancel" onClick={() => setShowDeleteConfirm(false)}>
-                  Cancel
-                </button>
-              </div>
+                }}
+              >
+                Yes, Delete
+              </button>
+              <button className="popup-btn cancel" onClick={() => setShowDeleteConfirm(false)}>
+                Cancel
+              </button>
             </div>
           </div>
-        )}
         </div>
-      );
-  };
+      )}
+    </div>
+  );
+};
 
 export default TaskDetail;

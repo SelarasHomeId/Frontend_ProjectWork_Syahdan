@@ -1,101 +1,83 @@
-/* ================== Animations ================== */
-
-/* Animasi fade-in untuk elemen yang mulai terlihat */
 @keyframes fadeIn {
-  from { opacity: 0; } /* Mulai dengan transparansi 0 */
-  to { opacity: 1; }   /* Berakhir dengan transparansi 1 */
+  from { opacity: 0; }
+  to { opacity: 1; }
 }
 
-/* Animasi slide-in untuk elemen yang masuk dari atas */
 @keyframes slideIn {
-  from { transform: translateY(-10px); opacity: 0; } /* Mulai sedikit di atas posisi normal dan transparansi 0 */
-  to { transform: translateY(0); opacity: 1; }       /* Berakhir di posisi normal dan transparansi 1 */
+  from { transform: translateY(-10px); opacity: 0; }
+  to { transform: translateY(0); opacity: 1; }
 }
 
-/* ================== Modal Overlay ================== */
-/* Overlay untuk modal dengan latar belakang transparan hitam */
 .modal-overlay {
-  position: fixed; /* Posisi fixed agar tetap terlihat di layar */
-  inset: 0; /* Mengisi seluruh layar */
-  background-color: rgba(0, 0, 0, 0.5); /* Latar belakang hitam dengan transparansi 50% */
-  display: flex; /* Menggunakan flexbox untuk memusatkan modal */
-  justify-content: center; /* Memusatkan secara horizontal */
-  align-items: center; /* Memusatkan secara vertikal */
-  z-index: 9999; /* Menempatkan modal di atas elemen lainnya */
-  animation: fadeIn 0.3s ease-in-out; /* Menambahkan animasi fade-in */
+  position: fixed;
+  inset: 0;
+  background-color: rgba(0, 0, 0, 0.5);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 9999;
+  animation: fadeIn 0.3s ease-in-out;
 }
 
-/* ================== Modal Container ================== */
-/* Kontainer utama dari modal */
 .modal-container {
-  background: #fff; /* Latar belakang putih */
-  width: 900px; /* Lebar modal */
-  display: flex; /* Menggunakan flexbox untuk pengaturan isi */
+  background: #fff;
+  width: 900px;
+  display: flex;
   align-items: flex-start;
-  border-radius: 12px; /* Sudut melengkung */
-  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2); /* Bayangan untuk memberikan efek kedalaman */
-  padding: 24px; /* Jarak dalam modal */
-  position: relative; /* Agar bisa menggunakan posisi absolute untuk elemen dalamnya */
-  animation: slideIn 0.3s ease-in-out; /* Animasi masuk */
-  max-height: 90vh; /* Batas ketinggian maksimal modal */
-  overflow-y: auto; /* Menambahkan scroll jika konten lebih banyak dari ukuran modal */
+  border-radius: 12px;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+  padding: 24px;
+  position: relative;
+  animation: slideIn 0.3s ease-in-out;
+  max-height: 90vh;
+  overflow-y: auto;
 }
 
-/* Menghilangkan scrollbar pada modal */
 .modal-container::-webkit-scrollbar {
   display: none;
 }
 
-/* ================== Close Button ================== */
-/* Tombol untuk menutup modal */
 .close-btn {
-  position: absolute; /* Posisi absolut di dalam modal */
-  top: 16px; /* Jarak dari atas */
-  right: 16px; /* Jarak dari kanan */
-  background: none; /* Tidak ada latar belakang */
-  border: none; /* Tidak ada border */
-  cursor: pointer; /* Menunjukkan kursor pointer saat hover */
-  transition: transform 0.2s ease; /* Efek transisi pada transformasi */
+  position: absolute;
+  top: 16px;
+  right: 16px;
+  background: none;
+  border: none;
+  cursor: pointer;
+  transition: transform 0.2s ease;
 }
 
-/* Efek saat tombol close di-hover */
 .close-btn:hover {
-  transform: scale(1.2); /* Memperbesar tombol saat hover */
-  color: #333; /* Mengubah warna saat hover */
+  transform: scale(1.2);
+  color: #333;
 }
 
-/* ================== Sidebar ================== */
-/* Sidebar untuk menu navigasi */
 .sidebar {
-  width: 250px; /* Lebar sidebar */
-  display: flex; /* Menggunakan flexbox */
-  flex-direction: column; /* Menyusun elemen secara vertikal */
-  gap: 10px; /* Jarak antar elemen */
-  padding-top: 230px; /* Jarak dari atas */
+  width: 250px;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  padding-top: 230px;
   position: relative;
 }
 
-/* Tombol di dalam sidebar */
 .sidebar-btn {
-  width: 100%; /* Lebar tombol 100% dari container */
-  display: flex; /* Flexbox untuk meratakan konten */
-  align-items: center; /* Menyusun isi tombol di tengah secara vertikal */
-  gap: 8px; /* Jarak antar icon dan teks */
-  font-size: 14px; /* Ukuran font */
-  background: #f8f9fa; /* Latar belakang terang */
-  padding: 10px; /* Padding tombol */
-  border-radius: 6px; /* Sudut melengkung */
-  cursor: pointer; /* Menunjukkan pointer saat hover */
-  transition: background 0.2s; /* Efek transisi saat hover */
+  width: 100%;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 14px;
+  background: #f8f9fa;
+  padding: 10px;
+  border-radius: 6px;
+  cursor: pointer;
+  transition: background 0.2s;
 }
 
-/* Efek saat hover tombol di sidebar */
 .sidebar-btn:hover {
-  background: #dadcde; /* Mengubah latar belakang saat hover */
+  background: #dadcde;
 }
 
-/* ================== Modal Content ================== */
-/* Bagian konten dalam modal */
 .modal-content {
   position: relative;
   flex: 1;
@@ -103,166 +85,142 @@
   z-index: 1;
 }
 
-/* ================== Judul ================== */
-/* Input untuk judul */
 .title-input {
-  font-size: 24px; /* Ukuran font lebih besar */
-  font-weight: bold; /* Membuat font tebal */
-  width: 100%; /* Lebar penuh */
-  border: none; /* Tidak ada border */
-  border-bottom: 2px solid #ccc; /* Hanya border bawah */
-  outline: none; /* Menghilangkan outline */
+  font-size: 24px;
+  font-weight: bold;
+  width: 100%;
+  border: none;
+  border-bottom: 2px solid #ccc;
+  outline: none;
   position: relative;
 }
 
-/* ================== Section Titles ================== */
-/* Judul untuk bagian modal */
 .modal-title {
-  font-size: 20px; /* Ukuran font lebih kecil dari judul utama */
-  font-weight: 600; /* Font tebal */
-  color: #333; /* Warna font gelap */
-  margin-top: 0; /* Menghilangkan margin atas */
+  font-size: 20px;
+  font-weight: 600;
+  color: #333;
+  margin-top: 0;
 }
 
-/* Subtitle atau keterangan kecil */
 .modal-subtitle {
-  font-size: 14px; /* Ukuran font kecil */
-  color: #777; /* Warna font abu-abu */
+  font-size: 14px;
+  color: #777;
 }
 
-/* Judul untuk bagian tertentu dalam modal */
 .section-title {
-  font-size: 18px; /* Ukuran font untuk bagian */
-  font-weight: 600; /* Font tebal */
-  margin-top: 20px; /* Jarak dari bagian sebelumnya */
+  font-size: 18px;
+  font-weight: 600;
+  margin-top: 20px;
 }
 
-/* ================== Tag ================== */
-/* Elemen tag untuk kategori atau label */
 .tag {
-  background: #ddd; /* Latar belakang abu-abu */
-  padding: 3px 8px; /* Padding dalam tag */
-  border-radius: 4px; /* Sudut melengkung */
-  font-size: 12px; /* Ukuran font kecil */
+  background: #ddd;
+  padding: 3px 8px;
+  border-radius: 4px;
+  font-size: 12px;
 }
 
-/* ================== Description Box ================== */
-/* Kotak deskripsi untuk input teks */
 .description-box {
-  background: #f8f8f8; /* Latar belakang terang */
-  padding: 10px; /* Padding dalam box */
-  border-radius: 6px; /* Sudut melengkung */
+  background: #f8f8f8;
+  padding: 10px;
+  border-radius: 6px;
 }
 
-/* ================== Watch Button ================== */
-/* Tombol untuk menandakan task telah dilihat */
 .watch-btn {
-  padding: 8px 12px; /* Padding tombol */
-  max-width: 120px; /* Lebar maksimal */
-  display: flex; /* Flexbox untuk meratakan konten */
-  align-items: center; /* Menyusun isi tombol di tengah */
-  justify-content: center; /* Menyusun tombol secara horizontal */
-  gap: 8px; /* Jarak antara icon dan teks */
-  font-size: 14px; /* Ukuran font */
-  border-radius: 8px; /* Sudut melengkung */
-  border: 1px solid #ccc; /* Border abu-abu */
-  background-color: #f0f0f0; /* Latar belakang terang */
-  transition: background-color 0.3s; /* Efek transisi pada latar belakang */
-  margin-top: 200px; /* Sejajarkan dengan bawah cover */
+  padding: 8px 12px;
+  max-width: 120px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  font-size: 14px;
+  border-radius: 8px;
+  border: 1px solid #ccc;
+  background-color: #f0f0f0;
+  transition: background-color 0.3s;
+  margin-top: 200px;
   position: relative;
   z-index: 10;
 }
 
-/* Efek hover pada tombol watch */
 .watch-btn:hover {
-  background-color: #e0e0e0; /* Mengubah latar belakang saat hover */
+  background-color: #e0e0e0;
 }
 
-/* Mengubah warna tombol saat sedang menonton */
 .watch-btn.watching {
-  background: #007bff; /* Warna biru */
-  color: white; /* Warna font putih */
+  background: #007bff;
+  color: white;
 }
 
-/* ================== Tanggal dan Date Picker ================== */
-/* Kontainer untuk tanggal */
 .watch-date-container {
-  display: flex; /* Flexbox untuk meratakan konten */
-  align-items: center; /* Menyusun secara vertikal */
-  gap: 12px; /* Jarak antar elemen */
-  justify-content: space-between; /* Menyebar elemen secara merata */
-  width: 100%; /* Lebar penuh */
-  font-family: 'Arial', sans-serif; /* Font yang digunakan */
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  justify-content: space-between;
+  width: 100%;
+  font-family: 'Arial', sans-serif;
 }
 
-/* Styling untuk input tanggal */
 .date-picker-input {
-  background-color: #fff; /* Latar belakang putih */
-  border: 1px solid #ddd; /* Border abu-abu */
-  padding: 10px 14px; /* Padding besar */
-  border-radius: 12px; /* Sudut melengkung */
-  font-size: 16px; /* Ukuran font besar */
-  color: #333; /* Warna font gelap */
-  width: 100%; /* Lebar penuh */
-  box-sizing: border-box; /* Padding tidak mempengaruhi ukuran */
-  transition: all 0.3s ease; /* Efek transisi pada perubahan elemen */
-  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1); /* Bayangan lembut */
+  background-color: #fff;
+  border: 1px solid #ddd;
+  padding: 10px 14px;
+  border-radius: 12px;
+  font-size: 16px;
+  color: #333;
+  width: 100%;
+  box-sizing: border-box;
+  transition: all 0.3s ease;
+  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
 }
 
-/* Efek saat hover pada input tanggal */
 .date-picker-input:hover {
-  border-color: #007bff; /* Warna border saat hover */
-  background-color: #f0f8ff; /* Latar belakang biru muda saat hover */
+  border-color: #007bff;
+  background-color: #f0f8ff;
 }
 
-/* Efek saat fokus pada input tanggal */
 .date-picker-input:focus {
-  outline: none; /* Menghilangkan outline default */
-  border-color: #007bff; /* Warna border biru saat fokus */
-  background-color: #e6f7ff; /* Latar belakang biru muda */
-  box-shadow: 0 4px 10px rgba(0, 123, 255, 0.2); /* Bayangan lebih besar saat fokus */
+  outline: none;
+  border-color: #007bff;
+  background-color: #e6f0ff;
+  box-shadow: 0 4px 10px rgba(0, 123, 255, 0.2);
 }
 
-/* Styling ikon datepicker */
 .date-picker-input::-webkit-calendar-picker-indicator {
-  filter: invert(50%); /* Menyesuaikan warna ikon */
+  filter: invert(50%);
 }
 
-/* Label untuk input tanggal */
 .date-picker-label {
-  font-size: 14px; /* Ukuran font kecil */
-  color: #555; /* Warna font abu-abu */
-  margin-right: 8px; /* Jarak antar label dan input */
-  font-weight: 600; /* Membuat label tebal */
+  font-size: 14px;
+  color: #555;
+  margin-right: 8px;
+  font-weight: 600;
 }
 
 .date-text {
-  max-width: 120px; /* Lebar maksimal untuk teks tanggal */
-  white-space: nowrap; /* Mencegah teks terpotong */
-  overflow: hidden; /* Menyembunyikan teks yang melampaui */
-  text-overflow: ellipsis; /* Menambahkan elipsis (...) pada teks panjang */
-  font-size: 12px; /* Ukuran font kecil */
+  max-width: 120px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  font-size: 12px;
 }
 
-/* ================== Comment Section ================== */
-/* Kotak input untuk komentar */
 .comment-input {
-  width: 100%; /* Lebar penuh */
-  background: #f8f8f8; /* Latar belakang terang */
-  border: 1px solid #ddd; /* Border abu-abu */
-  padding: 8px; /* Padding di dalam input */
-  border-radius: 6px; /* Sudut melengkung */
-  font-size: 14px; /* Ukuran font */
+  width: 100%;
+  background: #f8f8f8;
+  border: 1px solid #ddd;
+  padding: 8px;
+  border-radius: 6px;
+  font-size: 14px;
 }
 
-/* Tombol untuk menambahkan komentar */
 .add-comment-btn {
-  margin-top: 10px; /* Jarak atas */
-  padding: 8px 12px; /* Padding tombol */
-  background: #d9534f; /* Latar belakang merah */
-  color: white; /* Warna font putih */
-  border-radius: 6px; /* Sudut melengkung */
-  cursor: pointer; /* Menunjukkan pointer saat hover */
+  margin-top: 10px;
+  padding: 8px 12px;
+  background: #d9534f;
+  color: white;
+  border-radius: 6px;
+  cursor: pointer;
 }
 
 .add-comment-btn,
@@ -273,134 +231,117 @@
 .comment-input:focus,
 .dropdown-menu textarea:focus {
   outline: none;
-  border-color: #d9534f; /* warna merah sesuai tema */
+  border-color: #d9534f;
   box-shadow: 0 0 0 2px rgba(217, 83, 79, 0.2);
 }
 
-
-/* ================== Activity Section ================== */
-/* Nama pengguna dalam aktivitas */
 .activity-user {
-  font-weight: bold; /* Font tebal */
-  color: #000; /* Warna font hitam */
+  font-weight: bold;
+  color: #000;
 }
 
-/* Daftar aktivitas */
 .activity-list {
-  margin-top: 10px; /* Jarak atas */
+  margin-top: 10px;
 }
 
-/* Item dalam aktivitas */
 .activity-item {
-  display: flex; /* Flexbox untuk menyusun elemen secara horizontal */
-  align-items: center; /* Menyusun secara vertikal */
-  margin-top: 5px; /* Jarak antar item */
+  display: flex;
+  align-items: center;
+  margin-top: 5px;
 }
 
-/* Avatar pengguna dalam aktivitas */
 .avatar {
-  width: 32px; /* Ukuran avatar */
-  height: 32px; /* Ukuran avatar */
+  width: 32px;
+  height: 32px;
   background: linear-gradient(135deg, #007bff, #0056b3);
-  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);  
-  color: white; /* Warna font putih */
-  font-weight: bold; /* Font tebal */
-  border-radius: 50%; /* Membuat avatar berbentuk lingkaran */
-  display: flex; /* Menggunakan flexbox */
-  align-items: center; /* Menyusun konten di tengah */
-  justify-content: center; /* Menyusun konten di tengah */
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  color: white;
+  font-weight: bold;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
 }
 
-/* Teks deskripsi aktivitas */
 .activity-text {
-  margin-left: 10px; /* Jarak kiri */
-  font-size: 14px; /* Ukuran font */
+  margin-left: 10px;
+  font-size: 14px;
 }
 
-/* Waktu aktivitas */
 .activity-time {
-  font-size: 12px; /* Ukuran font kecil */
-  color: gray; /* Warna abu-abu */
+  font-size: 12px;
+  color: gray;
 }
 
-/* ================== Task Detail Content ================== */
-/* Isi detail tugas */
 .task-detail {
-  max-height: 400px; /* Batas tinggi maksimal */
-  overflow-y: auto; /* Menambahkan scrollbar vertikal */
-  padding-right: 8px; /* Padding kanan */
+  max-height: 400px;
+  overflow-y: auto;
+  padding-right: 8px;
   scrollbar-width: thin;
   scrollbar-color: #aaa #f1f1f1;
 }
 
-/* Scrollbar untuk task detail */
 .task-detail::-webkit-scrollbar {
-  width: 6px; /* Lebar scrollbar */
+  width: 6px;
 }
 
-/* Thumb pada scrollbar */
 .task-detail::-webkit-scrollbar-thumb {
-  background-color: #aaa; /* Warna thumb */
-  border-radius: 3px; /* Sudut melengkung */
+  background-color: #aaa;
+  border-radius: 3px;
 }
 
-/* Track pada scrollbar */
 .task-detail::-webkit-scrollbar-track {
-  background: #f1f1f1; /* Latar belakang track */
+  background: #f1f1f1;
 }
 
-/* ================== Dropdown ================== */
-/* Tombol dropdown */
 .dropdown-btn {
-  background: none; /* Tidak ada latar belakang */
-  border: none; /* Tidak ada border */
-  cursor: pointer; /* Menunjukkan pointer saat hover */
-  font-size: 18px; /* Ukuran font */
-  color: #333; /* Warna font */
-  margin-left: 10px; /* Jarak kiri */
-  position: relative; /* Posisi relatif untuk elemen dalamnya */
+  background: none;
+  border: none;
+  cursor: pointer;
+  font-size: 18px;
+  color: #333;
+  margin-left: 10px;
+  position: relative;
 }
 
-
-/* ================== Dropdown Menu ================== */
 .dropdown-menu {
-  position: absolute;  /* Posisi elemen dropdown ditentukan secara absolut terhadap elemen induknya */
-  top: 100%;  /* Menempatkan dropdown di bawah elemen induknya */
-  right: 0;  /* Menempatkan dropdown di sebelah kanan */
-  width: 200px;  /* Lebar dropdown adalah 200px */
-  background-color: #fff;  /* Warna latar belakang dropdown putih */
-  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);  /* Menambahkan bayangan untuk efek depth */
-  padding: 10px;  /* Padding di dalam dropdown untuk memberi jarak pada konten */
-  border-radius: 4px;  /* Membuat sudut dropdown menjadi tumpul */
-  display: none;  /* Menyembunyikan dropdown secara default */
-  z-index: 9999;  /* Menjamin dropdown tampil di atas elemen lain */
+  position: absolute;
+  top: 100%;
+  right: 0;
+  width: 200px;
+  background-color: #fff;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+  padding: 10px;
+  border-radius: 4px;
+  display: none;
+  z-index: 9999;
   opacity: 0;
   transform: translateY(-10px);
   pointer-events: none;
 }
 
 .dropdown-menu button {
-  width: 100%;  /* Tombol di dalam dropdown mengisi seluruh lebar dropdown */
-  padding: 8px;  /* Memberikan ruang di dalam tombol */
-  background-color: #f1f1f1;  /* Warna latar belakang tombol */
-  border: none;  /* Menghilangkan border tombol */
-  text-align: left;  /* Menyusun teks tombol ke kiri */
-  cursor: pointer;  /* Menambahkan kursor pointer saat hover tombol */
-  margin-bottom: 5px;  /* Menambahkan jarak bawah antar tombol */
+  width: 100%;
+  padding: 8px;
+  background-color: #f1f1f1;
+  border: none;
+  text-align: left;
+  cursor: pointer;
+  margin-bottom: 5px;
 }
 
 .dropdown-menu button:hover {
-  background-color: #e0e0e0;  /* Mengubah warna tombol saat di-hover */
+  background-color: #e0e0e0;
 }
 
 .dropdown-menu textarea {
-  width: 100%;  /* Membuat textarea mengisi seluruh lebar dropdown */
-  padding: 8px;  /* Memberikan ruang di dalam textarea */
-  margin-top: 10px;  /* Memberikan jarak atas antara textarea dan elemen lainnya */
-  font-size: 14px;  /* Mengatur ukuran font di dalam textarea */
-  border-radius: 4px;  /* Membuat sudut textarea tumpul */
-  border: 1px solid #ccc;  /* Menambahkan border berwarna abu-abu */
-  resize: none;  /* Menonaktifkan kemampuan untuk meresize textarea */
+  width: 100%;
+  padding: 8px;
+  margin-top: 10px;
+  font-size: 14px;
+  border-radius: 4px;
+  border: 1px solid #ccc;
+  resize: none;
 }
 
 .dropdown-menu.show {
@@ -409,194 +350,117 @@
   pointer-events: auto;
 }
 
-/* ================== Popup ================== */
 .popup-overlay {
-  position: fixed;  /* Menempatkan overlay di posisi tetap di layar */
-  inset: 0;  /* Membuat overlay menutupi seluruh layar */
-  background: rgba(0, 0, 0, 0.4);  /* Warna latar belakang semi-transparan */
-  display: flex;  /* Menggunakan Flexbox untuk menyusun konten di tengah */
-  align-items: center;  /* Menyusun elemen secara vertikal di tengah */
-  justify-content: center;  /* Menyusun elemen secara horizontal di tengah */
-  z-index: 9999;  /* Memastikan overlay tampil di atas elemen lain */
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.4);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 9999;
 }
 
 .popup-box {
-  background: #fff;  /* Warna latar belakang kotak popup putih */
-  padding: 24px;  /* Memberikan ruang di dalam kotak */
-  border-radius: 10px;  /* Membuat sudut kotak popup tumpul */
-  text-align: center;  /* Menyusun teks di tengah */
-  max-width: 400px;  /* Membatasi lebar maksimal kotak */
-  width: 90%;  /* Lebar kotak 90% dari lebar layar */
-  box-shadow: 0 8px 16px rgba(0, 0, 0, 0.2);  /* Menambahkan bayangan pada popup */
+  background: #fff;
+  padding: 24px;
+  border-radius: 10px;
+  text-align: center;
+  max-width: 400px;
+  width: 90%;
+  box-shadow: 0 8px 16px rgba(0, 0, 0, 0.2);
 }
 
 .popup-box h3 {
-  margin-bottom: 20px;  /* Memberikan jarak bawah pada judul popup */
-  font-size: 18px;  /* Ukuran font untuk judul */
+  margin-bottom: 20px;
+  font-size: 18px;
 }
 
 .popup-buttons {
-  display: flex;  /* Menyusun tombol secara horizontal */
-  justify-content: space-between;  /* Memberikan jarak antar tombol */
-  gap: 10px;  /* Memberikan jarak antar tombol */
+  display: flex;
+  justify-content: space-between;
+  gap: 10px;
 }
 
 .popup-btn {
-  padding: 10px 20px;  /* Memberikan padding pada tombol */
-  border: none;  /* Menghilangkan border tombol */
-  border-radius: 8px;  /* Menambahkan radius pada sudut tombol */
-  font-weight: bold;  /* Membuat teks tombol menjadi tebal */
-  cursor: pointer;  /* Menambahkan kursor pointer saat hover */
-  transition: background 0.2s ease;  /* Menambahkan transisi untuk perubahan latar belakang */
+  padding: 10px 20px;
+  border: none;
+  border-radius: 8px;
+  font-weight: bold;
+  cursor: pointer;
+  transition: background 0.2s ease;
 }
 
 .popup-btn.confirm {
-  background-color: #dc2626;  /* Warna latar belakang tombol konfirmasi */
-  color: white;  /* Warna teks tombol konfirmasi */
+  background-color: #dc2626;
+  color: white;
 }
 
 .popup-btn.confirm:hover {
-  background-color: #b91c1c;  /* Warna latar belakang tombol konfirmasi saat di-hover */
+  background-color: #b91c1c;
 }
 
 .popup-btn.cancel {
-  background-color: #e5e7eb;  /* Warna latar belakang tombol batal */
-  color: #111827;  /* Warna teks tombol batal */
+  background-color: #e5e7eb;
+  color: #111827;
 }
 
 .popup-btn.cancel:hover {
-  background-color: #d1d5db;  /* Warna latar belakang tombol batal saat di-hover */
+  background-color: #d1d5db;
 }
 
-/* ================== Check Circle & Tooltip ================== */
 .check-circle-wrapper {
-  position: absolute;  /* Menempatkan elemen di posisi absolut */
-  top: 0;  /* Posisi di atas */
-  left: 0;  /* Posisi di kiri */
-  margin: 0;  /* Menghilangkan margin */
-  z-index: 10;  /* Menempatkan elemen ini di atas elemen lainnya */
-}
-
-.check-circle {
-  width: 28px;  /* Lebar lingkaran */
-  height: 28px;  /* Tinggi lingkaran */
-  border-radius: 50%;  /* Membuat lingkaran */
-  border: 2px solid #ccc;  /* Menambahkan border abu-abu */
-  cursor: pointer;  /* Menambahkan kursor pointer saat hover */
-  display: flex;  /* Menggunakan Flexbox untuk menyusun isi lingkaran */
-  align-items: center;  /* Menyusun isi secara vertikal di tengah */
-  justify-content: center;  /* Menyusun isi secara horizontal di tengah */
-  font-weight: bold;  /* Membuat teks dalam lingkaran menjadi tebal */
-  font-size: 16px;  /* Ukuran font dalam lingkaran */
-  background-color: white;  /* Warna latar belakang lingkaran */
-  transition: background-color 0.3s ease, border-color 0.3s ease;  /* Menambahkan transisi pada warna latar dan border */
-}
-
-.check-circle.checked {
-  background-color: #4caf50;  /* Warna latar belakang saat lingkaran dicentang */
-  color: white;  /* Warna teks saat lingkaran dicentang */
-  border-color: #4caf50;  /* Warna border saat lingkaran dicentang */
-}
-
-.popup-text {
-  position: absolute;  /* Menempatkan tooltip di posisi absolut */
-  top: 50%;  /* Menempatkan tooltip di tengah vertikal */
-  left: 35px;  /* Menempatkan tooltip sedikit di samping lingkaran */
-  transform: translateY(-50%);  /* Menyusun tooltip di tengah vertikal */
-  background-color: #333;  /* Warna latar belakang tooltip */
-  color: #fff;  /* Warna teks tooltip */
-  padding: 6px 10px;  /* Padding dalam tooltip */
-  border-radius: 4px;  /* Sudut tumpul pada tooltip */
-  font-size: 12px;  /* Ukuran font tooltip */
-  white-space: nowrap;  /* Mencegah teks pecah baris */
-  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);  /* Bayangan tooltip */
-  z-index: 10000;  /* Memastikan tooltip tampil di atas */
-  opacity: 0;  /* Tooltip disembunyikan secara default */
-  transition: opacity 0.2s ease;  /* Efek transisi saat muncul */
-}
-
-.check-circle-wrapper:hover .popup-text {
-  opacity: 1;  /* Tooltip muncul saat hover pada check circle */
-}
-
-/* ================== Checklist Section ================== */
-.checklist-section {
-  padding: 10px;  /* Memberikan padding pada checklist section */
-}
-
-.checklist-section {
-  margin-top: 1rem;  /* Memberikan margin atas pada checklist section */
-}
-
-.checklist-input-wrapper {
-  display: flex;  /* Menggunakan Flexbox untuk menyusun input dan tombol secara horizontal */
-  gap: 0.5rem;  /* Memberikan jarak antar input dan tombol */
-  margin-bottom: 0.5rem;  /* Memberikan jarak bawah pada wrapper */
-}
-
-.checklist-input {
-  flex: 1;  /* Membuat input mengisi sisa ruang yang tersedia */
-  padding: 0.5rem;  /* Memberikan padding pada input */
-}
-
-.add-checklist-btn {
-  padding: 0.5rem 1rem;  /* Memberikan padding pada tombol tambah checklist */
-}
-
-.checklist-list {
-  list-style: none;  /* Menghilangkan bullet points dari list */
-  padding: 0;  /* Menghilangkan padding pada list */
-}
-
-.checklist-item {
-  margin-bottom: 0.5rem;  /* Memberikan jarak bawah antar item checklist */
-}
-
-.checked-text {
-  text-decoration: line-through;  /* Membuat teks dicoret */
-  color: gray;  /* Warna teks yang sudah dicentang */
-}
-
-/* ================== Cover Image ================== */
-.cover-image-container {
-  width: 100%;  /* Mengatur lebar kontainer gambar menjadi penuh */
-  max-width: 100%;  /* Membatasi gambar agar tidak lebih besar dari kontainer */
-  margin-bottom: 10px;  /* Memberikan jarak bawah pada gambar */
-  position: relative;  /* Menempatkan gambar relatif untuk penempatan modal zoom */
-  z-index: 5;
-}
-
-.cover-image {
-  width: 55vw; /* Bukan 100vw */
-  height: 170px;
-  object-fit: cover;
-  border-top-left-radius: 8px;
-  border-top-right-radius: 8px;
-  display: block;
   position: absolute;
   top: 0;
   left: 0;
-  right: 0;
-  z-index: 0;
+  margin: 0;
+  z-index: 10;
 }
 
-@media (max-width: 480px) {
-  .popup-box {
-    padding: 16px;
-    font-size: 14px;
-  }
-
-  .dropdown-menu {
-    width: 100%;
-    right: auto;
-    left: 0;
-  }
+.check-circle {
+  width: 28px;
+  height: 28px;
+  border-radius: 50%;
+  border: 2px solid #ccc;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: bold;
+  font-size: 16px;
+  background-color: white;
+  transition: background-color 0.3s ease, border-color 0.3s ease;
 }
 
-/* Checklist Section */
+.check-circle.checked {
+  background-color: #4caf50;
+  color: white;
+  border-color: #4caf50;
+}
+
+.popup-text {
+  position: absolute;
+  top: 50%;
+  left: 35px;
+  transform: translateY(-50%);
+  background-color: #333;
+  color: #fff;
+  padding: 6px 10px;
+  border-radius: 4px;
+  font-size: 12px;
+  white-space: nowrap;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  z-index: 10000;
+  opacity: 0;
+  transition: opacity 0.2s ease;
+}
+
+.check-circle-wrapper:hover .popup-text {
+  opacity: 1;
+}
+
 .checklist-section {
+  padding: 10px;
   margin-top: 20px;
-  padding: 16px;
   background-color: #f9f9f9;
   border-radius: 12px;
   box-shadow: 0 2px 6px rgba(0, 0, 0, 0.05);
@@ -609,7 +473,15 @@
   color: #333;
 }
 
+.checklist-input-wrapper {
+  display: flex;
+  gap: 0.5rem;
+  margin-bottom: 0.5rem;
+}
+
 .checklist-input {
+  flex: 1;
+  padding: 0.5rem;
   display: flex;
   gap: 10px;
   margin-bottom: 15px;
@@ -640,7 +512,7 @@
 
 .checklist-list {
   list-style: none;
-  padding-left: 0;
+  padding: 0;
 }
 
 .checklist-item {
@@ -656,7 +528,46 @@
   transform: scale(1.2);
 }
 
-/* Container untuk attachment */
+.checked-text {
+  text-decoration: line-through;
+  color: gray;
+}
+
+.cover-image-container {
+  width: 100%;
+  max-width: 100%;
+  margin-bottom: 10px;
+  position: relative;
+  z-index: 5;
+}
+
+.cover-image {
+  width: 55vw;
+  height: 170px;
+  object-fit: cover;
+  border-top-left-radius: 8px;
+  border-top-right-radius: 8px;
+  display: block;
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  z-index: 0;
+}
+
+@media (max-width: 480px) {
+  .popup-box {
+    padding: 16px;
+    font-size: 14px;
+  }
+
+  .dropdown-menu {
+    width: 100%;
+    right: auto;
+    left: 0;
+  }
+}
+
 .attachments {
   display: flex;
   flex-direction: column;
@@ -669,7 +580,6 @@
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
 }
 
-/* Setiap item attachment */
 .attachment-item {
   display: flex;
   align-items: center;
@@ -682,14 +592,12 @@
   box-shadow: 0 2px 6px rgba(0, 0, 0, 0.1);
 }
 
-/* Efek hover pada item attachment */
 .attachment-item:hover {
   background-color: #f1f1f1;
-  transform: translateY(-5px); /* Efek sedikit terangkat */
+  transform: translateY(-5px);
   box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
 }
 
-/* Nama file */
 .file-name {
   flex-grow: 1;
   font-size: 16px;
@@ -700,6 +608,7 @@
   white-space: nowrap;
 }
 
-.attachment-comment { 
-  margin-top: 8px; width: 100%; 
+.attachment-comment {
+  margin-top: 8px;
+  width: 100%;
 }
