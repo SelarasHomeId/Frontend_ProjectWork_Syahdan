@@ -78,7 +78,7 @@ export const apiRequest = async ({
     let response = await hitAPI();
     return response.data;
   } catch (error) {
-    if (error.status === 401 && (endpoint !== "/auth/login" && endpoint !== "/auth/send-email/forgot-password")) {
+    if (error.status === 401 && (endpoint !== "/auth/login" && endpoint !== "/auth/send-email/forgot-password" && endpoint !== "/auth/logout" && endpoint !== "/auth/refresh-token")) {
       const newToken = await refreshToken();
       if (newToken) {
         headers["Authorization"] = `Bearer ${newToken}`;
@@ -87,7 +87,7 @@ export const apiRequest = async ({
       } else {
         throw new Error("Gagal memperbarui token");
       }
-    }else if(error.status === 422 && (endpoint !== "/auth/login" && endpoint !== "/auth/send-email/forgot-password")){
+    }else if(error.status === 422 && (endpoint !== "/auth/login" && endpoint !== "/auth/send-email/forgot-password" && endpoint !== "/auth/logout" && endpoint !== "/auth/refresh-token")){
         try {
           const response = await authLogout();
           if (response.success) {
