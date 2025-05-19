@@ -46,7 +46,7 @@
 .divisi-table th, .divisi-table td {
   border: 1px solid #ddd;
   padding: 10px;
-  text-align: left;
+  text-align: center;
 }
 
 .divisi-table th {

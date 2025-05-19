@@ -3,6 +3,7 @@ import debounce from 'lodash.debounce';
 import '../styles/User.css';
 import { addUser, deleteUser, getAllDivision, getAllRole, getAllUser, getUserById, resetPasswordUser, updateUser } from '../service/apiService';
 import Swal from "sweetalert2";
+import { MdEdit } from "react-icons/md";
 
 const User = () => {
   const [users, setUsers] = useState([]);
@@ -462,15 +463,14 @@ const User = () => {
                   <td>
                   <div className="d-flex align-items-center gap-2">
                     {/* Edit Button */}
-                    <button 
-                      className="btn btn-warning btn-sm p-2 d-flex align-items-center justify-content-center" 
+                    <button
+                      className="action-button btn btn-warning d-flex align-items-center justify-content-center"
                       onClick={() => handleEditUser(user.id)}
-                      style={{ width: '38px', height: '38px' }}
-                      title="Edit"
+                      aria-label="Edit"
+                      style={{ width: '38px', height: '38px', padding: 0 }}
                     >
-                      <i className="fas fa-edit fa-fw"></i>
+                      <MdEdit style={{ fontSize: '1.4rem' }} />
                     </button>
-
                     {/* Delete Button */}
                     <button 
                       className="btn btn-danger btn-sm p-2 d-flex align-items-center justify-content-center"

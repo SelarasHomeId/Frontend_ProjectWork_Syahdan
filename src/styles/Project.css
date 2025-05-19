@@ -50,7 +50,7 @@ button:hover .fa-image {
 .project-table th, .project-table td {
   border: 1px solid #ddd;
   padding: 10px;
-  text-align: left;
+  text-align: center;
 }
 
 .project-table th {

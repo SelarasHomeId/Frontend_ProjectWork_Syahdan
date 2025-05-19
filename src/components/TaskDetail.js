@@ -38,7 +38,14 @@ const TaskDetail = ({ task, onClose, onDelete }) => {
   const [selectedBoard, setSelectedBoard] = useState('');
   const [selectedWorkspace, setSelectedWorkspace] = useState('');
 
+  const [showMemberModal, setShowMemberModal] = useState(false);
+  const [newMember, setNewMember] = useState("");
+  const [boardMembers, setBoardMembers] = useState([]); // Simpan daftar member board
 
+  const [showLabelModal, setShowLabelModal] = useState(false);
+const [newLabelName, setNewLabelName] = useState("");
+const [newLabelColor, setNewLabelColor] = useState("#FF0000"); // default merah
+const [labels, setLabels] = useState([]); // simpan label-label yang sudah dibuat
 
   const [coverImage, setCoverImage] = useState(null);
 
@@ -52,7 +59,13 @@ const TaskDetail = ({ task, onClose, onDelete }) => {
     }
   };
 
-  
+  const handleAddLabel = () => {
+  if (newLabelName.trim() === "") return alert("Label name is required");
+  setLabels([...labels, { name: newLabelName, color: newLabelColor }]);
+  setNewLabelName("");
+  setNewLabelColor("#FF0000");
+  setShowLabelModal(false);
+  };
 
   const handleAddChecklistItem = () => {
     if (newChecklistItem.trim()) {
@@ -268,8 +281,9 @@ const TaskDetail = ({ task, onClose, onDelete }) => {
                         type="checkbox"
                         checked={item.checked}
                         onChange={() => toggleChecklistItem(index)}
+                        aria-label={`Checklist item: ${item.text}`}
                       />
-                      {item.text}
+                      <span>{item.text}</span>
                     </label>
                   </li>
                 ))}
@@ -361,8 +375,8 @@ const TaskDetail = ({ task, onClose, onDelete }) => {
           style={{ width: "200px", flexShrink: 0, gap: "0.5rem" }}
         >
           {[
-            { icon: Users, label: "Members" },
-            { icon: Tag, label: "Labels" },
+            { icon: Users, label: "Members", action: () => setShowMemberModal(true) },
+            { icon: Tag, label: "Labels", action: () => setShowLabelModal(true) },
             { icon: CheckSquare, label: "Checklist", action: () => setShowChecklist(true) },
             { icon: Paperclip, label: "Attachment", action: () => fileInputAttachmentRef.current?.click() },
             { icon: Image, label: "Cover", action: () => fileInputCoverRef.current?.click() },
@@ -400,6 +414,75 @@ const TaskDetail = ({ task, onClose, onDelete }) => {
           ))}
         </div>
       </div>
+
+      {showLabelModal && (
+  <div className="popup-overlay">
+    <div className="popup-box">
+      <h3>Add Label</h3>
+      <input
+        type="text"
+        placeholder="Label name"
+        value={newLabelName}
+        onChange={(e) => setNewLabelName(e.target.value)}
+      />
+      <div className="color-picker">
+        {["#FF0000", "#00FF00", "#0000FF", "#FFFF00", "#FF00FF", "#00FFFF", "#FF8C00"].map((color) => (
+          <div
+            key={color}
+            className={`color-swatch ${newLabelColor === color ? "selected" : ""}`}
+            style={{ backgroundColor: color }}
+            onClick={() => setNewLabelColor(color)}
+          />
+        ))}
+      </div>
+      <div className="popup-buttons">
+        <button className="popup-btn confirm" onClick={handleAddLabel}>Add</button>
+        <button className="popup-btn cancel" onClick={() => setShowLabelModal(false)}>Cancel</button>
+      </div>
+    </div>
+  </div>
+)}
+
+      {showMemberModal && (
+  <div className="popup-overlay">
+    <div className="popup-box">
+      <h3>Add Board Member</h3>
+      <input
+        type="text"
+        placeholder="Enter member name or email"
+        value={newMember}
+        onChange={(e) => setNewMember(e.target.value)}
+      />
+      <div className="popup-buttons">
+        <button
+          className="popup-btn confirm"
+          onClick={() => {
+            if (newMember.trim()) {
+              setBoardMembers([...boardMembers, newMember.trim()]);
+              setNewMember("");
+              setShowMemberModal(false);
+            } else {
+              alert("Please enter member name or email");
+            }
+          }}
+        >
+          Add Member
+        </button>
+        <button className="popup-btn cancel" onClick={() => setShowMemberModal(false)}>
+          Cancel
+        </button>
+      </div>
+
+      <h4>Current Members:</h4>
+      <ul>
+        {boardMembers.map((member, i) => (
+          <li key={i}>{member}</li>
+        ))}
+      </ul>
+    </div>
+  </div>
+)}
+
 
       {showMoveModal && (
         <div className="popup-overlay">

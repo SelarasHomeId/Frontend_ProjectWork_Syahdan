@@ -3,6 +3,8 @@ import debounce from 'lodash.debounce';
 import '../styles/Division.css';
 import { getAllDivision, addDivision, updateDivision, deleteDivision, getDivisionById } from '../service/apiService';
 import Swal from "sweetalert2";
+import { MdEdit } from 'react-icons/md';
+
 
 const Division = () => {
   const [divisi, setDivisions] = useState([]);
@@ -236,13 +238,13 @@ const Division = () => {
                 <td>{divisi.name}</td>
                 <td>{divisi.created_at.replace("T", " ").replace("Z", "")}</td>
                 <td>
-                  <button 
-                    className="action-button btn btn-warning me-2" 
+                  <button
+                    className="action-button btn btn-warning me-2"
                     onClick={() => handleEditDivision(divisi.id)}
+                    aria-label="Edit"
                   >
-                    <i className="fas fa-edit"></i>
+                    <MdEdit className="action-icon" />
                   </button>
-
                   <button 
                     className="action-button btn btn-danger" 
                     onClick={() => handleDeleteDivision(divisi.id)}

@@ -4,7 +4,8 @@ import '../styles/Project.css';
 import { getAllProject, addProject, updateProject, deleteProject, getProjectById } from '../service/apiService';
 import Swal from "sweetalert2";
 import { Modal } from 'react-bootstrap';
-import { FaEdit, FaTrash } from 'react-icons/fa';
+import { MdEdit } from "react-icons/md";
+
 
 const Project = () => {
   const [projects, setProjects] = useState([]);
@@ -13,6 +14,9 @@ const Project = () => {
   const [itemsPerPage] = useState(5);
   const [hasNextPage, setHasNextPage] = useState(false);
   const [showImagePreview, setShowImagePreview] = useState(false);
+  const [selectedCover, setSelectedCover] = useState(null);
+
+  
 
   const fetchProjects = useCallback(async () => {
     try {
@@ -315,7 +319,7 @@ const handleEditProject = async (id) => {
                           <>
                             <button 
                               onClick={() => {
-                                console.log('Memulai preview untuk:', project.cover);
+                                setSelectedCover(project.cover.view_saved);
                                 setShowImagePreview(true);
                               }}
                               style={{ 
@@ -338,44 +342,46 @@ const handleEditProject = async (id) => {
                             </button>
 
                             <Modal show={showImagePreview} onHide={() => setShowImagePreview(false)}>
-                            <Modal.Header closeButton>
-                              <Modal.Title>Preview Cover</Modal.Title>
-                            </Modal.Header>
-                            <Modal.Body>
-                              {console.log('URL saat preview:', project.cover)}
-                              
-                              {project.cover ? (
-                                <img 
-                                  src={project.cover.view_saved} 
-                                  alt="Project Cover Preview" 
-                                  style={{ width: '100%' }}
-                                />
-                              ) : (
-                                <p>URL gambar tidak valid</p>
-                              )}
-                            </Modal.Body>
-                          </Modal>
+                              <Modal.Header closeButton>
+                                <Modal.Title>Preview Cover</Modal.Title>
+                              </Modal.Header>
+                              <Modal.Body>
+                                {selectedCover ? (
+                                  <img 
+                                    src={selectedCover} 
+                                    alt="Project Cover Preview" 
+                                    style={{ width: '100%' }}
+                                  />
+                                ) : (
+                                  <p>URL gambar tidak valid</p>
+                                )}
+                              </Modal.Body>
+                            </Modal>
                           </>
                         ) : (
-                          "No"
+                          "-"
                         )}
                       </td>
                       <td>{project.created_at.replace("T", " ").replace("Z", "")}</td>
                       <td>
-                        <button 
-                          className="action-button btn btn-warning" 
-                          onClick={() => handleEditProject(project.id)}
-                          aria-label="Edit"
-                        >
-                          <FaEdit />
-                        </button>
-                        <button 
-                          className="action-button btn btn-danger ms-2" 
-                          onClick={() => handleDeleteProject(project.id)}
-                          aria-label="Delete"
-                        >
-                          <FaTrash />
-                        </button>
+                        <div style={{ display: 'flex', justifyContent: 'center', gap: '8px' }}>
+                          <button
+                            className="action-button btn btn-warning d-flex align-items-center justify-content-center"
+                            onClick={() => handleEditProject(project.id)}
+                            aria-label="Edit"
+                            style={{ width: '35px', height: '35px' }}
+                          >
+                            <MdEdit/>
+                          </button>
+                          <button 
+                            className="btn btn-danger btn-sm p-2 d-flex align-items-center justify-content-center"
+                            onClick={() => handleDeleteProject(project.id)}
+                            style={{ width: '35px', height: '35px' }}
+                            title="Delete"
+                          >
+                            <i className="fas fa-trash-alt fa-fw"></i>
+                          </button>
+                        </div>
                       </td>
                     </tr>
                   ))
