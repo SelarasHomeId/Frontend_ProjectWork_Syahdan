@@ -276,6 +276,13 @@ export const deleteProject = async (projectId) => {
   });
 };
 
+export const deleteProjectCover = async (projectId) => {
+  return await apiRequest({
+    method: "DELETE",
+    endpoint: `/project/${projectId}/cover`,
+  });
+};
+
 // ==================================================================================================== //
 // DIVISION MANAGEMENT (CRUD)
 export const getAllDivision = async (endpoint) => {

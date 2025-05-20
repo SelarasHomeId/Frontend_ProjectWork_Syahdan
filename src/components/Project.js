@@ -5,6 +5,7 @@ import { getAllProject, addProject, updateProject, deleteProject, getProjectById
 import Swal from "sweetalert2";
 import { Modal } from 'react-bootstrap';
 import { MdEdit } from "react-icons/md";
+import { deleteProjectCover } from '../service/apiService'; // pastikan path-nya sesuai
 
 
 const Project = () => {
@@ -15,8 +16,7 @@ const Project = () => {
   const [hasNextPage, setHasNextPage] = useState(false);
   const [showImagePreview, setShowImagePreview] = useState(false);
   const [selectedCover, setSelectedCover] = useState(null);
-
-  
+  const [selectedProjectId, setSelectedProjectId] = useState(null);
 
   const fetchProjects = useCallback(async () => {
     try {
@@ -266,6 +266,31 @@ const handleEditProject = async (id) => {
         }
       };
 
+      const handleDeleteCover = async (projectId) => {
+        const result = await Swal.fire({
+          title: 'Apakah kamu yakin?',
+          text: "Cover yang dihapus tidak bisa dikembalikan!",
+          icon: 'warning',
+          showCancelButton: true,
+          confirmButtonColor: '#d33',
+          cancelButtonColor: '#3085d6',
+          confirmButtonText: 'Ya, hapus saja!',
+          cancelButtonText: 'Batal',
+        });
+
+        if (result.isConfirmed) {
+          try {
+            await deleteProjectCover(projectId);
+            fetchProjects();
+            setShowImagePreview(false);
+            Swal.fire('Terhapus!', 'Cover berhasil dihapus.', 'success');
+          } catch (error) {
+            console.error('Gagal menghapus cover:', error);
+            Swal.fire('Error!', 'Terjadi kesalahan saat menghapus cover.', 'error');
+          }
+        }
+      };
+
   return (
     <div className="project-container">
       <div className="table-header">
@@ -290,11 +315,11 @@ const handleEditProject = async (id) => {
           </tr>
         </thead>
             <tbody>
-                    {projects.length === 0 ? (
+                  {!projects || projects.length === 0 ? (
                     <tr>
                       <td colSpan="7">No projects found</td>
-                     </tr>
-                    ) : (
+                    </tr>
+                  ) : (
                   projects.map((project, index) => (
                     <tr key={project.id}>
                       <td>{(currentPage - 1) * itemsPerPage + index + 1}</td>
@@ -314,54 +339,73 @@ const handleEditProject = async (id) => {
                           )
                         }
                       </td>
-                      <td className='text-center'>
-                        {project.cover ? (
-                          <>
-                            <button 
-                              onClick={() => {
-                                setSelectedCover(project.cover.view_saved);
-                                setShowImagePreview(true);
-                              }}
-                              style={{ 
-                                background: 'none', 
-                                border: 'none', 
-                                padding: 0,
-                                cursor: 'pointer'
-                              }}
-                            >
-                              <i 
-                                className="fas fa-image" 
-                                style={{ 
-                                  fontSize: '1.5rem', 
-                                  color: '#6c757d',
-                                  transition: 'color 0.3s ease'
-                                }}
-                                title="Preview Gambar"
-                                aria-label="Preview Gambar"
-                              />
-                            </button>
+                      {/* Tombol preview tetap di dalam table */}
+<td className='text-center'>
+  {project.cover ? (
+    <>
+      <button 
+        onClick={() => {
+          setSelectedCover(project.cover.view_saved);
+          setSelectedProjectId(project.id); // simpan id untuk delete
+          setShowImagePreview(true);
+        }}
+        style={{ 
+          background: 'none', 
+          border: 'none', 
+          padding: 0,
+          cursor: 'pointer'
+        }}
+        title="Preview Gambar"
+        aria-label="Preview Gambar"
+      >
+        <i 
+          className="fas fa-image" 
+          style={{ 
+            fontSize: '1.5rem', 
+            color: '#6c757d',
+            transition: 'color 0.3s ease'
+          }}
+        />
+      </button>
+    </>
+  ) : (
+    "-"
+  )}
+</td>
 
-                            <Modal show={showImagePreview} onHide={() => setShowImagePreview(false)}>
-                              <Modal.Header closeButton>
-                                <Modal.Title>Preview Cover</Modal.Title>
-                              </Modal.Header>
-                              <Modal.Body>
-                                {selectedCover ? (
-                                  <img 
-                                    src={selectedCover} 
-                                    alt="Project Cover Preview" 
-                                    style={{ width: '100%' }}
-                                  />
-                                ) : (
-                                  <p>URL gambar tidak valid</p>
-                                )}
-                              </Modal.Body>
-                            </Modal>
-                          </>
-                        ) : (
-                          "-"
-                        )}
-                      </td>
+{/* Modal Preview dengan tombol delete di header */}
+<Modal show={showImagePreview} onHide={() => setShowImagePreview(false)}>
+  <Modal.Header closeButton>
+    <Modal.Title style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', width: '100%' }}>
+      <span>Preview Cover</span>
+      <button 
+        onClick={() => handleDeleteCover(selectedProjectId)}
+        style={{ 
+          background: 'none', 
+          border: 'none', 
+          padding: 0,
+          cursor: 'pointer',
+          color: '#dc3545'
+        }}
+        title="Hapus Cover"
+        aria-label="Hapus Cover"
+      >
+        <i className="fas fa-trash-alt" style={{ fontSize: '1.2rem' }} />
+      </button>
+    </Modal.Title>
+  </Modal.Header>
+  <Modal.Body>
+    {selectedCover ? (
+      <img 
+        src={selectedCover} 
+        alt="Project Cover Preview" 
+        style={{ width: '100%' }}
+      />
+    ) : (
+      <p>URL gambar tidak valid</p>
+    )}
+  </Modal.Body>
+</Modal>
                       <td>{project.created_at.replace("T", " ").replace("Z", "")}</td>
                       <td>
                         <div style={{ display: 'flex', justifyContent: 'center', gap: '8px' }}>
