@@ -85,10 +85,16 @@ const handleAddProject = async () => {
         const location = document.getElementById("swal-location").value;
         const coverInput = document.getElementById("swal-cover").files[0];
 
-        if (!name) {
-          Swal.showValidationMessage("Nama project tidak boleh kosong!");
-          return false;
+        if (!name.trim()) {
+            Swal.showValidationMessage("Nama tidak boleh kosong atau hanya berisi spasi!");
+            return false;
         }
+        
+        const namePattern = /^[A-Za-z\s]+$/;
+          if (!namePattern.test(name)) {
+            Swal.showValidationMessage("Tidak boleh di isi dengan character unik");
+            return false;
+          }
         if (!location) {
           Swal.showValidationMessage("Location tidak boleh kosong!");
           return false;
@@ -174,9 +180,15 @@ const handleEditProject = async (id) => {
             updatedData.cover = coverInput;
           }
 
-          if (!name) {
-            Swal.showValidationMessage("Nama tidak boleh kosong!");
+          if (!name.trim()) {
+            Swal.showValidationMessage("Nama tidak boleh kosong atau hanya berisi spasi!");
             return false;
+          }
+          
+          const namePattern = /^[A-Za-z\s-z0-9]+$/;
+          if (!namePattern.test(name)) {
+            Swal.showValidationMessage("Tidak boleh di isi dengan character unik");
+              return false;
           }
           
           return updatedData;
