@@ -30,7 +30,7 @@
 .chart canvas {
   width: 100% !important;
   height: auto !important;
-  max-width: 2000px;  /* naikin sesuai kebutuhan */
+  max-width: 2000px; 
   margin: 0 auto;
 }
 

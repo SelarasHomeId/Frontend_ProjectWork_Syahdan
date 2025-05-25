@@ -9,7 +9,7 @@ import Swal from "sweetalert2";
 import { createBoard, createTask, deleteBoard, getAllBoardByWorkspaceId, getAllTaskByBoardId, getTaskById, updateBoard, updateTask, workspaceFind } from "../service/apiService";
 import { FaCheckSquare, FaClock, FaComment, FaEye, FaFileAlt, FaPaperclip, FaTag  } from "react-icons/fa";
 import TaskDetail from "./TaskDetail";
-import { decimalToHexColor, getColorFromInitial, getInitials } from "../utils/general";
+import { decimalToHexColor, getColorFromInitial, getInitials, getContrastingTextColor } from "../utils/general";
 
 const ItemTypes = {
   TASK: "task",
@@ -56,6 +56,7 @@ const Workspace = ({ workspaceId, toDetailTask }) => {
 
   const handleClose = () => {
     setSelectedTask(null);
+    loadBoardsAndTasks(workspaceId);
   };
 
   useEffect(() => {
@@ -767,11 +768,12 @@ const Task = ({ task, boardId, index, moveTask, loadTasksForBoard, handleClickTa
               {task.assign_to_user.data.map((user, idx) => {
                 const initials = getInitials(user.name);
                 const bgColor = getColorFromInitial(initials);
+                const textColor = getContrastingTextColor(bgColor);
                 return (
                   <div
                     key={idx}
                     className="assignee-circle"
-                    style={{ backgroundColor: bgColor }}
+                    style={{ backgroundColor: bgColor,color:textColor }}
                     title={user.name}
                   >
                     {initials}

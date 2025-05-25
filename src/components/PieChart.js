@@ -5,7 +5,7 @@ import { Chart as ChartJS, ArcElement, Tooltip, Legend } from 'chart.js';
 // Daftarkan komponen yang diperlukan oleh Chart.js
 ChartJS.register(ArcElement, Tooltip, Legend);
 
-const PieChart = ({ data }) => {
+const PieChart = ({ data, height = 1000 }) => {
   const chartData = {
     labels: Object.keys(data),
     datasets: [
@@ -17,20 +17,21 @@ const PieChart = ({ data }) => {
     ],
   };
 
+  const options = {
+    responsive: true,
+    maintainAspectRatio: false,
+  };
+
   return (
     <div
-    className="pie-chart-container"
-    style={{
-      width: '100%',
-      maxWidth: '600px',    /* ubah di sini kalau ingin chart desktop lebih besar */
-      height: 'auto',
-      margin: '0 auto'      /* center container */
-    }}
+      className="w-100"
+      style={{
+        height: `${height}px`, // Tetapkan tinggi tetap sesuai prop
+      }}
     >
-      <Pie data={chartData} />
+      <Pie data={chartData} options={options} />
     </div>
   );
 };
-
 
 export default PieChart;

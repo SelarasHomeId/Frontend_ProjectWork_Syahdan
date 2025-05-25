@@ -264,31 +264,40 @@ function Dashboard(showDetailTask) {
       </div>
 
 
-      <div className="charts">
+       <div className="charts">
         <div className="row gap-x-5 justify-content-center">
-          <div className="col-12 col-sm-10 col-md-8 col-lg-6 mb-4 d-flex flex-column align-items-center"
+          <div
+            className="col-12 col-sm-10 col-md-8 col-lg-6 mb-4 d-flex flex-column align-items-center"
             style={{
-            width: '100%',
-            maxWidth: '500px',
-            margin: '0 auto'
-          }}
+              width: '100%',
+              maxWidth: '500px',
+              margin: '0 auto'
+            }}
           >
             <h2 style={{ whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
               Social Media Click
             </h2>
-            <PieChart data={socialMediaData} />
+            {/* wrapper tinggi tetap agar PieChart tidak menciut */}
+            <div className="w-100" style={{ height: '500px' }}>
+              <PieChart data={socialMediaData} height={300} />
+            </div>
           </div>
-          <div className="col-12 col-sm-10 col-md-8 col-lg-6 mb-4 d-flex flex-column align-items-center"
+
+          <div
+            className="col-12 col-sm-10 col-md-8 col-lg-6 mb-4 d-flex flex-column align-items-center"
             style={{
-            width: '100%',
-            maxWidth: '500px',
-            margin: '0 auto'
-          }}
+              width: '100%',
+              maxWidth: '500px',
+              margin: '0 auto'
+            }}
           >
             <h2 style={{ whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
               Contact & Affiliate
             </h2>
-            <PieChart data={contactAffiliateData} />
+            {/* wrapper tinggi tetap agar PieChart tidak menciut */}
+            <div className="w-100" style={{ height: '500px' }}>
+              <PieChart data={contactAffiliateData} height={300} />
+            </div>
           </div>
         </div>
       </div>

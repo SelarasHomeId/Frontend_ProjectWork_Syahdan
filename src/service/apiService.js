@@ -2,7 +2,7 @@ import axios from "axios";
 import { BASE_URL } from "../utils/constant";
 import { removeAllCookies } from "../utils/general";
 import Cookies from "js-cookie";
-import Swal from "sweetalert2";
+import Swal from "sweetalert2";
 
 // ==================================================================================================== //
 // Fungsi utama untuk melakukan request API
@@ -415,12 +415,12 @@ export const getTaskById = async (taskId) => {
   });
 };
 
-export const updateTask = async (taskId, updatedData) => {
+export const updateTask = async (taskId, updatedData, contentType) => {
   return await apiRequest({
     method: "PUT",
     endpoint: `/task/${taskId}`,
     body: updatedData,
-    contentType: "multipart/form-data"
+    contentType: contentType ?? "multipart/form-data"
   });
 };
 
@@ -428,6 +428,14 @@ export const searchTask = async (search) => {
   const response = await apiRequest({
     method: "GET",
     endpoint: `/task?search=${search}`,
+  });
+
+  return response.data.data
+}
+export const getLabel = async () => {
+  const response = await apiRequest({
+    method: "GET",
+    endpoint: `/task/label`,
   });
 
   return response.data.data

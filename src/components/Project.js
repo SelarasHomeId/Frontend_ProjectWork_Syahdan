@@ -85,14 +85,16 @@ const handleAddProject = async () => {
         const location = document.getElementById("swal-location").value;
         const coverInput = document.getElementById("swal-cover").files[0];
 
-        if (!name) {
-          Swal.showValidationMessage("Nama project tidak boleh kosong!");
-          return false;
+        if (!name.trim()) {
+            Swal.showValidationMessage("Nama tidak boleh kosong atau hanya berisi spasi!");
+            return false;
         }
-        if (!location) {
-          Swal.showValidationMessage("Location tidak boleh kosong!");
-          return false;
-        }
+        
+        const namePattern = /^[A-Za-z\s]+$/;
+          if (!namePattern.test(name)) {
+            Swal.showValidationMessage("Tidak boleh di isi dengan character unik");
+            return false;
+          }
         return { name, location, coverInput };
       },
     });
@@ -150,7 +152,7 @@ const handleEditProject = async (id) => {
             <input id="swal-name" type="text" class="swal2-input" placeholder="Input name" value="${projectData.name}">
 
             <label for="swal-location">Location:</label>
-            <input id="swal-location" type="text" class="swal2-input" placeholder="Input location" value="${projectData.location}">
+            <input id="swal-location" type="text" class="swal2-input" placeholder="Input location" value="${projectData.location || ''}">
 
             <label for="swal-cover">Cover:</label>
             <input id="swal-cover" type="file" class="swal2-input" accept="image/*">
@@ -174,11 +176,22 @@ const handleEditProject = async (id) => {
             updatedData.cover = coverInput;
           }
 
-          if (!name) {
-            Swal.showValidationMessage("Nama tidak boleh kosong!");
+          if (!name.trim()) {
+            Swal.showValidationMessage("Nama tidak boleh kosong atau hanya berisi spasi!");
             return false;
           }
           
+          const namePattern = /^[A-Za-z\s-z0-9]+$/;
+          if (!namePattern.test(name)) {
+            Swal.showValidationMessage("Tidak boleh di isi dengan character unik");
+              return false;
+          }
+
+          const locationPattern = document.getElementById('swal-location').value;
+          if (locationPattern !== '' && location.trim() === '') {
+            Swal.showValidationMessage("Location tidak boleh hanya berisi spasi");
+            return false;
+          }
           return updatedData;
         },
       });
