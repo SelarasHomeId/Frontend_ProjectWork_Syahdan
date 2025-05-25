@@ -56,10 +56,16 @@ const Division = () => {
           cancelButtonText: "Cancel",
           preConfirm: () => {
             const name = document.getElementById("swal-name").value;   
-            if (!name) {
-              Swal.showValidationMessage("Nama division tidak boleh kosong!");
-              return false;
-            }
+            if (!name.trim()) {
+              Swal.showValidationMessage("Nama tidak boleh kosong atau hanya berisi spasi!");
+                return false;
+              }
+            
+            const namePattern = /^[A-Za-z\s]+$/;
+            if (!namePattern.test(name)) {
+              Swal.showValidationMessage("Tidak boleh di isi dengan character unik");
+                return false;
+              }
     
             return { name };
           },

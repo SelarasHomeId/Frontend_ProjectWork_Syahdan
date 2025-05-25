@@ -32,7 +32,7 @@ const User = () => {
     fetchUsers();
   }, [fetchUsers]);
 
-  const handleSearchChange = debounce((value) => {
+  const handleSearchChange = debounce((value, searchTerm) => {
     setSearch(value);
     setCurrentPage(1);
   }, 500);
@@ -110,8 +110,14 @@ const User = () => {
         const role = document.getElementById("swal-role").value;
         const division = document.getElementById("swal-division").value;
 
-        if (!name) {
-          Swal.showValidationMessage("Nama tidak boleh kosong!");
+        if (!name.trim()) {
+          Swal.showValidationMessage("Nama tidak boleh kosong atau hanya berisi spasi!");
+          return false;
+        }
+
+        const namePattern = /^[A-Za-z\s]+$/;
+        if (!namePattern.test(name)) {
+          Swal.showValidationMessage("Tidak boleh di isi dengan character unik");
           return false;
         }
         if (!email) {
@@ -276,10 +282,16 @@ const User = () => {
         if (division && parseInt(division, 10) !== userData.divisi_id) updatedData.divisi_id = parseInt(division, 10);
         if (isLocked !== userData.is_locked) updatedData.is_locked = isLocked;
 
-        if (!name) {
-          Swal.showValidationMessage("Nama tidak boleh kosong!");
+        if (!name.trim()) {
+          Swal.showValidationMessage("Nama tidak boleh kosong atau hanya berisi spasi!");
           return false;
-        }
+         }
+                  
+        const namePattern = /^[A-Za-z\s]+$/;
+        if (!namePattern.test(name)) {
+          Swal.showValidationMessage("Tidak boleh di isi dengan character unik");
+           return false;
+         }
         if (!email) {
           Swal.showValidationMessage("Email tidak boleh kosong!");
           return false;
@@ -447,7 +459,7 @@ const User = () => {
           <tbody>
             {users == null ? (
               <tr>
-                <td colSpan="7">No users found</td>
+                <td colSpan="9">No users found</td>
               </tr>
             ) : (
               users.map((user, index) => (
