@@ -34,13 +34,13 @@ const TaskDetail = ({ task, onClose, onDelete }) => {
   //IS WATCH
   const [isWatched, setIsWatched] = useState(false);
   //COVER IMAGE
-  const [coverImage,] = useState(null);
+  const [coverImage, setCoverImage] = useState(null);
   const fileInputCoverRef = useRef(null);
   //CHECKLIST
   const [showChecklist, setShowChecklist] = useState(false);
   const [checklistItems, setChecklistItems] = useState([]);
   const [newChecklistItem, setNewChecklistItem] = useState("");
-  //const [percentage, setPercentage] = useState(0);
+  const [percentage, setPercentage] = useState(0);
   // MEMBER
   const [showMemberModal, setShowMemberModal] = useState(false);
   const [currentMember, setCurrentMember] = useState([]);
@@ -57,7 +57,13 @@ const TaskDetail = ({ task, onClose, onDelete }) => {
   const [taskData, setTaskData] = useState(null);
   const [isEditing, setIsEditing] = useState(false);
   // DUE DATE
-  // const [showDueDateModal, setShowDueDateModal] = useState(false);
+  const [showDueDateModal, setShowDueDateModal] = useState(false);
+  const [dueDate, setDueDate] = useState(''); // menyimpan tanggal
+
+  const toggleDueDateModal = () => {
+    setShowDueDateModal(!showDueDateModal);
+  };
+  const Date = () => <span>📅</span>;
   //ATTACHMENT
   const [attachments, setAttachments] = useState([]);
   const [attachmentMessage, setAttachmentMessage] = useState("");
@@ -77,13 +83,13 @@ const TaskDetail = ({ task, onClose, onDelete }) => {
 //======================= *END USE STATE*====================================
 
 //======================= *START FUNCTION*====================================  
-// const handleCoverImageChange = (event) => {
-//   const file = event.target.files[0];
-//   if (file) {
-//     const imageUrl = URL.createObjectURL(file);
-//     setCoverImage(imageUrl);
-//   }
-// };
+const handleCoverImageChange = (event) => {
+  const file = event.target.files[0];
+  if (file) {
+    const imageUrl = URL.createObjectURL(file);
+    setCoverImage(imageUrl);
+  }
+};
 
 const handleToggleComplete = async () => {
     const next = !isCompleted;
@@ -376,6 +382,20 @@ const handleToggleWatch = async () => {
     console.log(`Pindahkan task ${taskId} ke list ${targetListId}`);
     // Lanjutkan sesuai kebutuhan
   };
+
+  // Handle due date
+  const handleDateChange = (e) => {
+  setDueDate(e.target.value);
+};
+const handleSaveDueDate = () => {
+  console.log('Due Date disimpan:', dueDate);
+  setTaskData((prevTask) => ({
+    ...prevTask,
+    dueDate: dueDate,
+  }));
+  setShowDueDateModal(false);
+};
+
 //=======================* END FUNCTION*====================================
 
 //=======================*USE EFFECT*======================================//
@@ -512,22 +532,27 @@ useEffect(() => {
             </button>
           </div>
 
-          {/* Section 2: Cover Image */}
-          <div 
-            className="cover-image-container rounded mb-3 w-100" 
-            style={{
-              height: '90px',
-              background: coverImage 
-                ? `url(${coverImage})` 
-                : '#f8f9fa'
-            }}
-          >
-            {!coverImage && (
-              <div className="text-muted d-flex h-100 align-items-center justify-content-center">
-                No Cover
-              </div>
-            )}
+          <div>
+      {/* Section 2: Cover Image */}
+      <div
+        className="cover-image-container rounded mb-3 w-100"
+        style={{
+          height: '90px',
+          background: coverImage
+            ? `url(${coverImage})`
+            : '#f8f9fa',
+          backgroundSize: 'cover',
+          backgroundPosition: 'center',
+        }}
+        onClick={() => fileInputCoverRef.current?.click()} // klik cover untuk upload juga
+      >
+        {!coverImage && (
+          <div className="text-muted d-flex h-100 align-items-center justify-content-center">
+            No Cover
           </div>
+        )}
+      </div>
+      </div>
 
           {/* Section 3: Completion Check + Title */}
           <div className="d-flex align-items-center gap-3 w-100">
@@ -626,7 +651,7 @@ useEffect(() => {
               <h5 className="text-start section-title mb-2">
                 <FontAwesomeIcon icon={faTag} className="me-2" />
                 Label
-              </h5>
+              </h5>              
               
               {labeled && labeled.length > 0 ? (
                 <div className="d-flex flex-wrap">
@@ -846,7 +871,7 @@ useEffect(() => {
               { icon: Users , label: 'Members', action: () => setShowMemberModal(true) },
               { icon: Tag, label: 'Labels', action: () => setShowLabelModal(true) },
               { icon: CheckSquare, label: 'Checklist', action: () => setShowChecklist(true) },
-              // { icon: Clock, label: 'Dates', action: () => setShowDueDateModal(true) },
+              { icon: Date, label: 'Set Due Dates', action: () => setShowDueDateModal(true) },
               { icon: Paperclip, label: 'Attachment', action: () => fileInputAttachmentRef.current?.click() },
               { icon: Image, label: 'Cover', action: () => fileInputCoverRef.current?.click() },
               { icon: Trash, label: 'Delete Task', action: () => setShowDeleteConfirm(true) },
@@ -1063,6 +1088,32 @@ useEffect(() => {
           </div>
         </div>
       )}
+      
+      <div className="task-detail">
+      {/* Bagian atas: judul task */}
+      <h1>{taskData?.title}</h1>
+      {/* Tampilkan due date jika ada */}
+      {taskData?.dueDate && (
+        <p style={{ color: '#666' }}>Due Date: {taskData.dueDate}</p>
+      )}</div>
+    
+      {showDueDateModal && (
+      <div className="due-date-content">
+        <div className="due-date-overlay" onClick={(e) => e.stopPropagation()}>
+          <h2>Set Due Date</h2>
+          <input type="date" value={dueDate} onChange={handleDateChange} />
+          
+          <div style={{ marginTop: '16px', display: 'flex', gap: '10px' }}>
+            <button onClick={handleSaveDueDate} style={{ flex: 1, backgroundColor: '#28a745', color: '#fff' }}>
+              Save
+            </button>
+            <button onClick={toggleDueDateModal} style={{ flex: 1 }}>
+              Close
+            </button>
+          </div>
+        </div>
+      </div>
+        )}
 
       {showMoveModal && (
         <div className="popup-overlay">
