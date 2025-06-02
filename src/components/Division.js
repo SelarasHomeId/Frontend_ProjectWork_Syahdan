@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useCallback  } from 'react';
 import debounce from 'lodash.debounce';
 import '../styles/Division.css';
-import { getAllDivision, addDivision, updateDivision, deleteDivision, getDivisionById } from '../service/apiService';
+import { getAllDivision, addDivision, updateDivision, deleteDivision, getDivisionById, processDownloadExcel } from '../service/apiService';
 import Swal from "sweetalert2";
 import { MdEdit } from 'react-icons/md';
 
@@ -12,12 +12,15 @@ const Division = () => {
   const [currentPage, setCurrentPage] = useState(1);
   const [itemsPerPage] = useState(5);
   const [hasNextPage, setHasNextPage] = useState(false);
+  const [isLoading, setIsLoading] = useState(false);
+  const [isLoadingFetch, setIsLoadingFetch] = useState(false);
 
   const fetchDivisions = useCallback(async () => {
+    setIsLoadingFetch(true);
     try {
       const offset = (currentPage - 1) * itemsPerPage;
       const response = await getAllDivision(`/divisi?limit=${itemsPerPage}&offset=${offset}&search=${search}`);
-  
+ 
       if (response.success) {
         setDivisions(response.data.data);
         setHasNextPage(offset + itemsPerPage < response.data.count);
@@ -25,8 +28,9 @@ const Division = () => {
     } catch (error) {
       console.error('Error fetching divisi:', error);
     }
+    setIsLoadingFetch(false);
   }, [currentPage, search, itemsPerPage]);
-  
+ 
   useEffect(() => {
     fetchDivisions();
   }, [fetchDivisions]);
@@ -55,27 +59,28 @@ const Division = () => {
           confirmButtonText: "Submit",
           cancelButtonText: "Cancel",
           preConfirm: () => {
-            const name = document.getElementById("swal-name").value;   
+            const name = document.getElementById("swal-name").value;  
             if (!name.trim()) {
               Swal.showValidationMessage("Nama tidak boleh kosong atau hanya berisi spasi!");
                 return false;
               }
-            
-            const namePattern = /^[A-Za-z\s]+$/;
+           
+            const namePattern = /^[A-Za-z0-9\s]+$/;
             if (!namePattern.test(name)) {
               Swal.showValidationMessage("Tidak boleh di isi dengan character unik");
                 return false;
               }
-    
+   
             return { name };
           },
         });
-    
+   
         if (formValues) {
-          const response = await addDivision({ 
-            name: formValues.name, 
+          setIsLoading(true);
+          const response = await addDivision({
+            name: formValues.name,
           });
-    
+   
           if (response.success) {
             Swal.fire({
               title: "Berhasil!",
@@ -93,6 +98,7 @@ const Division = () => {
               confirmButtonText: "OK",
             });
           }
+          setIsLoading(false);
         }
       } catch (error) {
         Swal.fire({
@@ -108,7 +114,7 @@ const Division = () => {
         try {
           const divisionDataRes = await getDivisionById(id);
           const divisionData = divisionDataRes.data.data;
-    
+   
           const { value: formValues } = await Swal.fire({
             title: "Edit Divisi",
             html: `
@@ -125,7 +131,7 @@ const Division = () => {
             preConfirm: () => {
               const name = document.getElementById("swal-name").value;
               const updatedData = {};
-    
+   
               if (name !== divisionData.name) updatedData.name = name;
               if (!name) {
                 Swal.showValidationMessage("Nama division tidak boleh kosong!");
@@ -135,10 +141,11 @@ const Division = () => {
               return updatedData;
             },
           });
-    
+   
           if (formValues && Object.keys(formValues).length > 0) {
+            setIsLoading(true);
             const response = await updateDivision(id, formValues);
-    
+   
             if (response.success) {
               Swal.fire({
                 title: "Berhasil!",
@@ -156,6 +163,7 @@ const Division = () => {
                 confirmButtonText: "OK",
               });
             }
+            setIsLoading(false);
           }
         } catch (error) {
           Swal.fire({
@@ -179,10 +187,10 @@ const Division = () => {
             confirmButtonColor: '#dc3545',
             cancelButtonText: "Batal",
           });
-    
+   
           if (confirmDelete.isConfirmed) {
             const response = await deleteDivision(id);
-    
+   
             if (response.success) {
               Swal.fire({
                 title: "Berhasil!",
@@ -211,16 +219,32 @@ const Division = () => {
         }
       };
 
+  const handleExportData = async () => {
+    setIsLoading(true);
+    await processDownloadExcel(`/divisi/export`)
+    setIsLoading(false);
+  }
+
   return (
     <div className="divisi-container">
+      {isLoading && (
+        <div className="loading-overlay">
+          <div className="spinner" />
+        </div>
+      )}
       <div className="table-header">
-        <input 
-          type="text" 
-          className="search-input" 
-          placeholder="Search by division name" 
-          onChange={(e) => handleSearchChange(e.target.value)} 
+        <input
+          type="text"
+          className="search-input"
+          placeholder="Search by division name"
+          onChange={(e) => handleSearchChange(e.target.value)}
         />
-        <button className="add-button" onClick={() => handleAddDivision()}>Add Division</button>
+        <div>
+          <button className="unduh-button" style={{ marginRight: '10px' }} onClick={handleExportData}>
+            Export Data
+          </button>
+          <button className="add-button" onClick={() => handleAddDivision()}>Add Division</button>
+        </div>
       </div>
 
       <table className="divisi-table">
@@ -235,7 +259,12 @@ const Division = () => {
         <tbody>
           {divisi == null ? (
             <tr>
-              <td colSpan="7">No divisi found</td>
+              <td colSpan="7">
+                <span style={{ display: 'inline-flex', alignItems: 'center', gap: '8px' }}>
+                  { isLoadingFetch ? 'Prepare your data' : 'No division found'}
+                  {isLoadingFetch && <div className="mini-spinner" />}
+                </span>
+              </td>
             </tr>
           ) : (
             divisi.map((divisi, index) => (
@@ -251,8 +280,8 @@ const Division = () => {
                   >
                     <MdEdit className="action-icon" />
                   </button>
-                  <button 
-                    className="action-button btn btn-danger" 
+                  <button
+                    className="action-button btn btn-danger"
                     onClick={() => handleDeleteDivision(divisi.id)}
                   >
                     <i className="fas fa-trash-alt"></i>

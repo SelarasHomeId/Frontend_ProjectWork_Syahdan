@@ -51,7 +51,7 @@ const Workspace = ({ workspaceId, toDetailTask }) => {
       });
     } finally {
       setIsLoadingTask(false);
-    }
+    } 
   };
 
   const handleClose = () => {
@@ -274,7 +274,9 @@ const Workspace = ({ workspaceId, toDetailTask }) => {
             title: detailTask.title, //
             assign_to_user: detailTask.assign_to_user, //
             checklist: detailTask.checklist.data, //
-            comment: detailTask.comment.count, //
+            comment: detailTask.comment && detailTask.comment.data
+              ? detailTask.comment.data.filter((item) => item.is_history === false).length
+              : 0,
             cover: detailTask.cover, //
             description: false, //
             due_date: detailTask.due_date, //

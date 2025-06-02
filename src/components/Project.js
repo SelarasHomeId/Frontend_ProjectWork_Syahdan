@@ -1,12 +1,10 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import debounce from 'lodash.debounce';
 import '../styles/Project.css';
-import { getAllProject, addProject, updateProject, deleteProject, getProjectById } from '../service/apiService';
+import { getAllProject, addProject, updateProject, deleteProject, getProjectById, processDownloadExcel } from '../service/apiService';
 import Swal from "sweetalert2";
 import { Modal } from 'react-bootstrap';
 import { MdEdit } from "react-icons/md";
-import { deleteProjectCover } from '../service/apiService'; // pastikan path-nya sesuai
-
 
 const Project = () => {
   const [projects, setProjects] = useState([]);
@@ -17,12 +15,15 @@ const Project = () => {
   const [showImagePreview, setShowImagePreview] = useState(false);
   const [selectedCover, setSelectedCover] = useState(null);
   const [selectedProjectId, setSelectedProjectId] = useState(null);
+  const [isLoading, setIsLoading] = useState(false);
+  const [isLoadingFetch, setIsLoadingFetch] = useState(false);
 
   const fetchProjects = useCallback(async () => {
+    setIsLoadingFetch(true);
     try {
       const offset = (currentPage - 1) * itemsPerPage;
       const response = await getAllProject(`/project?limit=${itemsPerPage}&offset=${offset}&search=${search}`);
-  
+ 
       if (response.success) {
         setProjects(response.data.data);
         setHasNextPage(offset + itemsPerPage < response.data.count);
@@ -30,8 +31,9 @@ const Project = () => {
     } catch (error) {
       console.error('Error fetching projects:', error);
     }
+    setIsLoadingFetch(false);
   }, [currentPage, search, itemsPerPage]);
-  
+ 
   useEffect(() => {
     fetchProjects();
   }, [fetchProjects]);
@@ -89,8 +91,8 @@ const handleAddProject = async () => {
             Swal.showValidationMessage("Nama tidak boleh kosong atau hanya berisi spasi!");
             return false;
         }
-        
-        const namePattern = /^[A-Za-z\s]+$/;
+       
+        const namePattern = /^[A-Za-z0-9\s]+$/;
           if (!namePattern.test(name)) {
             Swal.showValidationMessage("Tidak boleh di isi dengan character unik");
             return false;
@@ -100,6 +102,7 @@ const handleAddProject = async () => {
     });
 
     if (formValues) {
+      setIsLoading(true);
       let cover = null;
       if (formValues.coverInput) {
         cover = formValues.coverInput;
@@ -127,6 +130,7 @@ const handleAddProject = async () => {
           confirmButtonText: "OK",
         });
       }
+      setIsLoading(false);
     }
   } catch (error) {
     Swal.fire({
@@ -180,8 +184,8 @@ const handleEditProject = async (id) => {
             Swal.showValidationMessage("Nama tidak boleh kosong atau hanya berisi spasi!");
             return false;
           }
-          
-          const namePattern = /^[A-Za-z\s-z0-9]+$/;
+         
+          const namePattern = /^[A-Za-z0-9\s]+$/;
           if (!namePattern.test(name)) {
             Swal.showValidationMessage("Tidak boleh di isi dengan character unik");
               return false;
@@ -197,7 +201,7 @@ const handleEditProject = async (id) => {
       });
 
         if (formValues && Object.keys(formValues).length > 0) {
-        
+        setIsLoading(true);
         const response = await updateProject(id, formValues);
 
         if (response.success) {
@@ -217,6 +221,7 @@ const handleEditProject = async (id) => {
             confirmButtonText: "OK",
           });
         }
+        setIsLoading(false);
       }
     } catch (error) {
       Swal.fire({
@@ -238,10 +243,10 @@ const handleEditProject = async (id) => {
           confirmButtonText: "Ya, Hapus",
           cancelButtonText: "Batal",
         });
-  
+ 
         if (confirmDelete.isConfirmed) {
           const response = await deleteProject(id);
-  
+ 
           if (response.success) {
             Swal.fire({
               title: "Berhasil!",
@@ -292,28 +297,63 @@ const handleEditProject = async (id) => {
         });
 
         if (result.isConfirmed) {
+          setIsLoading(true);
           try {
-            await deleteProjectCover(projectId);
-            fetchProjects();
+            const response = await updateProject(projectId, { delete_cover: true });
+            if (response.success) {
+              Swal.fire({
+                title: "Berhasil!",
+                text: "Cover project berhasil dihapus.",
+                icon: "success",
+                confirmButtonText: "OK",
+              }).then(async () => {
+                await fetchProjects();
+              });
+            } else {
+              Swal.fire({
+                title: "Gagal!",
+                text: response.error.data.message || "Terjadi kesalahan.",
+                icon: "error",
+                confirmButtonText: "OK",
+              });
+            }
             setShowImagePreview(false);
-            Swal.fire('Terhapus!', 'Cover berhasil dihapus.', 'success');
           } catch (error) {
             console.error('Gagal menghapus cover:', error);
             Swal.fire('Error!', 'Terjadi kesalahan saat menghapus cover.', 'error');
           }
+          setIsLoading(false);
         }
       };
+ 
+  const handleExportData = async () => {
+    setIsLoading(true);
+    await processDownloadExcel(`/project/export`)
+    setIsLoading(false);
+  }
 
   return (
     <div className="project-container">
+      {isLoading && (
+        <div className="loading-overlay">
+          <div className="spinner" />
+        </div>
+      )}
       <div className="table-header">
-        <input 
-          type="text" 
-          className="search-input" 
-          placeholder="Search by project name" 
-          onChange={(e) => handleSearchChange(e.target.value)} 
+        <input
+          type="text"
+          className="search-input"
+          placeholder="Search by project name"
+          onChange={(e) => handleSearchChange(e.target.value)}
         />
-        <button className="add-button" onClick={() => handleAddProject()}>Add Project</button>
+        <div>
+          <button className="unduh-button" style={{ marginRight: '10px' }} onClick={handleExportData}>
+            Export Data
+          </button>
+          <button className="add-button" onClick={handleAddProject}>
+            Add Project
+          </button>
+        </div>
       </div>
 
       <table className="project-table">
@@ -330,7 +370,12 @@ const handleEditProject = async (id) => {
             <tbody>
                   {!projects || projects.length === 0 ? (
                     <tr>
-                      <td colSpan="7">No projects found</td>
+                      <td colSpan="7">
+                        <span style={{ display: 'inline-flex', alignItems: 'center', gap: '8px' }}>
+                          { isLoadingFetch ? 'Prepare your data' : 'No projects found'}
+                          {isLoadingFetch && <div className="mini-spinner" />}
+                        </span>
+                      </td>
                     </tr>
                   ) : (
                   projects.map((project, index) => (
@@ -340,9 +385,9 @@ const handleEditProject = async (id) => {
                       <td className="text-center">
                         {
                           isValidUrl(project.location) ? (
-                            <a 
-                              href={`${project.location}`} 
-                              target="_blank" 
+                            <a
+                              href={`${project.location}`}
+                              target="_blank"
                               rel="noopener noreferrer"
                             >
                                <i className="fas fa-map-marker-alt fa-2x"></i>
@@ -356,25 +401,25 @@ const handleEditProject = async (id) => {
 <td className='text-center'>
   {project.cover ? (
     <>
-      <button 
+      <button
         onClick={() => {
           setSelectedCover(project.cover.view_saved);
           setSelectedProjectId(project.id); // simpan id untuk delete
           setShowImagePreview(true);
         }}
-        style={{ 
-          background: 'none', 
-          border: 'none', 
+        style={{
+          background: 'none',
+          border: 'none',
           padding: 0,
           cursor: 'pointer'
         }}
         title="Preview Gambar"
         aria-label="Preview Gambar"
       >
-        <i 
-          className="fas fa-image" 
-          style={{ 
-            fontSize: '1.5rem', 
+        <i
+          className="fas fa-image"
+          style={{
+            fontSize: '1.5rem',
             color: '#6c757d',
             transition: 'color 0.3s ease'
           }}
@@ -391,11 +436,11 @@ const handleEditProject = async (id) => {
   <Modal.Header closeButton>
     <Modal.Title style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', width: '100%' }}>
       <span>Preview Cover</span>
-      <button 
+      <button
         onClick={() => handleDeleteCover(selectedProjectId)}
-        style={{ 
-          background: 'none', 
-          border: 'none', 
+        style={{
+          background: 'none',
+          border: 'none',
           padding: 0,
           cursor: 'pointer',
           color: '#dc3545'
@@ -409,9 +454,9 @@ const handleEditProject = async (id) => {
   </Modal.Header>
   <Modal.Body>
     {selectedCover ? (
-      <img 
-        src={selectedCover} 
-        alt="Project Cover Preview" 
+      <img
+        src={selectedCover}
+        alt="Project Cover Preview"
         style={{ width: '100%' }}
       />
     ) : (
@@ -430,7 +475,7 @@ const handleEditProject = async (id) => {
                           >
                             <MdEdit/>
                           </button>
-                          <button 
+                          <button
                             className="btn btn-danger btn-sm p-2 d-flex align-items-center justify-content-center"
                             onClick={() => handleDeleteProject(project.id)}
                             style={{ width: '35px', height: '35px' }}

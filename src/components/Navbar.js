@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useRef, useCallback } from "react";
 import "../styles/Navbar.css";
 import { FaBars, FaBell, FaUser } from "react-icons/fa";
 import { Link, useNavigate } from "react-router-dom";
@@ -7,13 +7,17 @@ import Swal from "sweetalert2";
 import { removeAllCookies, validatePassword } from "../utils/general";
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faEnvelopeOpen, faEnvelope } from '@fortawesome/free-solid-svg-icons';
-import LogoSelarasSidebar from "../assets/img/selarasBackground.jpg"; 
+import LogoSelarasSidebar from "../assets/img/selarasBackground.jpg";
 import Cookies from "js-cookie";
+import notifSound from '../assets/notif_sound.ogg'
+import { useBadge } from "./BadgeContext";
+import { useCentrifuge } from "../service/webSocket"
 
 function Navbar({ showSidebar, toggleNavbar, showDetailTask }) {
   const navigate = useNavigate();
-  
+ 
   const [user] = useState({
+    id: Cookies.get("id") || 0,
     name: Cookies.get("name") || "",
     role: Cookies.get("roleName") || "",
     divisi: Cookies.get("divisiName") || "",
@@ -21,9 +25,29 @@ function Navbar({ showSidebar, toggleNavbar, showDetailTask }) {
 
   const [notifications, setNotifications] = useState([]);
   const [unreadNotif, setUnreadNotif] = useState(0);
+  const [unreadNotifBefore, setUnreadNotifBefore] = useState(0);
   const [showNotificationDropdown, setShowNotificationDropdown] = useState(false);
   const [showUserDropdown, setShowUserDropdown] = useState(false);
- 
+  const audioRef = useRef(new Audio(notifSound));
+  const { setBadge, clearBadge } = useBadge();
+
+  const loadNotifications = useCallback(async () => {
+    const response = await fetchNotifications();
+    if (response.success) {
+      setNotifications(response.data.data);
+      setUnreadNotifBefore(unreadNotif);
+      setUnreadNotif(response.data.count_unread);
+      document.title = response.data.count_unread > 0
+        ? `(${response.data.count_unread}) SelarasHomeId`
+        : `SelarasHomeId`;
+      if (response.data.count_unread > 0) {
+        setBadge(response.data.count_unread)
+      } else {
+        clearBadge()
+      }
+    }
+  }, [unreadNotif, setBadge, clearBadge]);
+
   useEffect(() => {
     loadNotifications();
     if (!Cookies.get("id")) {
@@ -38,7 +62,14 @@ function Navbar({ showSidebar, toggleNavbar, showDetailTask }) {
         navigate("/");
       });
     }
-  }, [navigate]);
+    if (unreadNotif > 0 && unreadNotif > unreadNotifBefore) {
+      if (audioRef.current) {
+        audioRef.current.play().catch(() => {
+          console.log("user didn't interact");
+        });
+      }
+    }
+  }, [navigate, unreadNotif, unreadNotifBefore, loadNotifications])
 
   useEffect(() => {
     const handleClickOutside = (event) => {
@@ -50,22 +81,47 @@ function Navbar({ showSidebar, toggleNavbar, showDetailTask }) {
         setShowUserDropdown(false);
       }
     };
-  
+ 
     document.addEventListener("click", handleClickOutside);
     return () => {
       document.removeEventListener("click", handleClickOutside);
     };
-  }, []);  
-  
-  const loadNotifications = async () => {
-    const response = await fetchNotifications();
-    if (response.success) {
-      setNotifications(response.data.data);
-      setUnreadNotif(response.data.count_unread)
+  }, []);
+
+  useEffect(() => {
+    setBadge(unreadNotif);
+    return () => {
+      document.title = `SelarasHomeId`;
+      clearBadge();
     }
-  };
+  }, [unreadNotif, setBadge, clearBadge]);
+
+  const playAudioNotif = async () => {
+    await loadNotifications();
+    if (unreadNotif > 0 && unreadNotif > unreadNotifBefore) {
+      if (audioRef.current) {
+        audioRef.current.play().catch(() => {
+          console.log("user didn't interact");
+        });
+      }
+    }
+  }
+
+  const handleDataReceive = (data) => {
+    if (data) {
+      if (data.is_new && data.count > unreadNotif) {
+        playAudioNotif();
+      }
+    }
+  }
+
+  useCentrifuge({
+    userId: user.id,
+    onDataReceive: handleDataReceive,
+  });
 
   const toggleNotificationDropdown = async () => {
+    loadNotifications();
     setShowNotificationDropdown(!showNotificationDropdown);
     setShowUserDropdown(false);
   };
@@ -103,7 +159,7 @@ function Navbar({ showSidebar, toggleNavbar, showDetailTask }) {
   const handleChangePassword = async () => {
     const { value: formValues } = await Swal.fire({
       iconHtml: '<i class="fas fa-lock" style="font-size: 64px; color: #444;"></i>',
-      
+     
       title: "Change Password",
       html: `
         <div class="input-group mb-3" style="width: 100%;">
@@ -242,7 +298,7 @@ function Navbar({ showSidebar, toggleNavbar, showDetailTask }) {
         showDetailTask(task)
       }
     }
-    
+   
     setShowNotificationDropdown(false);
   };
 
@@ -284,7 +340,7 @@ function Navbar({ showSidebar, toggleNavbar, showDetailTask }) {
             onClick={toggleNotificationDropdown}
           >
             <FaBell className="icon notification-icon" />
-            {(notifications != null && notifications.length > 0) && (
+            {(unreadNotif > 0) && (
               <span className="notification-badge">{unreadNotif}</span>
             )}
               <div className={`notification-dropdown ${showNotificationDropdown?'show':''}`}>

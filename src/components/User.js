@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useCallback  } from 'react';
 import debounce from 'lodash.debounce';
 import '../styles/User.css';
-import { addUser, deleteUser, getAllDivision, getAllRole, getAllUser, getUserById, resetPasswordUser, updateUser } from '../service/apiService';
+import { addUser, deleteUser, getAllDivision, getAllRole, getAllUser, getUserById, processDownloadExcel, resetPasswordUser, updateUser } from '../service/apiService';
 import Swal from "sweetalert2";
 import { MdEdit } from "react-icons/md";
 
@@ -11,14 +11,17 @@ const User = () => {
   const [currentPage, setCurrentPage] = useState(1);
   const [itemsPerPage] = useState(5);
   const [hasNextPage, setHasNextPage] = useState(false);
+  const [isLoading, setIsLoading] = useState(false);
+  const [isLoadingFetch, setIsLoadingFetch] = useState(false);
 
-  const capitalize = (str) => str.split(" ").map((word) => word.charAt(0).toUpperCase() + word.slice(1)).join(" ");
+  const capitalize = (str) => str.split(" ").map((word) => word.charAt(0).toUpperCase() + word.slice(1)).join(" ");
 
   const fetchUsers = useCallback(async () => {
+    setIsLoadingFetch(true);
     try {
       const offset = (currentPage - 1) * itemsPerPage;
       const response = await getAllUser(`/user?limit=${itemsPerPage}&offset=${offset}&search=${search}`);
-  
+ 
       if (response.success) {
         setUsers(response.data.data);
         setHasNextPage(offset + itemsPerPage < response.data.count);
@@ -26,8 +29,9 @@ const User = () => {
     } catch (error) {
       console.error('Error fetching users:', error);
     }
+    setIsLoadingFetch(false);
   }, [currentPage, search, itemsPerPage]);
-  
+ 
   useEffect(() => {
     fetchUsers();
   }, [fetchUsers]);
@@ -115,7 +119,7 @@ const User = () => {
           return false;
         }
 
-        const namePattern = /^[A-Za-z\s]+$/;
+        const namePattern = /^[A-Za-z0-9\s]+$/;
         if (!namePattern.test(name)) {
           Swal.showValidationMessage("Tidak boleh di isi dengan character unik");
           return false;
@@ -143,6 +147,7 @@ const User = () => {
     });
 
     if (formValues) {
+      setIsLoading(true);
       const response = await addUser({
         name: formValues.name,
         email: formValues.email,
@@ -167,6 +172,7 @@ const User = () => {
           confirmButtonText: "OK",
         });
       }
+      setIsLoading(false);
     }
     } catch (error) {
       Swal.fire({
@@ -191,11 +197,11 @@ const User = () => {
       const roles = rolesRes.data.data || [];
       const divisions = divisiRes.data.data || [];
 
-      const roleOptions = roles.map((role) => 
+      const roleOptions = roles.map((role) =>
         `<option value="${role.id}" ${role.name === userData.role.name ? "selected" : ""}>${role.name}</option>`
       ).join("");
-      
-      const divisionOptions = divisions.map((div) => 
+     
+      const divisionOptions = divisions.map((div) =>
         `<option value="${div.id}" ${div.name === userData.divisi.name ? "selected" : ""}>${div.name}</option>`
       ).join("");
 
@@ -286,8 +292,8 @@ const User = () => {
           Swal.showValidationMessage("Nama tidak boleh kosong atau hanya berisi spasi!");
           return false;
          }
-                  
-        const namePattern = /^[A-Za-z\s]+$/;
+                 
+        const namePattern = /^[A-Za-z0-9\s]+$/;
         if (!namePattern.test(name)) {
           Swal.showValidationMessage("Tidak boleh di isi dengan character unik");
            return false;
@@ -308,6 +314,7 @@ const User = () => {
 
 
       if (formValues && Object.keys(formValues).length > 0) {
+        setIsLoading(true);
         const response = await updateUser(id, formValues);
 
         if (response.success) {
@@ -327,6 +334,7 @@ const User = () => {
             confirmButtonText: "OK",
           });
         }
+        setIsLoading(false);
       }
     } catch (error) {
       Swal.fire({
@@ -429,16 +437,32 @@ const User = () => {
     }
   };
 
+  const handleExportData = async () => {
+    setIsLoading(true);
+    await processDownloadExcel(`/user/export`)
+    setIsLoading(false);
+  }
+
   return (
     <div className="user-container">
+      {isLoading && (
+        <div className="loading-overlay">
+          <div className="spinner" />
+        </div>
+      )}
       <div className="table-header">
-        <input 
-          type="text" 
-          className="search-input" 
-          placeholder="Search by name or email" 
-          onChange={(e) => handleSearchChange(e.target.value)} 
+        <input
+          type="text"
+          className="search-input"
+          placeholder="Search by name or email"
+          onChange={(e) => handleSearchChange(e.target.value)}
         />
-        <button className="add-button" onClick={() => handleAddUser()}>Add User</button>
+        <div>
+          <button className="unduh-button" style={{ marginRight: '10px' }} onClick={handleExportData}>
+            Export Data
+          </button>
+          <button className="add-button" onClick={() => handleAddUser()}>Add User</button>
+        </div>
       </div>
 
       <div className='table-responsive'>
@@ -459,7 +483,12 @@ const User = () => {
           <tbody>
             {users == null ? (
               <tr>
-                <td colSpan="9">No users found</td>
+                <td colSpan="9">
+                  <span style={{ display: 'inline-flex', alignItems: 'center', gap: '8px' }}>
+                    { isLoadingFetch ? 'Prepare your data' : 'No users found'}
+                    {isLoadingFetch && <div className="mini-spinner" />}
+                  </span>
+                </td>
               </tr>
             ) : (
               users.map((user, index) => (
@@ -484,7 +513,7 @@ const User = () => {
                       <MdEdit style={{ fontSize: '1.4rem' }} />
                     </button>
                     {/* Delete Button */}
-                    <button 
+                    <button
                       className="btn btn-danger btn-sm p-2 d-flex align-items-center justify-content-center"
                       onClick={() => handleDeleteUser(user.id)}
                       style={{ width: '38px', height: '38px' }}
@@ -494,7 +523,7 @@ const User = () => {
                     </button>
 
                     {/* Reset Password Button */}
-                    <button 
+                    <button
                       className="btn btn-secondary btn-sm p-2 d-flex align-items-center justify-content-center"
                       onClick={() => handleResetPassword(user.id)}
                       style={{ width: '38px', height: '38px' }}

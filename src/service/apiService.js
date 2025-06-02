@@ -276,13 +276,6 @@ export const deleteProject = async (projectId) => {
   });
 };
 
-export const deleteProjectCover = async (projectId) => {
-  return await apiRequest({
-    method: "DELETE",
-    endpoint: `/project/${projectId}/cover`,
-  });
-};
-
 // ==================================================================================================== //
 // DIVISION MANAGEMENT (CRUD)
 export const getAllDivision = async (endpoint) => {
@@ -432,6 +425,7 @@ export const searchTask = async (search) => {
 
   return response.data.data
 }
+
 export const getLabel = async () => {
   const response = await apiRequest({
     method: "GET",
@@ -440,3 +434,254 @@ export const getLabel = async () => {
 
   return response.data.data
 }
+
+export const deleteLabel = async (labelId) => {
+  const response = await apiRequest({
+    method: "DELETE",
+    endpoint: `/task/label/${labelId}`,
+  });
+
+  return response.data.data
+}
+
+export const createLabel = async ({ title, color }) => {
+  const response = await apiRequest({
+    method: "POST",
+    endpoint: `/task/label`,
+    body: { title, color }
+  });
+  return response.data.data;
+};
+
+export const updateLabel = async ({ labelId, title }) => {
+  const response = await apiRequest({
+    method: "PUT",
+    endpoint: `/task/label/${labelId}`,
+    body: { title }
+  });
+  return response.data.data;
+};
+
+export const moveTask = async (taskId, payload) => {
+  const response = await apiRequest({
+    method: 'PUT',
+    endpoint: `/task/${taskId}`,
+    body: payload,
+  });
+  return response.data;
+};
+
+export const getTaskFiles = async (taskId) => {
+  return await apiRequest({
+    method: "GET",
+    endpoint: `/task/file/${taskId}`,
+  });
+};
+
+export const uploadAttachment = async (taskId, file) => {
+  const updatedData = {};
+  updatedData.file = file;
+  updatedData.task_id = taskId;
+  return await apiRequest({
+    method: 'POST',
+    endpoint: `/task/file`,
+    body: updatedData,
+    contentType: "multipart/form-data"
+  });
+};
+
+export const deleteAttachment = async (fileId) => {
+  return await apiRequest({
+    method: "DELETE",
+    endpoint: `/task/file/${fileId}`,
+  });
+};
+
+export const renameAttachment = async (fileId, newName) => {
+  return await apiRequest({
+    method: "PUT",
+    endpoint: `/task/file/${fileId}`,
+    body: { name: newName },
+  });
+};
+
+export const deleteTask = async (taskId) => {
+  const response = await apiRequest({
+    method: 'DELETE',
+    endpoint: `/task/${taskId}`,
+  });
+  return response.data;
+};
+
+export const getAllCommentByTaskId = async (taskId) => {
+  const response = await apiRequest({
+    method: "GET",
+    endpoint: `/task/comment/${taskId}`,
+  });
+
+
+  return response.data.data
+}
+
+export const createTaskComment = async (taskData) => {
+  return await apiRequest({
+    method: "POST",
+    endpoint: "/task/comment",
+    body: taskData,
+  });
+};
+
+export const updateTaskComment = async (commentId, updatedData) => {
+  return await apiRequest({
+    method: "PUT",
+    endpoint: `/task/comment/${commentId}`,
+    body: updatedData,
+  });
+};
+
+export const deleteTaskComment = async (commentId) => {
+  return await apiRequest({
+    method: "DELETE",
+    endpoint: `/task/comment/${commentId}`,
+  });
+};
+
+export const apiRequestExportData = async ({
+  method,
+  endpoint,
+  token = null,
+  responseType = 'blob'
+}) => {
+  const url = `${BASE_URL}${endpoint}`;
+  let headers = { "Content-Type": "application/json" };
+
+
+  if (!token) {
+    token = Cookies.get("token");
+  }
+
+
+  if (token != null) {
+    headers["Authorization"] = `Bearer ${token}`;
+  }
+
+  const id = Cookies.get('id');
+  if (token != null && (id === undefined || id === null)){
+    try {
+      const response = await authLogout();
+      if (response.success) {
+        Swal.fire({
+          title: "Logout",
+          text: "Sesi Anda Telah Berakhir, Silahkan Login Ulang",
+          icon: "warning",  
+          iconColor: "#dc3545",
+          timer: 2500,
+          showConfirmButton: false,
+        }).then(() => {
+          removeAllCookies();
+          window.location.replace('/');
+        });
+      }
+    } catch (error) {
+      Swal.fire({
+        title: "Gagal Logout, hubungi admin anda",
+        text: error,
+        icon: "error",
+        confirmButtonText: "OK",
+      });
+    }
+  }
+ 
+  const hitAPI = async () => {
+    switch (method.toUpperCase()) {
+      case "GET":
+        return axios.get(url, { headers, responseType });
+      default:
+        throw new Error(`Metode HTTP tidak didukung: ${method}`);
+    }
+  };
+ 
+  try {
+    let response = await hitAPI();
+    return response;
+  } catch (error) {
+    if (error.status === 401 && (endpoint !== "/auth/login" && endpoint !== "/auth/send-email/forgot-password" && endpoint !== "/auth/logout" && endpoint !== "/auth/refresh-token")) {
+      const newToken = await refreshToken();
+      if (newToken) {
+        headers["Authorization"] = `Bearer ${newToken}`;
+        let response = await hitAPI();
+        return response
+      } else {
+        throw new Error("Gagal memperbarui token");
+      }
+    }else if(error.status === 422 && (endpoint !== "/auth/login" && endpoint !== "/auth/send-email/forgot-password" && endpoint !== "/auth/logout" && endpoint !== "/auth/refresh-token")){
+        try {
+          const response = await authLogout();
+          if (response.success) {
+            Swal.fire({
+              title: "Logout",
+              text: "Akun Dikunci atau password telah berubah",
+              icon: "success",
+              timer: 2500,
+              showConfirmButton: false,
+            }).then(() => {
+              removeAllCookies();
+              window.location.replace('/');
+            });
+          }
+        } catch (error) {
+          Swal.fire({
+            title: "Gagal Logout, hubungi admin anda",
+            text: error,
+            icon: "error",
+            confirmButtonText: "OK",
+          });
+        }
+    }
+    console.error(`Error pada request ${method} ${endpoint}:`, error);
+    return { success: false, error: error.response?.data || error.message };
+  }
+};
+
+export const processDownloadExcel = async (endpoint) => {
+  try {
+    const response = await apiRequestExportData({
+      method: "GET",
+      endpoint: endpoint,
+    });
+
+
+    const contentDisposition = response.headers["content-disposition"];
+    let fileName = "download.xlsx";
+    if (contentDisposition && contentDisposition.includes("filename=")) {
+      fileName = contentDisposition.split("filename=")[1].replace(/['"]/g, "");
+    }
+
+
+    const blob = new Blob([response.data], {
+      type: "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+    });
+
+
+    const url = window.URL.createObjectURL(blob);
+    const link = document.createElement("a");
+    link.href = url;
+    link.download = fileName;
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+    window.URL.revokeObjectURL(url);
+  } catch (error) {
+    console.error("Download error:", error);
+    Swal.fire("Gagal", "Gagal mengunduh file", "error");
+  }
+}
+
+export const refreshTokenForWebsocket = async () => {
+  const response = await apiRequest({
+    method: "POST",
+    endpoint: "/auth/refresh-token",
+  })
+  Cookies.set("token", response.data.token, { expires: 36500, secure: true, sameSite: "Strict" });
+  return response.data.token;
+};
