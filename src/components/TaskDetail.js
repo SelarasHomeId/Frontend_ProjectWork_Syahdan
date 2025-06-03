@@ -1,7 +1,7 @@
 import React, { useState, useRef, useEffect, useCallback } from "react";
 import {
   X, Eye, Users, Tag, CheckSquare, Paperclip, Image, 
-  Trash,Edit
+  Trash,Edit,Calendar
 } from "lucide-react";
 import { EditorContent, useEditor } from "@tiptap/react";
 import StarterKit from "@tiptap/starter-kit";
@@ -80,7 +80,6 @@ const TaskDetail = ({ task, onClose, onDelete}) => {
   const toggleDueDateModal = () => {
     setShowDueDateModal(!showDueDateModal);
   };
-  const Date = () => <span>📅</span>;
   //ATTACHMENT
   const [attachments, setAttachments] = useState([]);
   // const [attachmentMessage, setAttachmentMessage] = useState("");
@@ -130,15 +129,19 @@ const handleToggleComplete = async () => {
 
 // Handle due date
 const handleDateChange = (e) => {
-  setDueDate(e.target.value);
+  setDueDate(e.target.value.replace("T", " "));
 };
-const handleSaveDueDate = () => {
-  console.log('Due Date disimpan:', dueDate);
-  setTaskData((prevTask) => ({
-    ...prevTask,
-    dueDate: dueDate,
-  }));
-  setShowDueDateModal(false);
+
+const handleSaveDueDate = async () => {
+  try {
+    await updateTask(task.id, { due_date: dueDate }, "application/json");
+    const res = await getTaskById(task.id);
+    setTaskData(res.data.data);
+    setShowDueDateModal(false);
+  } catch (err) {
+    console.error(err);
+    alert('Gagal update due date');
+  }
 };
 
 const handleSaveTitle = async () => {
@@ -624,6 +627,7 @@ useEffect(() => {
       setIsWatched(!!data.watch);
       setIsCompleted(!!data.is_completed);
       setActivity(res.data.data.comment.data)
+      setDueDate(data.due_date)
     } catch (e) {
       console.error('Gagal load task:', e);
     }
@@ -831,14 +835,41 @@ useEffect(() => {
             <div 
               className="d-flex flex-column flex-grow-1 w-75"
             >
-              <button
-                className={`btn btn-sm mb-3 ${isWatched ? 'btn-success' : 'btn-outline-secondary'} align-self-start w-auto`}
-                style={{ width: 'auto' }} 
-                onClick={handleToggleWatch}
-              >
-                <Eye size={16} className="me-1" />
-                {isWatched ? 'Watching' : 'Watch'}
-              </button>
+              <div className="d-flex align-items-center flex-wrap gap-2 mb-3">
+                  <button
+                      className={`btn btn-sm d-inline-flex align-items-center px-3 py-1 fs-6 fw-semibold ${
+                      isWatched ? 'btn-success' : 'btn-outline-secondary'
+                      }`}
+                      onClick={handleToggleWatch}
+                  >
+                      <Eye size={16} className="me-1" />
+                      {isWatched ? 'Watching' : 'Watch'}
+                  </button>
+
+                  {dueDate && (() => {
+                    const date = new Date(dueDate.replace(' ', 'T')); // ubah spasi jadi 'T' agar bisa di-parse
+                    const now = new Date();
+                    const sameYear = date.getFullYear() === now.getFullYear();
+
+                    const datePart = date.toLocaleDateString(undefined, {
+                      year: sameYear ? undefined : 'numeric',
+                      month: 'short',
+                      day: 'numeric',
+                    });
+
+                    const timePart = date.toLocaleTimeString(undefined, {
+                      hour: 'numeric',
+                      minute: '2-digit',
+                      hour12: true,
+                    });
+
+                    return (
+                      <span className="badge bg-success-subtle text-success d-inline-flex align-items-center px-3 py-2 fs-6 fw-semibold">
+                        Due Date:&nbsp;{datePart}, {timePart}
+                      </span>
+                    );
+                  })()}
+              </div>
 
               <div className="mb-4">
                 <h5 className="text-start section-title mb-2">
@@ -1238,7 +1269,7 @@ useEffect(() => {
                   { icon: Users , label: 'Members', action: () => setShowMemberModal(true) },
                   { icon: Tag, label: 'Labels', action: () => setShowLabelModal(true) },
                   { icon: CheckSquare, label: 'Checklist', action: () => setShowChecklist(true) },
-                  { icon: Date, label: 'Set Due Dates', action: () => setShowDueDateModal(true) },
+                  { icon: Calendar, label: 'Due Date', action: () => setShowDueDateModal(true) },
                   { icon: Paperclip, label: 'Attachment', action: triggerFileUpload },
                   { icon: Image, label: 'Cover', action: () => fileInputCoverRef.current?.click() },
                   { icon: Move, label: 'Move', action: handleOpenMove },
@@ -1511,14 +1542,20 @@ useEffect(() => {
           <div className="due-date-content">
             <div className="due-date-overlay" onClick={(e) => e.stopPropagation()}>
               <h2>Set Due Date</h2>
-              <input type="date" value={dueDate} onChange={handleDateChange} />
-              
-              <div style={{ marginTop: '16px', display: 'flex', gap: '10px' }}>
-                <button onClick={handleSaveDueDate} style={{ flex: 1, backgroundColor: '#28a745', color: '#fff' }}>
-                  Save
+              <input
+                type="datetime-local"
+                step="1" // penting: agar bisa simpan detik
+                value={dueDate ?? ''}
+                onChange={handleDateChange}
+              />
+
+              <div style={{marginTop: '16px', display: 'flex', gap: '10px'}}>
+                <button onClick={handleSaveDueDate}
+                        style={{flex: 1, backgroundColor: '#28a745', color: '#fff'}}>
+                    Save
                 </button>
-                <button onClick={toggleDueDateModal} style={{ flex: 1 }}>
-                  Close
+                <button onClick={toggleDueDateModal} style={{flex: 1}}>
+                    Close
                 </button>
               </div>
             </div>
