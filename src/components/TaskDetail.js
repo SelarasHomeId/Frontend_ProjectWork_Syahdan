@@ -109,13 +109,13 @@ const TaskDetail = ({ task, onClose, onDelete}) => {
 //======================= *END USE STATE*====================================
 
 //======================= *START FUNCTION*====================================  
-// const handleCoverImageChange = (event) => {
-//   const file = event.target.files[0];
-//   if (file) {
-//     const imageUrl = URL.createObjectURL(file);
-//     setCoverImage(imageUrl);
-//   }
-// };
+const handleCoverImageChange = (event) => {
+  const file = event.target.files[0];
+  if (file) {
+    const imageUrl = URL.createObjectURL(file);
+    setCoverImage(imageUrl);
+  }
+};
 
 const handleToggleComplete = async () => {
     const next = !isCompleted;
@@ -1255,13 +1255,34 @@ useEffect(() => {
                 ))}
               </div>
             </div>
-            <input
-              ref={fileInputAttachmentRef}
-              type="file"
-              accept="*/*"
-              style={{ display: 'none' }}
-              onChange={handleAttachmentUpload}
-            />
+          </div>
+
+        {/* Right Column: sidebar */}
+        <div className="d-flex flex-column mt-n3 ms-auto align-self-start w-25" style={{ marginTop: '1rem' }}>
+          <div
+            className="sidebar d-flex flex-column pt-0"
+            style={{ width: '200px', flexShrink: 0, gap: '0.5rem' }}
+          >
+            {[
+              { icon: Users , label: 'Members', action: () => setShowMemberModal(true) },
+              { icon: Tag, label: 'Labels', action: () => setShowLabelModal(true) },
+              { icon: CheckSquare, label: 'Checklist', action: () => setShowChecklist(true) },
+              { icon: Date, label: 'Set Due Dates', action: () => setShowDueDateModal(true) },
+              { icon: Paperclip, label: 'Attachment', action: () => fileInputAttachmentRef.current?.click() },
+              { icon: Image, label: 'Cover', action: () => fileInputCoverRef.current?.click() },
+              { icon: Trash, label: 'Delete Task', action: () => setShowDeleteConfirm(true) },
+              { icon: Move, label: 'Move', action: () => setShowMoveModal(true) },
+              ].map(({ icon: Icon, label, action }, idx) => (
+              <button
+                key={idx}
+                className="btn btn-outline-secondary d-flex align-items-center gap-2 py-2"
+                onClick={action}
+                type="button"
+              >
+                <Icon size={16} className="icon" /> {label}
+              </button>
+            ))}
+          </div>
           </div>
         </div>
             
@@ -1531,6 +1552,33 @@ useEffect(() => {
               </div>
             </div>
           </div>
+      </div>
+      )}
+      
+      <div className="task-detail">
+      {/* Bagian atas: judul task */}
+      <h1>{taskData?.title}</h1>
+      {/* Tampilkan due date jika ada */}
+      {taskData?.dueDate && (
+        <p style={{ color: '#666' }}>Due Date: {taskData.dueDate}</p>
+      )}</div>
+    
+      {showDueDateModal && (
+      <div className="due-date-content">
+        <div className="due-date-overlay" onClick={(e) => e.stopPropagation()}>
+          <h2>Set Due Date</h2>
+          <input type="date" value={dueDate} onChange={handleDateChange} />
+          
+          <div style={{ marginTop: '16px', display: 'flex', gap: '10px' }}>
+            <button onClick={handleSaveDueDate} style={{ flex: 1, backgroundColor: '#28a745', color: '#fff' }}>
+              Save
+            </button>
+            <button onClick={toggleDueDateModal} style={{ flex: 1 }}>
+              Close
+            </button>
+          </div>
+        </div>
+      </div>
         )}
 
         {showMoveModal && (
