@@ -109,13 +109,13 @@ const TaskDetail = ({ task, onClose, onDelete}) => {
 //======================= *END USE STATE*====================================
 
 //======================= *START FUNCTION*====================================  
-const handleCoverImageChange = (event) => {
-  const file = event.target.files[0];
-  if (file) {
-    const imageUrl = URL.createObjectURL(file);
-    setCoverImage(imageUrl);
-  }
-};
+// const handleCoverImageChange = (event) => {
+//   const file = event.target.files[0];
+//   if (file) {
+//     const imageUrl = URL.createObjectURL(file);
+//     setCoverImage(imageUrl);
+//   }
+// };
 
 const handleToggleComplete = async () => {
     const next = !isCompleted;
@@ -741,6 +741,7 @@ useEffect(() => {
           </div>
       )}
       <div className="modal-overlay" onClick={onClose}>
+        {/* ============================== STACK UI ============================== */}
         <div
           className="modal-container d-flex flex-column"
           style={{ gap: '1rem', maxHeight: '90vh', overflowY: 'auto' }}
@@ -825,20 +826,19 @@ useEffect(() => {
           </div>
 
           {/* Box 2: bawah */}
-          <div className="bg-white border p-3 d-flex flex-row align-items-start gap-3 min-vh-100 w-100">
+          <div className="bg-white border p-3 d-flex flex-row align-items-start gap-3 w-100">
             {/* Left Column */}
             <div 
-              className="d-flex flex-column flex-grow-1 w-75 overflow-auto"
-              style={{ maxHeight: '100vh'}}
+              className="d-flex flex-column flex-grow-1 w-75"
             >
-            <button
-              className={`btn btn-sm mb-3 ${isWatched ? 'btn-success' : 'btn-outline-secondary'} align-self-start w-auto`}
-              style={{ width: 'auto' }} 
-              onClick={handleToggleWatch}
-            >
-              <Eye size={16} className="me-1" />
-              {isWatched ? 'Watching' : 'Watch'}
-            </button>
+              <button
+                className={`btn btn-sm mb-3 ${isWatched ? 'btn-success' : 'btn-outline-secondary'} align-self-start w-auto`}
+                style={{ width: 'auto' }} 
+                onClick={handleToggleWatch}
+              >
+                <Eye size={16} className="me-1" />
+                {isWatched ? 'Watching' : 'Watch'}
+              </button>
 
               <div className="mb-4">
                 <h5 className="text-start section-title mb-2">
@@ -903,8 +903,8 @@ useEffect(() => {
               </div>
 
               <div
-                className="description-wrapper border rounded mb-4"
-                style={{ borderColor: '#ccc', padding: '4px 8px 8px' }}
+                className="description-wrapper rounded mb-4"
+                style={{ padding: '4px 8px 8px' }}
               >
                 <h3 className="section-title mb-2">
                   <i className="fas fa-align-left me-2" /> Description
@@ -1090,146 +1090,146 @@ useEffect(() => {
                     ))}
                   </div>
                 )}
+              </div>
 
-                <div className="mb-4">
-                  <h3 className="section-title mb-2">Activity</h3>
-                  <div className="comment-wrapper d-flex mb-3">
-                    <input
-                      type="text"
-                      className="form-control me-2"
-                      placeholder="Write a comment..."
-                      value={comment}
-                      onChange={e => setComment(e.target.value)}
-                      onKeyDown={e => e.key === 'Enter' && handleAddComment()}
-                    />
-                    <button className="btn btn-primary" onClick={handleAddComment}>
-                      Add
-                    </button>
-                  </div>
-                  <div className="activity-list">
-                    {activity.map((data, index) => {
-                      const userLogin = Cookies.get('id');
-                      const initials = getInitials(data.created_by.name);
-                      const bgColor = getColorFromInitial(initials);
-                      const textColor = getContrastingTextColor(bgColor);
-                      const isHistory = data.is_history;
-                      // eslint-disable-next-line
-                      const isCommentEdit = data.created_by.id == userLogin;
+              <div className="mb-4">
+                <h3 className="section-title mb-2">Activity</h3>
+                <div className="comment-wrapper d-flex mb-3">
+                  <input
+                    type="text"
+                    className="form-control me-2"
+                    placeholder="Write a comment..."
+                    value={comment}
+                    onChange={e => setComment(e.target.value)}
+                    onKeyDown={e => e.key === 'Enter' && handleAddComment()}
+                  />
+                  <button className="btn btn-primary" onClick={handleAddComment}>
+                    Add
+                  </button>
+                </div>
+                <div className="activity-list">
+                  {activity.map((data, index) => {
+                    const userLogin = Cookies.get('id');
+                    const initials = getInitials(data.created_by.name);
+                    const bgColor = getColorFromInitial(initials);
+                    const textColor = getContrastingTextColor(bgColor);
+                    const isHistory = data.is_history;
+                    // eslint-disable-next-line
+                    const isCommentEdit = data.created_by.id == userLogin;
 
-                      return (
-                        <div key={index} className="activity-item d-flex mb-2 align-items-start">
-                          {/* Avatar */}
-                          {isHistory ? (
-                            <img
-                              src={LogoSelaras} // Ganti dengan path sesuai lokasi logo kamu
-                              alt="History Logo"
-                              className="rounded-circle me-2 flex-shrink-0"
-                              style={{ width: '36px', height: '36px', minWidth: '36px', objectFit: 'cover' }}
-                            />
-                          ) : (
+                    return (
+                      <div key={index} className="activity-item d-flex mb-2 align-items-start">
+                        {/* Avatar */}
+                        {isHistory ? (
+                          <img
+                            src={LogoSelaras} // Ganti dengan path sesuai lokasi logo kamu
+                            alt="History Logo"
+                            className="rounded-circle me-2 flex-shrink-0"
+                            style={{ width: '36px', height: '36px', minWidth: '36px', objectFit: 'cover' }}
+                          />
+                        ) : (
+                          <div
+                            className="avatar rounded-circle d-flex align-items-center justify-content-center me-2 flex-shrink-0"
+                            style={{
+                              width: '36px',
+                              height: '36px',
+                              backgroundColor: bgColor,
+                              color: textColor,
+                              minWidth: '36px',
+                              fontWeight: 'bold'
+                            }}
+                          >
+                            {initials}
+                          </div>
+                        )}
+
+                        {/* Kontainer Isi */}
+                        <div className="d-flex flex-grow-1">
+                          {!isHistory ? (
                             <div
-                              className="avatar rounded-circle d-flex align-items-center justify-content-center me-2 flex-shrink-0"
                               style={{
-                                width: '36px',
-                                height: '36px',
-                                backgroundColor: bgColor,
-                                color: textColor,
-                                minWidth: '36px',
-                                fontWeight: 'bold'
+                                wordBreak: 'break-word',
+                                overflowWrap: 'break-word',
+                                whiteSpace: 'normal',
+                                width: '100%', // Tambahkan ini agar isi membentang penuh
+                                display: 'flex',
+                                flexDirection: 'column'
                               }}
                             >
-                              {initials}
-                            </div>
-                          )}
+                              <strong className="d-block">{data.created_by.name}</strong>
 
-                          {/* Kontainer Isi */}
-                          <div className="d-flex flex-grow-1">
-                            {!isHistory ? (
+                              {/* Komentar */}
+                              <div className="mb-2">{data.comment}</div>
+
+                              {/* Baris bawah: Edit | Delete dan Timestamp */}
+                              <div className="d-flex justify-content-between align-items-center w-100">
+                                {/* Kiri: Edit | Delete */}
+                                {isCommentEdit ? (
+                                  <div className="d-flex">
+                                    <div
+                                      className="me-2 text-primary text-decoration-none"
+                                      style={{ cursor: 'pointer' }}
+                                      onClick={() => {
+                                        setShowCommentModal(true)
+                                        setCommentEdit(data.comment)
+                                        setCommentIdEdit(data.id)
+                                      }}
+                                    >
+                                      Edit
+                                    </div>
+                                    <div
+                                      className="text-danger text-decoration-none"
+                                      style={{ cursor: 'pointer' }}
+                                      onClick={() => {
+                                        setShowCommentDeleteConfirm(true)
+                                        setCommentIdDelete(data.id)
+                                      }}
+                                    >
+                                      Delete
+                                    </div>
+                                  </div>
+                                ) : (
+                                  <div></div>
+                                )}
+                                {/* Kanan: Timestamp */}
+                                <small className="text-muted">
+                                  {data.updated_at.replace("T", " ").replace("Z", "")}
+                                </small>
+                              </div>
+                            </div>
+
+                          ) : (
+                            <>
                               <div
+                                className="me-2 text-nowrap"
+                                style={{ minWidth: 'max-content' }}
+                              >
+                                <strong className="d-block">{data.created_by.name}</strong>
+                                <small className="text-muted d-block">{data.updated_at.replace("T", " ").replace("Z", "")}</small>
+                              </div>
+                              <div className="me-2 text-muted">|</div>
+                              <div
+                                className="flex-grow-1"
                                 style={{
                                   wordBreak: 'break-word',
                                   overflowWrap: 'break-word',
-                                  whiteSpace: 'normal',
-                                  width: '100%', // Tambahkan ini agar isi membentang penuh
-                                  display: 'flex',
-                                  flexDirection: 'column'
+                                  whiteSpace: 'normal'
                                 }}
                               >
-                                <strong className="d-block">{data.created_by.name}</strong>
-
-                                {/* Komentar */}
-                                <div className="mb-2">{data.comment}</div>
-
-                                {/* Baris bawah: Edit | Delete dan Timestamp */}
-                                <div className="d-flex justify-content-between align-items-center w-100">
-                                  {/* Kiri: Edit | Delete */}
-                                  {isCommentEdit ? (
-                                    <div className="d-flex">
-                                      <div
-                                        className="me-2 text-primary text-decoration-none"
-                                        style={{ cursor: 'pointer' }}
-                                        onClick={() => {
-                                          setShowCommentModal(true)
-                                          setCommentEdit(data.comment)
-                                          setCommentIdEdit(data.id)
-                                        }}
-                                      >
-                                        Edit
-                                      </div>
-                                      <div
-                                        className="text-danger text-decoration-none"
-                                        style={{ cursor: 'pointer' }}
-                                        onClick={() => {
-                                          setShowCommentDeleteConfirm(true)
-                                          setCommentIdDelete(data.id)
-                                        }}
-                                      >
-                                        Delete
-                                      </div>
-                                    </div>
-                                  ) : (
-                                    <div></div>
-                                  )}
-                                  {/* Kanan: Timestamp */}
-                                  <small className="text-muted">
-                                    {data.updated_at.replace("T", " ").replace("Z", "")}
-                                  </small>
-                                </div>
+                                {data.comment}
                               </div>
-
-                            ) : (
-                              <>
-                                <div
-                                  className="me-2 text-nowrap"
-                                  style={{ minWidth: 'max-content' }}
-                                >
-                                  <strong className="d-block">{data.created_by.name}</strong>
-                                  <small className="text-muted d-block">{data.updated_at.replace("T", " ").replace("Z", "")}</small>
-                                </div>
-                                <div className="me-2 text-muted">|</div>
-                                <div
-                                  className="flex-grow-1"
-                                  style={{
-                                    wordBreak: 'break-word',
-                                    overflowWrap: 'break-word',
-                                    whiteSpace: 'normal'
-                                  }}
-                                >
-                                  {data.comment}
-                                </div>
-                              </>
-                            )}
-                          </div>
+                            </>
+                          )}
                         </div>
-                      );
-                    })}
-                  </div>
+                      </div>
+                    );
+                  })}
                 </div>
               </div>
             </div>
 
-          {/* Right Column: sidebar */}
-          <div className="d-flex flex-column mt-n3 ms-auto align-self-start w-25" style={{ marginTop: '1rem' }}>
+            {/* Right Column: sidebar */}
+            <div className="d-flex flex-column mt-n3 ms-auto align-self-start w-25" style={{ marginTop: '1rem' }}>
               <div
                 className="sidebar d-flex flex-column pt-0"
                 style={{ width: '200px', flexShrink: 0, gap: '0.5rem' }}
@@ -1255,37 +1255,17 @@ useEffect(() => {
                 ))}
               </div>
             </div>
-          </div>
-
-        {/* Right Column: sidebar */}
-        <div className="d-flex flex-column mt-n3 ms-auto align-self-start w-25" style={{ marginTop: '1rem' }}>
-          <div
-            className="sidebar d-flex flex-column pt-0"
-            style={{ width: '200px', flexShrink: 0, gap: '0.5rem' }}
-          >
-            {[
-              { icon: Users , label: 'Members', action: () => setShowMemberModal(true) },
-              { icon: Tag, label: 'Labels', action: () => setShowLabelModal(true) },
-              { icon: CheckSquare, label: 'Checklist', action: () => setShowChecklist(true) },
-              { icon: Date, label: 'Set Due Dates', action: () => setShowDueDateModal(true) },
-              { icon: Paperclip, label: 'Attachment', action: () => fileInputAttachmentRef.current?.click() },
-              { icon: Image, label: 'Cover', action: () => fileInputCoverRef.current?.click() },
-              { icon: Trash, label: 'Delete Task', action: () => setShowDeleteConfirm(true) },
-              { icon: Move, label: 'Move', action: () => setShowMoveModal(true) },
-              ].map(({ icon: Icon, label, action }, idx) => (
-              <button
-                key={idx}
-                className="btn btn-outline-secondary d-flex align-items-center gap-2 py-2"
-                onClick={action}
-                type="button"
-              >
-                <Icon size={16} className="icon" /> {label}
-              </button>
-            ))}
-          </div>
+            <input
+              ref={fileInputAttachmentRef}
+              type="file"
+              accept="*/*"
+              style={{ display: 'none' }}
+              onChange={handleAttachmentUpload}
+            />
           </div>
         </div>
-            
+        
+        {/* ============================== STACK MODAL ============================== */}
         {showLabelModal && (
           <div
             className="modal fade show d-block"
@@ -1526,15 +1506,6 @@ useEffect(() => {
             </div>
           </div>
         )}
-
-        <div className="task-detail">
-          {/* Bagian atas: judul task */}
-          <h1>{taskData?.title}</h1>
-          {/* Tampilkan due date jika ada */}Add commentMore actions
-          {taskData?.dueDate && (
-            <p style={{ color: '#666' }}>Due Date: {taskData.dueDate}</p>
-          )}
-        </div>
         
         {showDueDateModal && (
           <div className="due-date-content">
@@ -1552,33 +1523,6 @@ useEffect(() => {
               </div>
             </div>
           </div>
-      </div>
-      )}
-      
-      <div className="task-detail">
-      {/* Bagian atas: judul task */}
-      <h1>{taskData?.title}</h1>
-      {/* Tampilkan due date jika ada */}
-      {taskData?.dueDate && (
-        <p style={{ color: '#666' }}>Due Date: {taskData.dueDate}</p>
-      )}</div>
-    
-      {showDueDateModal && (
-      <div className="due-date-content">
-        <div className="due-date-overlay" onClick={(e) => e.stopPropagation()}>
-          <h2>Set Due Date</h2>
-          <input type="date" value={dueDate} onChange={handleDateChange} />
-          
-          <div style={{ marginTop: '16px', display: 'flex', gap: '10px' }}>
-            <button onClick={handleSaveDueDate} style={{ flex: 1, backgroundColor: '#28a745', color: '#fff' }}>
-              Save
-            </button>
-            <button onClick={toggleDueDateModal} style={{ flex: 1 }}>
-              Close
-            </button>
-          </div>
-        </div>
-      </div>
         )}
 
         {showMoveModal && (
