@@ -20,7 +20,7 @@ import {
 import "../styles/TaskDetail.css";
 import { Move } from 'lucide-react';
 import TextAlign from '@tiptap/extension-text-align'
-import { FaAlignLeft, FaAlignCenter, FaAlignJustify, FaAlignRight,} from 'react-icons/fa';
+import { FaAlignLeft, FaAlignCenter, FaAlignJustify, FaAlignRight, FaTrash,} from 'react-icons/fa';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import { faUser } from '@fortawesome/free-regular-svg-icons'
 import { faTag, faUserPlus } from '@fortawesome/free-solid-svg-icons';
@@ -50,7 +50,7 @@ const TaskDetail = ({ task, onClose, onDelete}) => {
   //IS WATCH
   const [isWatched, setIsWatched] = useState(false);
   //COVER IMAGE
-  const [coverImage] = useState(null);
+  const [coverImage, setCoverImage] = useState(null);
   const fileInputCoverRef = useRef(null);
   //CHECKLIST
   const [showChecklist, setShowChecklist] = useState(false);
@@ -108,15 +108,36 @@ const TaskDetail = ({ task, onClose, onDelete}) => {
 //======================= *END USE STATE*====================================
 
 //======================= *START FUNCTION*====================================  
-// const handleCoverImageChange = (event) => {
-//   const file = event.target.files[0];
-//   if (file) {
-//     const imageUrl = URL.createObjectURL(file);
-//     setCoverImage(imageUrl);
-//   }
-// };
+  const handleCoverImageChange = async (e) => {
+    const file = e.target.files[0];
+    if (file) {
+      const reader = new FileReader();
+      reader.onloadend = () => {
+        setCoverImage(reader.result);
+      };
+      reader.readAsDataURL(file);
+      
+      try {
+        await updateTask(task.id, { cover: file });
+      } catch (err) {
+        console.error(err);
+        alert('Gagal update due date');
+      }
+    }
+  };
 
-const handleToggleComplete = async () => {
+  const handleRemoveImage = async (e) => {
+    e.stopPropagation();
+    try {
+      await updateTask(task.id, { delete_cover: true });
+      setCoverImage(null);
+    } catch (err) {
+      console.error(err);
+      alert('Gagal update due date');
+    }
+  };
+
+  const handleToggleComplete = async () => {
     const next = !isCompleted;
     setIsCompleted(next);
     try {
@@ -127,44 +148,52 @@ const handleToggleComplete = async () => {
     }
   };
 
-// Handle due date
-const handleDateChange = (e) => {
-  setDueDate(e.target.value.replace("T", " "));
-};
+  // Handle due date
+  const handleDateChange = (e) => {
+    setDueDate(e.target.value.replace("T", " "));
+  };
 
-const handleSaveDueDate = async () => {
-  try {
-    await updateTask(task.id, { due_date: dueDate }, "application/json");
-    const res = await getTaskById(task.id);
-    setTaskData(res.data.data);
-    setShowDueDateModal(false);
-  } catch (err) {
-    console.error(err);
-    alert('Gagal update due date');
-  }
-};
+  const handleSaveDueDate = async () => {
+    try {
+      await updateTask(task.id, { due_date: dueDate }, "application/json");
+      setShowDueDateModal(false);
+    } catch (err) {
+      console.error(err);
+      alert('Gagal update due date');
+    }
+  };
 
-const handleSaveTitle = async () => {
-  if(!title.trim()) { // Validasi title tidak boleh kosong
-    alert('Judul tidak boleh kosong');
-    return;
-  }
-  
-  try {
-    await updateTask(task.id, { title: title }, "application/json");
-    // Jika perlu refresh data dari server
-    const res = await getTaskById(task.id);
-    setTaskData(res.data);
-    setIsEditingTitle(false);
-  } catch (err) {
-    console.error('Gagal menyimpan judul:', err);
-    alert('Gagal menyimpan judul');
-    // Rollback ke nilai sebelumnya jika gagal
-    setTitle(currentTitle);
-  }
-};
+  const handleRemoveDueDate = async () => {
+    try {
+      await updateTask(task.id, { due_date: '' }, "application/json");
+      setDueDate('')
+    } catch (err) {
+      console.error(err);
+      alert('Gagal update due date');
+    }
+  };
 
-const handleToggleWatch = async () => {
+  const handleSaveTitle = async () => {
+    if(!title.trim()) { // Validasi title tidak boleh kosong
+      alert('Judul tidak boleh kosong');
+      return;
+    }
+    
+    try {
+      await updateTask(task.id, { title: title }, "application/json");
+      // Jika perlu refresh data dari server
+      const res = await getTaskById(task.id);
+      setTaskData(res.data);
+      setIsEditingTitle(false);
+    } catch (err) {
+      console.error('Gagal menyimpan judul:', err);
+      alert('Gagal menyimpan judul');
+      // Rollback ke nilai sebelumnya jika gagal
+      setTitle(currentTitle);
+    }
+  };
+
+  const handleToggleWatch = async () => {
     const newWatch = !isWatched;
     setIsWatched(newWatch);
 
@@ -176,35 +205,35 @@ const handleToggleWatch = async () => {
     }
   };
 
-//USER AND MEMBER 
+  //USER AND MEMBER 
   const debounceSearch = useRef(
-  debounce((value, users) => {
-    const filtered = value 
-      ? users.filter(user => 
-          user.name.toLowerCase().includes(value.toLowerCase()) ||
-          user.email.toLowerCase().includes(value.toLowerCase())
-        )
-      : users;
-    setFilteredUsers(filtered);
-  }, 300)
+    debounce((value, users) => {
+      const filtered = value 
+        ? users.filter(user => 
+            user.name.toLowerCase().includes(value.toLowerCase()) ||
+            user.email.toLowerCase().includes(value.toLowerCase())
+          )
+        : users;
+      setFilteredUsers(filtered);
+    }, 300)
   ).current;
 
   const handleSearchUserChange = useCallback((value) => {
-  setSearchUser(value);
-  if (value === '') {
-    setFilteredUsers(allUser);
-    return;
-  }
-  debounceSearch(value, allUser);
+    setSearchUser(value);
+    if (value === '') {
+      setFilteredUsers(allUser);
+      return;
+    }
+    debounceSearch(value, allUser);
   }, [allUser, debounceSearch]);
 
   const handleCheckboxChange = user => {
-  setCurrentMember(prev => {
-    if (prev.some(m => m.id === user.id)) {
-      return prev.filter(m => m.id !== user.id);
-    }
-    return [...prev, user];
-  });
+    setCurrentMember(prev => {
+      if (prev.some(m => m.id === user.id)) {
+        return prev.filter(m => m.id !== user.id);
+      }
+      return [...prev, user];
+    });
   };
 
   const handleSaveChanges = async () => {
@@ -230,7 +259,7 @@ const handleToggleWatch = async () => {
     }
   },[allUser, setShowMemberModal]);
 
-//lABEL
+  //lABEL
   const handleLabelToggle = lbl => {
     setCurrentLabeled(prev => {
       const exists = prev.some(l => l.id === lbl.id);
@@ -276,18 +305,18 @@ const handleToggleWatch = async () => {
   };
 
   const handleLabelDelete = async (labelId) => {
-  if (!window.confirm("Yakin ingin menghapus label ini?")) return;
-  try {
-    await deleteLabel(labelId);
-    setLabels(prev => prev.filter(l => l.id !== labelId));
-    setCurrentLabeled(prev => prev.filter(l => l.id !== labelId));
-  } catch (err) {
-    console.error("Gagal menghapus label:", err);
-    alert("Gagal menghapus label");
-  }
-};
+    if (!window.confirm("Yakin ingin menghapus label ini?")) return;
+    try {
+      await deleteLabel(labelId);
+      setLabels(prev => prev.filter(l => l.id !== labelId));
+      setCurrentLabeled(prev => prev.filter(l => l.id !== labelId));
+    } catch (err) {
+      console.error("Gagal menghapus label:", err);
+      alert("Gagal menghapus label");
+    }
+  };
 
-const handleLabelUpdate = async (lbl) => {
+  const handleLabelUpdate = async (lbl) => {
     const newTitle = window.prompt('Edit nama label:', lbl.title || '');
     if (newTitle === null) return;
     if (!newTitle.trim()) return alert('Nama label tidak boleh kosong');
@@ -302,13 +331,13 @@ const handleLabelUpdate = async (lbl) => {
     }
   };
 
-const fetchLabels = () => {
+  const fetchLabels = () => {
     getLabel()
       .then(data => setLabels(data || []))
       .catch(err => console.error("Gagal fetch labels:", err));
   };
 
-//CHECKLIST 
+  //CHECKLIST 
   const handleAddChecklistItem = () => {
     if (newChecklistItem.trim()) {
       setChecklistItems((prev) => [
@@ -327,7 +356,7 @@ const fetchLabels = () => {
     );
   };
 
-//DESCRIPTION
+  //DESCRIPTION
   const editor = useEditor({
     extensions: [StarterKit, 
       ImageExtension, 
@@ -364,7 +393,7 @@ const fetchLabels = () => {
     }
   };
 
-//TOOLBAR
+  //TOOLBAR
   const toolbarButtons = [
     { label: "B", action: () => editor?.chain().focus().toggleBold().run() },
     { label: "I", action: () => editor?.chain().focus().toggleItalic().run() },
@@ -511,62 +540,62 @@ const fetchLabels = () => {
   };
 
   //PreviewFile
-const handlePreview = (att) => {
-  const imageExt = ['jpg', 'jpeg', 'png'];
-  const pdfExt = ['pdf'];
-  const docExt = ['doc', 'docx'];
-  const pptExt = ['ppt', 'pptx'];
-  const videoExt = ['mp4', 'mov'];
-  const audioExt = ['mp3', 'wav'];
-  const txtExt = ['txt'];
-  const xlsxExt = ['xlsx', 'xls'];
+  const handlePreview = (att) => {
+    const imageExt = ['jpg', 'jpeg', 'png'];
+    const pdfExt = ['pdf'];
+    const docExt = ['doc', 'docx'];
+    const pptExt = ['ppt', 'pptx'];
+    const videoExt = ['mp4', 'mov'];
+    const audioExt = ['mp3', 'wav'];
+    const txtExt = ['txt'];
+    const xlsxExt = ['xlsx', 'xls'];
 
-  const ext = att.ext.toLowerCase();
+    const ext = att.ext.toLowerCase();
 
-  if (imageExt.includes(ext)) {
-    window.open(att.urlView, '_blank');
-  } else if (pdfExt.includes(ext)) {
-    window.open(att.urlView, '_blank');
-  } else if (docExt.includes(ext) || pptExt.includes(ext) || xlsxExt.includes(ext)) {
-    const viewerURL = `https://docs.google.com/viewer?url=${encodeURIComponent(att.urlView)}&embedded=true`;
-    window.open(viewerURL, '_blank');
-  } else if (videoExt.includes(ext)) {
-    window.open(att.urlView, '_blank');
-  } else if (audioExt.includes(ext)) {
-    window.open(att.urlView, '_blank');
-  } else if (txtExt.includes(ext)) {
-    window.open(att.urlView, '_blank');
-  } else {
-    alert('Preview tidak tersedia untuk ekstensi ini.');
-  }
-};
+    if (imageExt.includes(ext)) {
+      window.open(att.urlView, '_blank');
+    } else if (pdfExt.includes(ext)) {
+      window.open(att.urlView, '_blank');
+    } else if (docExt.includes(ext) || pptExt.includes(ext) || xlsxExt.includes(ext)) {
+      const viewerURL = `https://docs.google.com/viewer?url=${encodeURIComponent(att.urlView)}&embedded=true`;
+      window.open(viewerURL, '_blank');
+    } else if (videoExt.includes(ext)) {
+      window.open(att.urlView, '_blank');
+    } else if (audioExt.includes(ext)) {
+      window.open(att.urlView, '_blank');
+    } else if (txtExt.includes(ext)) {
+      window.open(att.urlView, '_blank');
+    } else {
+      alert('Preview tidak tersedia untuk ekstensi ini.');
+    }
+  };
 
-// Rename handler
-const handleEditFileName = async (att, newName) => {
-  if (!newName.trim()) return;
-  
-  try {
-    await renameAttachment(att.id, newName.trim());
-    fetchAttachment();
-  } catch (err) {
-    console.error("Rename failed:", err);
-    alert("Gagal mengganti nama file");
-  }
-};
+  // Rename handler
+  const handleEditFileName = async (att, newName) => {
+    if (!newName.trim()) return;
+    
+    try {
+      await renameAttachment(att.id, newName.trim());
+      fetchAttachment();
+    } catch (err) {
+      console.error("Rename failed:", err);
+      alert("Gagal mengganti nama file");
+    }
+  };
 
-const closeAllDropdown = () => {
-  setAttachments(prev =>
-    prev.map(att => ({
-      ...att,
-      showDropdown: false,
-    }))
-  );
-};
+  const closeAllDropdown = () => {
+    setAttachments(prev =>
+      prev.map(att => ({
+        ...att,
+        showDropdown: false,
+      }))
+    );
+  };
 
-const triggerFileUpload = () => fileInputAttachmentRef.current?.click();
+  const triggerFileUpload = () => fileInputAttachmentRef.current?.click();
 
-// ======================= MOVE========================================//
-const handleOpenMove = () => {
+  // ======================= MOVE========================================//
+  const handleOpenMove = () => {
     setShowMoveModal(true);
     setLoadingWorkspaces(true);
     workspaceFind()
@@ -609,133 +638,134 @@ const handleOpenMove = () => {
 
 //=======================* END FUNCTION*====================================
 
-//=======================*USE EFFECT*======================================//
-// 1. Sync currentTitle dengan title
-useEffect(() => {
-  if (title !== currentTitle) {
-    setCurrentTitle(title);
-  }
-}, [title,currentTitle]);
-
-// 2. Fetch task detail (sekali tiap task.id berubah)
-useEffect(() => {
-  const fetchTask = async () => {
-    try {
-      const res = await getTaskById(task.id);
-      const data = res.data.data;
-      setTaskData(data);
-      setIsWatched(!!data.watch);
-      setIsCompleted(!!data.is_completed);
-      setActivity(res.data.data.comment.data)
-      setDueDate(data.due_date)
-    } catch (e) {
-      console.error('Gagal load task:', e);
+  //=======================*USE EFFECT*======================================//
+  // 1. Sync currentTitle dengan title
+  useEffect(() => {
+    if (title !== currentTitle) {
+      setCurrentTitle(title);
     }
-  };
-  fetchTask();
-}, [task]);
+  }, [title,currentTitle]);
 
-useEffect(() => {
-  if (editor && taskData?.description) {
-    editor.commands.setContent(taskData.description || '');
-  }
-}, [editor, taskData?.description]);
-
-// 3. Fetch attachment files
-useEffect(() => {
-  if (!task.id) return;
-
-  const fetchFiles = async () => {
-    try {
-      const res = await getTaskFiles(task.id);
-      if (res.success && Array.isArray(res.data.data)) {
-        const files = res.data.data.map(f => ({
-          id: f.id,
-          name: f.file.name,
-          ext: f.file.ext,
-          urlDownload: f.file.content,
-          urlView: f.file.view_saved,
-          createdAt: f.created_at,
-          showDropdown: false,
-        }));
-        setAttachments(files);
+  // 2. Fetch task detail (sekali tiap task.id berubah)
+  useEffect(() => {
+    const fetchTask = async () => {
+      try {
+        const res = await getTaskById(task.id);
+        const data = res.data.data;
+        setTaskData(data);
+        setIsWatched(!!data.watch);
+        setIsCompleted(!!data.is_completed);
+        setActivity(res.data.data.comment.data)
+        setDueDate(data.due_date)
+        setCoverImage(data.cover != null ? data.cover.view_saved : null)
+      } catch (e) {
+        console.error('Gagal load task:', e);
       }
-    } catch (err) {
-      console.error('Failed to fetch attachments:', err);
+    };
+    fetchTask();
+  }, [task]);
+
+  useEffect(() => {
+    if (editor && taskData?.description) {
+      editor.commands.setContent(taskData.description || '');
     }
-  };
+  }, [editor, taskData?.description]);
 
-  fetchFiles();
-}, [task]);
+  // 3. Fetch attachment files
+  useEffect(() => {
+    if (!task.id) return;
 
-// 4. Move modal - fetch boards by workspace
-useEffect(() => {
-  if (!showMoveModal || !selectedWorkspace) {
-    setBoards([]);
-    return;
-  }
+    const fetchFiles = async () => {
+      try {
+        const res = await getTaskFiles(task.id);
+        if (res.success && Array.isArray(res.data.data)) {
+          const files = res.data.data.map(f => ({
+            id: f.id,
+            name: f.file.name,
+            ext: f.file.ext,
+            urlDownload: f.file.content,
+            urlView: f.file.view_saved,
+            createdAt: f.created_at,
+            showDropdown: false,
+          }));
+          setAttachments(files);
+        }
+      } catch (err) {
+        console.error('Failed to fetch attachments:', err);
+      }
+    };
 
-  setLoadingBoards(true);
-  getAllBoardByWorkspaceId(selectedWorkspace)
-    .then(data => {
-      setBoards(data || []);
-      const currentBoard = data?.find(b => b.id === task.board_id);
-      setSelectedBoard(currentBoard ? currentBoard.id.toString() : '');
-    })
-    .catch(err => console.error('Gagal fetch boards:', err))
-    .finally(() => setLoadingBoards(false));
-}, [showMoveModal, selectedWorkspace, task.board_id]);
+    fetchFiles();
+  }, [task]);
 
-// 5. Fetch all members (hanya saat komponen mount)
-useEffect(() => {
-  getAllUser('/user?no_paging=yes')
-    .then(res => setAllMember(res.data.data))
-    .catch(err => console.error('Gagal fetch user:', err));
-}, []);
+  // 4. Move modal - fetch boards by workspace
+  useEffect(() => {
+    if (!showMoveModal || !selectedWorkspace) {
+      setBoards([]);
+      return;
+    }
 
-// 6. Fetch users saat buka Member Modal
-useEffect(() => {
-  if (showMemberModal) {
-    getAllUser('/user?no_paging=yes')
-      .then(res => {
-        setAllUser(res.data.data);
-        setFilteredUsers(res.data.data);
+    setLoadingBoards(true);
+    getAllBoardByWorkspaceId(selectedWorkspace)
+      .then(data => {
+        setBoards(data || []);
+        const currentBoard = data?.find(b => b.id === task.board_id);
+        setSelectedBoard(currentBoard ? currentBoard.id.toString() : '');
       })
+      .catch(err => console.error('Gagal fetch boards:', err))
+      .finally(() => setLoadingBoards(false));
+  }, [showMoveModal, selectedWorkspace, task.board_id]);
+
+  // 5. Fetch all members (hanya saat komponen mount)
+  useEffect(() => {
+    getAllUser('/user?no_paging=yes')
+      .then(res => setAllMember(res.data.data))
       .catch(err => console.error('Gagal fetch user:', err));
-  }
-}, [showMemberModal]);
+  }, []);
 
-// 7. Fetch labels saat buka Label Modal atau selesai Add Label
-useEffect(() => {
-  if (showLabelModal || (!showAddLabelModal && showLabelModal)) {
-    fetchLabels();
-  }
-}, [showLabelModal, showAddLabelModal]);
+  // 6. Fetch users saat buka Member Modal
+  useEffect(() => {
+    if (showMemberModal) {
+      getAllUser('/user?no_paging=yes')
+        .then(res => {
+          setAllUser(res.data.data);
+          setFilteredUsers(res.data.data);
+        })
+        .catch(err => console.error('Gagal fetch user:', err));
+    }
+  }, [showMemberModal]);
 
-// 8. Editor event listener
-useEffect(() => {
-  if (!editor) return;
+  // 7. Fetch labels saat buka Label Modal atau selesai Add Label
+  useEffect(() => {
+    if (showLabelModal || (!showAddLabelModal && showLabelModal)) {
+      fetchLabels();
+    }
+  }, [showLabelModal, showAddLabelModal]);
 
-  const onFocus = () => setIsEditing(true);
-  editor.on('focus', onFocus);
+  // 8. Editor event listener
+  useEffect(() => {
+    if (!editor) return;
 
-  return () => {
-    editor.off('focus', onFocus);
-  };
-}, [editor]);
+    const onFocus = () => setIsEditing(true);
+    editor.on('focus', onFocus);
 
-// 9. Debounce cleanup
-useEffect(() => {
-  return () => {
-    debounceSearch.cancel();
-  };
-}, [debounceSearch]);
+    return () => {
+      editor.off('focus', onFocus);
+    };
+  }, [editor]);
 
-useEffect(() => {
-  setCurrentMember(task.assign_to_user?.data || []);
-  setCurrentLabeled(task.label?.data || []);
-}, [task]);
-//=======================*END USE EFFECT*======================================//
+  // 9. Debounce cleanup
+  useEffect(() => {
+    return () => {
+      debounceSearch.cancel();
+    };
+  }, [debounceSearch]);
+
+  useEffect(() => {
+    setCurrentMember(task.assign_to_user?.data || []);
+    setCurrentLabeled(task.label?.data || []);
+  }, [task]);
+  //=======================*END USE EFFECT*======================================//
   
   return (
     <>
@@ -752,11 +782,57 @@ useEffect(() => {
           onClick={e => e.stopPropagation()}
         >
           {/* Box 1: atas */}
-          <div className="bg-light border p-3 mb-1 d-flex flex-column w-100">
+          <div 
+            className="border p-3 mb-1 d-flex flex-column w-100"
+            style={{
+              backgroundImage: `url('${coverImage}')`,
+              backgroundColor: '#f0f0f0',
+              backgroundSize: 'cover',
+              backgroundPosition: 'center',
+              backgroundRepeat: 'no-repeat',
+            }}
+          >
             {/* Section 1: Close Button */}
-            <div className="d-flex justify-content-end w-100 mb-2">
+            <div className="d-flex justify-content-between align-items-center w-100 mb-2 position-relative">
+              {coverImage && (
+                <button
+                  onClick={handleRemoveImage}
+                  className="position-absolute"
+                  style={{
+                    top: 8,
+                    left: 8,
+                    background: 'rgba(255, 255, 255, 0.8)',
+                    border: 'none',
+                    borderRadius: '50%',
+                    width: '28px',
+                    height: '28px',
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    boxShadow: '0 2px 5px rgba(0,0,0,0.15)',
+                    cursor: 'pointer',
+                    transition: '0.2s',
+                  }}
+                  title="Remove image"
+                >
+                  <FaTrash size={14} color="#000"/>
+                </button>
+              )}
+
+              {/* Loading tengah */}
+              {taskData === null && (
+                <div className="d-flex align-items-center gap-2 position-absolute start-50 translate-middle-x">
+                  <div className="spinner-border spinner-border-sm text-danger" role="status" />
+                  <span className="text-danger small">Prepare your data...</span>
+                </div>
+              )}
+
+              {/* Spacer kiri agar jarak merata */}
+              <div style={{ width: '24px' }} />
+
+              {/* Tombol close kanan */}
               <button 
-                className="btn btn-light p-1" 
+                className="btn btn-light p-1 ms-auto" 
                 onClick={onClose}
                 style={{ flexShrink: 0 }}
               >
@@ -766,22 +842,54 @@ useEffect(() => {
 
             {/* Section 2: Cover Image */}
             <div
-              className="cover-image-container rounded mb-3 w-100"
-              style={{
-                height: '90px',
-                background: coverImage
-                  ? `url(${coverImage})`
-                  : '#f8f9fa',
-                backgroundSize: 'cover',
-                backgroundPosition: 'center',
-              }}
-              onClick={() => fileInputCoverRef.current?.click()} // klik cover untuk upload juga
+                className="position-relative mb-3"
+                style={{
+                    width: '100%',
+                    borderRadius: '12px',
+                    overflow: 'hidden',
+                }}
             >
-              {!coverImage && (
-                <div className="text-muted d-flex h-100 align-items-center justify-content-center">
-                  No Cover
-                </div>
-              )}
+              <div
+                className="cover-image-container"
+                style={{
+                  height: '100px',
+                  backgroundColor: coverImage ? 'transparent' : '#f0f0f0',
+                  backgroundSize: 'cover',
+                  backgroundPosition: 'center',
+                  backgroundRepeat: 'no-repeat',
+                  cursor: 'pointer',
+                  transition: '0.3s ease',
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                }}
+                onClick={() => fileInputCoverRef.current?.click()}
+                onMouseEnter={(e) => {
+                  if (coverImage) {
+                    e.currentTarget.style.filter = 'brightness(0.85)';
+                  }
+                }}
+                onMouseLeave={(e) => {
+                  if (coverImage) {
+                    e.currentTarget.style.filter = 'brightness(1)';
+                  }
+                }}
+              >
+                {!coverImage && (
+                    <div style={{color: '#aaa', fontSize: '14px'}}>
+                        Click to Upload Cover
+                    </div>
+                )}
+              </div>
+
+              {/* Hidden file input */}
+              <input
+                  type="file"
+                  accept="image/*"
+                  ref={fileInputCoverRef}
+                  style={{display: 'none'}}
+                  onChange={handleCoverImageChange}
+              />
             </div>
 
             {/* Section 3: Completion Check + Title */}
@@ -847,8 +955,10 @@ useEffect(() => {
                   </button>
 
                   {dueDate && (() => {
-                    const date = new Date(dueDate.replace(' ', 'T')); // ubah spasi jadi 'T' agar bisa di-parse
+                    const date = new Date(dueDate.replace(' ', 'T'));
                     const now = new Date();
+                    const isCompletedStatus = isCompleted === true;
+
                     const sameYear = date.getFullYear() === now.getFullYear();
 
                     const datePart = date.toLocaleDateString(undefined, {
@@ -863,10 +973,56 @@ useEffect(() => {
                       hour12: true,
                     });
 
+                    let badgeClass = "badge bg-success-subtle text-success";
+                    let additionalText = "";
+
+                    if (isCompletedStatus) {
+                      additionalText = " - completed";
+                    } else {
+                      const diffInMs = date - now;
+                      const diffInDays = Math.floor(diffInMs / (1000 * 60 * 60 * 24));
+
+                      if (diffInMs < 0) {
+                        badgeClass = "badge bg-danger-subtle text-danger";
+                        additionalText = " - overdue";
+                      } else if (diffInDays <= 1) {
+                        badgeClass = "badge bg-secondary-subtle text-secondary";
+                        additionalText = " - due soon";
+                      } else {
+                        badgeClass = "badge bg-secondary-subtle text-secondary";
+                      }
+                    }
+
                     return (
-                      <span className="badge bg-success-subtle text-success d-inline-flex align-items-center px-3 py-2 fs-6 fw-semibold">
-                        Due Date:&nbsp;{datePart}, {timePart}
-                      </span>
+                      <div className="position-relative d-inline-block">
+                        <span className={`${badgeClass} d-inline-flex align-items-center px-3 py-2 fs-6 fw-semibold`}>
+                          {datePart}, {timePart}{additionalText}
+                        </span>
+                        <button 
+                          onClick={handleRemoveDueDate}
+                          style={{
+                            position: 'absolute',
+                            top: '-8px',
+                            right: '-8px',
+                            backgroundColor: 'red',
+                            border: 'none',
+                            borderRadius: '50%',
+                            color: 'white',
+                            fontWeight: 'bold',
+                            fontSize: '0.8rem',
+                            width: '20px',
+                            height: '20px',
+                            padding: 0,
+                            cursor: 'pointer',
+                            lineHeight: '1',
+                            textAlign: 'center',
+                            boxShadow: '0 0 2px rgba(0,0,0,0.3)'
+                          }}
+                          aria-label="Remove due date"
+                        >
+                          &times;
+                        </button>
+                      </div>
                     );
                   })()}
               </div>
@@ -1544,7 +1700,7 @@ useEffect(() => {
               <h2>Set Due Date</h2>
               <input
                 type="datetime-local"
-                step="1" // penting: agar bisa simpan detik
+                step="1"
                 value={dueDate ?? ''}
                 onChange={handleDateChange}
               />
