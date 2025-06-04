@@ -11,7 +11,7 @@ import { debounce } from "lodash";
 
 
 
-function Dashboard(showDetailTask) {
+function Dashboard({showDetailTask}) {
   const [countAccess, setCountAccess] = useState({});
   const [countCalculateTask, setCountCalculateTask] = useState([]);
   const [contactData, setContactData] = useState([]);

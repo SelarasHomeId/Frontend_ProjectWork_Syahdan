@@ -353,7 +353,7 @@ export const getAllContactAndAffiliate = async (endpoint) => {
 export const getAllBoardByWorkspaceId = async (workspaceId) => {
   const response = await apiRequest({
     method: "GET",
-    endpoint: `/board/${workspaceId}?order=sort_number&order_by=asc`,
+    endpoint: `/board/${workspaceId}?order=sort_number&order_by=asc&no_paging=yes`,
   });
 
   return response.data.data
@@ -387,7 +387,7 @@ export const createBoard = async (boardData) => {
 export const getAllTaskByBoardId = async (boardId) => {
   const response = await apiRequest({
     method: "GET",
-    endpoint: `/task/${boardId}?order=sort_number&order_by=asc`,
+    endpoint: `/task/${boardId}?order=sort_number&order_by=asc&no_paging=yes`,
   });
 
   return response.data.data
@@ -518,8 +518,6 @@ export const getAllCommentByTaskId = async (taskId) => {
     method: "GET",
     endpoint: `/task/comment/${taskId}`,
   });
-
-
   return response.data.data
 }
 
@@ -543,6 +541,75 @@ export const deleteTaskComment = async (commentId) => {
   return await apiRequest({
     method: "DELETE",
     endpoint: `/task/comment/${commentId}`,
+  });
+};
+
+export const getAllChecklistByTaskId = async (taskId) => {
+  const response = await apiRequest({
+    method: "GET",
+    endpoint: `/task/checklist/${taskId}`,
+  });
+  return response.data.data
+}
+
+export const createTaskChecklist = async (taskData) => {
+  return await apiRequest({
+    method: "POST",
+    endpoint: "/task/checklist",
+    body: taskData,
+  });
+};
+
+export const editTaskChecklist = async (checklistId,taskData) => {
+  return await apiRequest({
+    method: "PUT",
+    endpoint: `/task/checklist/${checklistId}`,
+    body: taskData,
+  });
+};
+
+export const deleteTaskChecklist = async (checklistId) => {
+  return await apiRequest({
+    method: "DELETE",
+    endpoint: `/task/checklist/${checklistId}`,
+  });
+};
+
+export const getAllChecklistItemByChecklistId = async (checklistId) => {
+  const response = await apiRequest({
+    method: "GET",
+    endpoint: `/task/checklist/item/${checklistId}`,
+  });
+  return response.data.data
+}
+
+export const createTaskChecklistItem = async (taskData) => {
+  return await apiRequest({
+    method: "POST",
+    endpoint: "/task/checklist/item",
+    body: taskData,
+  });
+};
+
+export const updateTaskChecklistItem = async (checklistItemId,taskData) => {
+  return await apiRequest({
+    method: "PUT",
+    endpoint: `/task/checklist/item/${checklistItemId}`,
+    body: taskData,
+  });
+};
+
+export const deleteTaskChecklistItem = async (checklistItemId) => {
+  return await apiRequest({
+    method: "DELETE",
+    endpoint: `/task/checklist/item/${checklistItemId}`,
+  });
+};
+
+export const convertTaskChecklistItem = async (checklistItemId) => {
+  return await apiRequest({
+    method: "PATCH",
+    endpoint: `/task/checklist/item/convert_to_task/${checklistItemId}`,
   });
 };
 

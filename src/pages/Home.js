@@ -35,13 +35,7 @@ function Home() {
   };
 
   const handleHasCover = (cover) => {
-    if (cover != null){
-      console.log("masuk cover:",cover)
-      setCover(cover);
-    }else{
-      console.log("ga masuk cover");
-      setCover(null);
-    }
+    setCover(cover != null ? cover : null);
   };
 
   const pageTitles = {
@@ -73,7 +67,7 @@ function Home() {
           {pageTitles[currentPage] || `${capitalizeWords(currentPage.split("_")[0])}`}
         </h3>
         {currentPage === "dashboard" ? (
-          <Dashboard />
+          <Dashboard showDetailTask={showDetailTask} />
         ) : currentPage === "user" ? (
           <User />
         ) : currentPage === "role" ? (

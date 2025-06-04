@@ -1,7 +1,9 @@
 import React, { useState, useRef, useEffect, useCallback } from "react";
 import {
   X, Eye, Users, Tag, CheckSquare, Paperclip, Image, 
-  Trash,Edit,Calendar
+  Trash,Edit,Calendar,
+  Pencil,
+  MoreVertical
 } from "lucide-react";
 import { EditorContent, useEditor } from "@tiptap/react";
 import StarterKit from "@tiptap/starter-kit";
@@ -16,6 +18,14 @@ import {
   getTaskById, updateTask, getLabel, getAllUser,deleteLabel,createLabel, updateLabel, 
   getAllBoardByWorkspaceId, workspaceFind, getTaskFiles, deleteAttachment,deleteTask, uploadAttachment,
   renameAttachment, createTaskComment, getAllCommentByTaskId, updateTaskComment, deleteTaskComment,
+  createTaskChecklist,
+  getAllChecklistByTaskId,
+  deleteTaskChecklist,
+  editTaskChecklist,
+  createTaskChecklistItem,
+  updateTaskChecklistItem,
+  deleteTaskChecklistItem,
+  convertTaskChecklistItem,
 } from '../service/apiService';
 import "../styles/TaskDetail.css";
 import { Move } from 'lucide-react';
@@ -53,10 +63,15 @@ const TaskDetail = ({ task, onClose, onDelete}) => {
   const [coverImage, setCoverImage] = useState(null);
   const fileInputCoverRef = useRef(null);
   //CHECKLIST
-  const [showChecklist, setShowChecklist] = useState(false);
-  const [checklistItems, setChecklistItems] = useState([]);
-  const [newChecklistItem, setNewChecklistItem] = useState("");
-  // const [percentage, setPercentage] = useState(0);
+  const [showChecklistModal, setShowChecklistModal] = useState(false);
+  const [checklist, setChecklist] = useState([]);
+  const [newChecklistItem, setNewChecklistItem] = useState({});
+  const [newChecklist, setNewChecklist] = useState("");
+  const [checklistIdEdit, setChecklistIdEdit] = useState(0);
+  const [showChecklistEditModal, setShowChecklistEditModal] = useState(false);
+  const [newChecklistItemEdit, setNewChecklistItemEdit] = useState("");
+  const [checklistItemIdEdit, setChecklistItemIdEdit] = useState(0);
+  const [showChecklistItemEditModal, setShowChecklistItemEditModal] = useState(false);
   // MEMBER
   const [showMemberModal, setShowMemberModal] = useState(false);
   const [currentMember, setCurrentMember] = useState([]);
@@ -82,10 +97,7 @@ const TaskDetail = ({ task, onClose, onDelete}) => {
   };
   //ATTACHMENT
   const [attachments, setAttachments] = useState([]);
-  // const [attachmentMessage, setAttachmentMessage] = useState("");
-  // const [attachmentComments, setAttachmentComments] = useState([]);
   const fileInputAttachmentRef = useRef(null);
-  // const [dropdownOpenIndex, setDropdownOpenIndex] = useState(null);
   const IMAGE_EXTENSIONS = ['jpg', 'jpeg', 'png'];
   //DELETE
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
@@ -338,22 +350,82 @@ const TaskDetail = ({ task, onClose, onDelete}) => {
   };
 
   //CHECKLIST 
-  const handleAddChecklistItem = () => {
-    if (newChecklistItem.trim()) {
-      setChecklistItems((prev) => [
-        ...prev,
-        { text: newChecklistItem, checked: false }
-      ]);
-      setNewChecklistItem("");
+  const fetchChecklist = async () => {
+    const response = await getAllChecklistByTaskId(task.id)
+    setChecklist(response);
+  }
+
+  const handleAddChecklist = async () => {
+    if (newChecklist.trim()) {
+      await createTaskChecklist({
+        task_id: task.id,
+        title: newChecklist
+      })
+      await fetchChecklist()
+      setNewChecklist("");
+      setShowChecklistModal(false)
     }
   };
 
-  const toggleChecklistItem = (index) => {
-    setChecklistItems((prev) =>
-      prev.map((item, i) =>
-        i === index ? { ...item, checked: !item.checked } : item
-      )
-    );
+  const handleEditChecklist = async () => {
+    if (newChecklist.trim()) {
+      await editTaskChecklist(checklistIdEdit,{
+        title: newChecklist
+      })
+      await fetchChecklist()
+      setNewChecklist("");
+      setChecklistIdEdit(0)
+      setShowChecklistEditModal(false)
+    }
+  };
+
+  const handleDeleteChecklist =  async (checklistId) => {
+    await deleteTaskChecklist(checklistId)
+    await fetchChecklist();
+  };
+
+  const handleAddChecklistItem = async (checklistId) => {
+    const newItemText = newChecklistItem[checklistId];
+    if (!newItemText || newItemText.trim() === '') return;
+
+    await createTaskChecklistItem({
+      task_checklist_id: checklistId,
+      title: newItemText
+    })
+    await fetchChecklist()
+    setNewChecklistItem(prev => ({ 
+      ...prev, 
+      [checklistId]: ''
+    }))
+  };
+
+  const toggleChecklistItem = async (itemId, newStatus) => {
+    await updateTaskChecklistItem(itemId,{
+      is_completed: newStatus
+    })
+    await fetchChecklist()
+  };
+
+  const handleRenameChecklistItem = async () => {
+    if (newChecklistItemEdit.trim()) {
+      await updateTaskChecklistItem(checklistItemIdEdit,{
+        title: newChecklistItemEdit
+      })
+      await fetchChecklist()
+      setNewChecklistItemEdit("");
+      setChecklistItemIdEdit(0)
+      setShowChecklistItemEditModal(false)
+    }
+  };
+
+  const handleDeleteChecklistItem =  async (itemId) => {
+    await deleteTaskChecklistItem(itemId)
+    await fetchChecklist();
+  };
+
+  const handleConvertChecklistItem =  async (itemId) => {
+    await convertTaskChecklistItem(itemId)
+    await fetchChecklist();
   };
 
   //DESCRIPTION
@@ -655,7 +727,8 @@ const TaskDetail = ({ task, onClose, onDelete}) => {
         setTaskData(data);
         setIsWatched(!!data.watch);
         setIsCompleted(!!data.is_completed);
-        setActivity(res.data.data.comment.data)
+        setActivity(data.comment.data)
+        setChecklist(data.checklist.data)
         setDueDate(data.due_date)
         setCoverImage(data.cover != null ? data.cover.view_saved : null)
       } catch (e) {
@@ -1020,7 +1093,7 @@ const TaskDetail = ({ task, onClose, onDelete}) => {
                           }}
                           aria-label="Remove due date"
                         >
-                          &times;
+                          <X size={15} />
                         </button>
                       </div>
                     );
@@ -1148,38 +1221,202 @@ const TaskDetail = ({ task, onClose, onDelete}) => {
                 </div>
               </div>
 
-              {showChecklist && (
-                <div className="checklist-section mb-4">
-                  <h3 className="section-title mb-2">Checklist</h3>
-                  <div className="checklist-input d-flex mb-2">
-                    <input
-                      type="text"
-                      className="form-control me-2"
-                      placeholder="Add new item..."
-                      value={newChecklistItem}
-                      onChange={e => setNewChecklistItem(e.target.value)}
-                    />
-                    <button className="btn btn-primary" onClick={handleAddChecklistItem}>
-                      Add
-                    </button>
-                  </div>
-                  <ul className="list-unstyled">
-                    {checklistItems.map((item, index) => (
-                      <li key={index} className="checklist-item mb-1">
-                        <label className="d-flex align-items-center">
+              <div className="attachment-section mb-4">
+                <h3 className="section-title mb-2 d-flex align-items-center gap-2">
+                  <CheckSquare size={18} className="text-muted" />
+                  Checklist
+                </h3>
+                {!checklist ? (
+                  <div className="border rounded p-3 text-muted text-center">Belum ada Checklist</div>
+                ) : (
+                  <div className="d-flex flex-column align-items-start gap-1" >
+                    {checklist.map((chk, idx) => (
+                      <div className="checklist-section">
+                        <h3 className="section-title mb-1 mt-1 d-flex justify-content-between align-items-center">
+                          <span className="d-flex align-items-center gap-2">
+                            {chk.title}
+                            <button
+                              type="button"
+                              className="btn btn-sm p-0 border-0 bg-transparent"
+                              onClick={() => {
+                                setNewChecklist(chk.title)
+                                setChecklistIdEdit(chk.id)
+                                setShowChecklistEditModal(true)
+                              }}
+                            >
+                              <Pencil size={16} className="text-primary" />
+                            </button>
+                          </span>
+                          <button
+                            type="button"
+                            className="btn btn-sm ms-2 py-0 px-2"
+                            style={{ lineHeight: '1', background: 'transparent', border: 'none' }}
+                            onClick={() => handleDeleteChecklist(chk.id)}
+                          >
+                            <X size={20} className="text-danger" />
+                          </button>
+                        </h3>
+                        <p></p>
+                        <div className="w-100 mt-2 mb-2">
+                          <div className="progress" style={{ height: '8px' }}>
+                            <div
+                              className="progress-bar bg-success"
+                              role="progressbar"
+                              style={{
+                                width: chk.check_persentase || '0%',
+                                transition: 'width 0.6s ease'
+                              }}
+                              aria-valuenow={parseInt(chk.check_persentase) || 0}
+                              aria-valuemin="0"
+                              aria-valuemax="100"
+                            ></div>
+                          </div>
+                          <small className="text-muted">{chk.check_persentase || '0%'}</small>
+                        </div>
+                        <div className="checklist-input d-flex mb-2">
                           <input
-                            type="checkbox"
-                            className="form-check-input me-2"
-                            checked={item.checked}
-                            onChange={() => toggleChecklistItem(index)}
+                            type="text"
+                            className="form-control me-2"
+                            placeholder="Add new item..."
+                            value={newChecklistItem[chk.id] || ''}
+                            onChange={e => 
+                              setNewChecklistItem(prev => ({ 
+                                ...prev, 
+                                [chk.id]: e.target.value 
+                              }))
+                            }
                           />
-                          <span>{item.text}</span>
-                        </label>
-                      </li>
+                          <button className="btn btn-primary" onClick={() => handleAddChecklistItem(chk.id)}>
+                            Add
+                          </button>
+                        </div>
+                        <ul className="list-unstyled" style={{ paddingLeft: '8px' }}>
+                          {(chk.item.data ?? []).map((item, index) => (
+                            <li key={index} className="mb-2">
+                              <div className="d-flex align-items-start">
+                                <i className="bi bi-arrow-return-right text-secondary me-2 mt-2" style={{ fontSize: '20px' }}></i>
+                                <div className="border rounded px-3 py-2 d-flex justify-content-between align-items-start flex-grow-1">
+                                  <div className="d-flex flex-row flex-wrap flex-grow-1 me-2">
+                                    <input
+                                      type="checkbox"
+                                      className="form-check-input me-2 mt-1"
+                                      checked={item.is_completed}
+                                      style={{cursor: "pointer"}}
+                                      onChange={() => toggleChecklistItem(item.id, !item.is_completed)}
+                                    />
+                                    <span className="text-wrap" style={{ wordBreak: 'break-word' }}>{item.title}</span>
+                                  </div>
+                                  <div className="dropdown" data-bs-auto-close="true">
+                                    <button
+                                      className="btn btn-sm p-0 border-0 bg-transparent"
+                                      type="button"
+                                      data-bs-toggle="dropdown"
+                                      aria-expanded="false"
+                                    >
+                                      <MoreVertical size={18} />
+                                    </button>
+                                    <ul className="dropdown-menu dropdown-menu-end">
+                                      <li>
+                                        <button 
+                                          className="dropdown-item" 
+                                          onClick={(e) => {
+                                            const dropdown = e.target.closest('.dropdown');
+                                            const toggleButton = dropdown?.querySelector('[data-bs-toggle="dropdown"]');
+                                            if (toggleButton) toggleButton.click();
+
+                                            setNewChecklistItemEdit(item.title);
+                                            setChecklistItemIdEdit(item.id);
+                                            setShowChecklistItemEditModal(true);
+                                          }}
+                                        >
+                                          Edit
+                                        </button>
+                                      </li>
+                                      <li>
+                                        <button 
+                                          className="dropdown-item" 
+                                          onClick={(e) => {
+                                            const dropdown = e.target.closest('.dropdown');
+                                            const toggleButton = dropdown?.querySelector('[data-bs-toggle="dropdown"]');
+                                            if (toggleButton) toggleButton.click();
+                                            
+                                            // move
+                                            alert("codingan move nya belum ada bro")
+                                          }}
+                                        >
+                                          Move
+                                        </button>
+                                      </li>
+                                      <li>
+                                        <button 
+                                          className="dropdown-item" 
+                                          onClick={(e) => {
+                                            const dropdown = e.target.closest('.dropdown');
+                                            const toggleButton = dropdown?.querySelector('[data-bs-toggle="dropdown"]');
+                                            if (toggleButton) toggleButton.click();
+                                            
+                                            // member
+                                            alert("codingan member nya belum ada bro")
+                                          }}
+                                        >
+                                          Members
+                                        </button>
+                                      </li>
+                                      <li>
+                                        <button 
+                                          className="dropdown-item" 
+                                          onClick={(e) => {
+                                            const dropdown = e.target.closest('.dropdown');
+                                            const toggleButton = dropdown?.querySelector('[data-bs-toggle="dropdown"]');
+                                            if (toggleButton) toggleButton.click();
+                                            
+                                            // due date
+                                            alert("codingan due date nya belum ada bro")
+                                          }}
+                                        >
+                                          Due Date
+                                        </button>
+                                      </li>
+                                      <li>
+                                        <button 
+                                          className="dropdown-item" 
+                                          onClick={(e) => {
+                                            const dropdown = e.target.closest('.dropdown');
+                                            const toggleButton = dropdown?.querySelector('[data-bs-toggle="dropdown"]');
+                                            if (toggleButton) toggleButton.click();
+
+                                            handleDeleteChecklistItem(item.id);
+                                          }}
+                                        >
+                                          Delete
+                                        </button>
+                                      </li>
+                                      <li>
+                                        <button 
+                                          className="dropdown-item" 
+                                          onClick={(e) => {
+                                            const dropdown = e.target.closest('.dropdown');
+                                            const toggleButton = dropdown?.querySelector('[data-bs-toggle="dropdown"]');
+                                            if (toggleButton) toggleButton.click();
+
+                                            handleConvertChecklistItem(item.id);
+                                          }}
+                                        >
+                                          Convert To Task
+                                        </button>
+                                      </li>
+                                    </ul>
+                                  </div>
+                                </div>
+                              </div>
+                            </li>
+                          ))}
+                        </ul>
+                      </div>
                     ))}
-                  </ul>
-                </div>
-              )}
+                  </div>
+                )}
+              </div>
 
               <div className="attachment-section mb-4">
                 <h3 className="section-title mb-2 d-flex align-items-center gap-2">
@@ -1424,7 +1661,7 @@ const TaskDetail = ({ task, onClose, onDelete}) => {
                 {[
                   { icon: Users , label: 'Members', action: () => setShowMemberModal(true) },
                   { icon: Tag, label: 'Labels', action: () => setShowLabelModal(true) },
-                  { icon: CheckSquare, label: 'Checklist', action: () => setShowChecklist(true) },
+                  { icon: CheckSquare, label: 'Checklist', action: () => setShowChecklistModal(true) },
                   { icon: Calendar, label: 'Due Date', action: () => setShowDueDateModal(true) },
                   { icon: Paperclip, label: 'Attachment', action: triggerFileUpload },
                   { icon: Image, label: 'Cover', action: () => fileInputCoverRef.current?.click() },
@@ -1890,6 +2127,96 @@ const TaskDetail = ({ task, onClose, onDelete}) => {
                   Yes, Delete
                 </button>
                 <button className="popup-btn cancel" onClick={() => setShowCommentDeleteConfirm(false)}>
+                  Cancel
+                </button>
+              </div>
+            </div>
+          </div>
+        )}
+
+        {showChecklistModal && (
+          <div
+            className="popup-overlay"
+            onClick={(e) => e.stopPropagation()}
+          >
+            <div className="popup-box">
+              <h3>Add Checklist</h3>
+              <div className="popup-section">
+                <input
+                  type="text"
+                  value={newChecklist}
+                  onChange={(e) => setNewChecklist(e.target.value)}
+                  placeholder="Add checklist"
+                  className="form-control"
+                  onClick={(e) => e.stopPropagation()}
+                  onKeyDown={(e) => e.key === 'Enter' && handleAddChecklist()}
+                />
+              </div>
+              <div className="popup-buttons mt-3">
+                <button className="popup-btn confirm" onClick={handleAddChecklist}>
+                  Save
+                </button>
+                <button className="popup-btn cancel" onClick={() => setShowChecklistModal(false)}>
+                  Cancel
+                </button>
+              </div>
+            </div>
+          </div>
+        )}
+
+        {showChecklistEditModal && (
+          <div
+            className="popup-overlay"
+            onClick={(e) => e.stopPropagation()}
+          >
+            <div className="popup-box">
+              <h3>Edit Checklist</h3>
+              <div className="popup-section">
+                <input
+                  type="text"
+                  value={newChecklist}
+                  onChange={(e) => setNewChecklist(e.target.value)}
+                  placeholder="Edit checklist"
+                  className="form-control"
+                  onClick={(e) => e.stopPropagation()}
+                  onKeyDown={(e) => e.key === 'Enter' && handleEditChecklist()}
+                />
+              </div>
+              <div className="popup-buttons mt-3">
+                <button className="popup-btn confirm" onClick={handleEditChecklist}>
+                  Save
+                </button>
+                <button className="popup-btn cancel" onClick={() => setShowChecklistEditModal(false)}>
+                  Cancel
+                </button>
+              </div>
+            </div>
+          </div>
+        )}
+
+        {showChecklistItemEditModal && (
+          <div
+            className="popup-overlay"
+            onClick={(e) => e.stopPropagation()}
+          >
+            <div className="popup-box">
+              <h3>Edit Checklist Item</h3>
+              <div className="popup-section">
+                <input
+                  type="text"
+                  value={newChecklistItemEdit}
+                  onChange={(e) => setNewChecklistItemEdit(e.target.value)}
+                  placeholder="Edit checklist item"
+                  className="form-control"
+                  onClick={(e) => e.stopPropagation()}
+                  onKeyDown={(e) => e.key === 'Enter' && handleRenameChecklistItem()}
+                />
+              </div>
+              <div className="popup-buttons mt-3">
+                <button className="popup-btn confirm" onClick={handleRenameChecklistItem}>
+                  Save
+                </button>
+                <button className="popup-btn cancel" onClick={() => setShowChecklistItemEditModal(false)}>
                   Cancel
                 </button>
               </div>
