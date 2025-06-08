@@ -32,7 +32,7 @@ export const apiRequest = async ({
         Swal.fire({
           title: "Logout",
           text: "Sesi Anda Telah Berakhir, Silahkan Login Ulang",
-          icon: "warning",	
+          icon: "warning",
           iconColor: "#dc3545",
           timer: 2500,
           showConfirmButton: false,
@@ -78,7 +78,7 @@ export const apiRequest = async ({
     let response = await hitAPI();
     return response.data;
   } catch (error) {
-    if (error.status === 401 && (endpoint !== "/auth/login" && endpoint !== "/auth/send-email/forgot-password" && endpoint !== "/auth/logout" && endpoint !== "/auth/refresh-token")) {
+    if (error.status === 401 && (endpoint !== "/auth/login" || endpoint !== "/auth/send-email/forgot-password")) {
       const newToken = await refreshToken();
       if (newToken) {
         headers["Authorization"] = `Bearer ${newToken}`;
@@ -87,14 +87,15 @@ export const apiRequest = async ({
       } else {
         throw new Error("Gagal memperbarui token");
       }
-    }else if(error.status === 422 && (endpoint !== "/auth/login" && endpoint !== "/auth/send-email/forgot-password" && endpoint !== "/auth/logout" && endpoint !== "/auth/refresh-token")){
+    }else if(error.status === 422 && (endpoint !== "/auth/login" || endpoint !== "/auth/send-email/forgot-password")){
         try {
           const response = await authLogout();
           if (response.success) {
             Swal.fire({
               title: "Logout",
-              text: "Akun Dikunci atau password telah berubah",
-              icon: "success",
+              text: "Sesi Anda Telah Berakhir, Silahkan Login Ulang",
+              icon: "warning",
+              iconColor: "#dc3545",
               timer: 2500,
               showConfirmButton: false,
             }).then(() => {
@@ -640,7 +641,7 @@ export const apiRequestExportData = async ({
         Swal.fire({
           title: "Logout",
           text: "Sesi Anda Telah Berakhir, Silahkan Login Ulang",
-          icon: "warning",  
+          icon: "warning",
           iconColor: "#dc3545",
           timer: 2500,
           showConfirmButton: false,
@@ -672,7 +673,7 @@ export const apiRequestExportData = async ({
     let response = await hitAPI();
     return response;
   } catch (error) {
-    if (error.status === 401 && (endpoint !== "/auth/login" && endpoint !== "/auth/send-email/forgot-password" && endpoint !== "/auth/logout" && endpoint !== "/auth/refresh-token")) {
+    if (error.status === 401 && (endpoint !== "/auth/login" || endpoint !== "/auth/send-email/forgot-password")) {
       const newToken = await refreshToken();
       if (newToken) {
         headers["Authorization"] = `Bearer ${newToken}`;
@@ -681,14 +682,15 @@ export const apiRequestExportData = async ({
       } else {
         throw new Error("Gagal memperbarui token");
       }
-    }else if(error.status === 422 && (endpoint !== "/auth/login" && endpoint !== "/auth/send-email/forgot-password" && endpoint !== "/auth/logout" && endpoint !== "/auth/refresh-token")){
+    }else if(error.status === 422 && (endpoint !== "/auth/login" || endpoint !== "/auth/send-email/forgot-password")){
         try {
           const response = await authLogout();
           if (response.success) {
             Swal.fire({
               title: "Logout",
-              text: "Akun Dikunci atau password telah berubah",
-              icon: "success",
+              text: "Sesi Anda Telah Berakhir, Silahkan Login Ulang",
+              icon: "warning",
+              iconColor: "#dc3545",
               timer: 2500,
               showConfirmButton: false,
             }).then(() => {

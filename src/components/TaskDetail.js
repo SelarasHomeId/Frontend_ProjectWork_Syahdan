@@ -72,6 +72,15 @@ const TaskDetail = ({ task, onClose, onDelete}) => {
   const [newChecklistItemEdit, setNewChecklistItemEdit] = useState("");
   const [checklistItemIdEdit, setChecklistItemIdEdit] = useState(0);
   const [showChecklistItemEditModal, setShowChecklistItemEditModal] = useState(false);
+  const [showMoveChecklistItemModal, setShowMoveChecklistItemModal] = useState(false);
+  const [selectedChecklist, setSelectedChecklist] = useState('');
+  const [showDueDateItemModal, setShowDueDateItemModal] = useState(false);
+  const [dueDateItem, setDueDateItem] = useState('');
+  const toggleDueDateItemModal = () => {
+    setShowDueDateItemModal(!showDueDateItemModal);
+  };
+  const [showMemberItemModal, setShowMemberItemModal] = useState(false);
+  const [currentMemberItem, setCurrentMemberItem] = useState([]);
   // MEMBER
   const [showMemberModal, setShowMemberModal] = useState(false);
   const [currentMember, setCurrentMember] = useState([]);
@@ -426,6 +435,83 @@ const TaskDetail = ({ task, onClose, onDelete}) => {
   const handleConvertChecklistItem =  async (itemId) => {
     await convertTaskChecklistItem(itemId)
     await fetchChecklist();
+  };
+
+  const handleMoveChecklistItem = async () => {
+    if (!selectedChecklist) return alert('Pilih checklist terlebih dahulu');
+    try {
+      await updateTaskChecklistItem(checklistItemIdEdit,{
+        task_checklist_id: parseInt(selectedChecklist)
+      })
+      await fetchChecklist()
+      setChecklistItemIdEdit(0)
+      setSelectedChecklist('')
+      setShowMoveChecklistItemModal(false)
+    } catch (err) {
+      console.error('Gagal memindah item:', err);
+      alert('Gagal memindah item');
+    }
+  };
+
+  const handleDateItemChange = (e) => {
+    setDueDateItem(e.target.value.replace("T", " "));
+  };
+
+  const handleSaveDueDateItem = async () => {
+    try {
+      await updateTaskChecklistItem(checklistItemIdEdit, { due_date: dueDateItem }, "application/json");
+      await fetchChecklist()
+      setChecklistItemIdEdit(0)
+      setDueDateItem('')
+      setShowDueDateItemModal(false);
+    } catch (err) {
+      console.error(err);
+      alert('Gagal update due date item');
+    }
+  };
+
+  const handleRemoveDueDateItem = async (itemId) => {
+    try {
+      await updateTaskChecklistItem(itemId, { due_date: '' }, "application/json");
+      await fetchChecklist()
+      setDueDateItem('')
+    } catch (err) {
+      console.error(err);
+      alert('Gagal update due date item');
+    }
+  };
+
+  const closeModalMemberItem = useCallback(() => {
+    setShowMemberItemModal(false);
+    setSearchUser('');
+    setFilteredUsers(allUser);
+    const searchInput = document.getElementById('searchInput');
+    if (searchInput) {
+      searchInput.value = '';
+    }
+  },[allUser, setShowMemberItemModal]);
+
+  const handleCheckboxChangeMemberItem = user => {
+    setCurrentMemberItem(prev => {
+      if (prev.some(m => m.id === user.id)) {
+        return prev.filter(m => m.id !== user.id);
+      }
+      return [...prev, user];
+    });
+  };
+
+  const handleSaveChangesMemberItem = async () => {
+    const memberIds = currentMemberItem.map(m => m.id);
+    try {
+      await updateTaskChecklistItem(checklistItemIdEdit, { assign_to_user: memberIds }, "application/json");
+      await fetchChecklist()
+      setChecklistItemIdEdit(0)
+      setCurrentMemberItem([])
+      closeModalMemberItem();
+    } catch (err) {
+      console.error(err);
+      alert('Gagal update member item');
+    }
   };
 
   //DESCRIPTION
@@ -798,7 +884,7 @@ const TaskDetail = ({ task, onClose, onDelete}) => {
 
   // 6. Fetch users saat buka Member Modal
   useEffect(() => {
-    if (showMemberModal) {
+    if (showMemberModal || showMemberItemModal) {
       getAllUser('/user?no_paging=yes')
         .then(res => {
           setAllUser(res.data.data);
@@ -806,7 +892,7 @@ const TaskDetail = ({ task, onClose, onDelete}) => {
         })
         .catch(err => console.error('Gagal fetch user:', err));
     }
-  }, [showMemberModal]);
+  }, [showMemberModal, showMemberItemModal]);
 
   // 7. Fetch labels saat buka Label Modal atau selesai Add Label
   useEffect(() => {
@@ -1295,118 +1381,238 @@ const TaskDetail = ({ task, onClose, onDelete}) => {
                             <li key={index} className="mb-2">
                               <div className="d-flex align-items-start">
                                 <i className="bi bi-arrow-return-right text-secondary me-2 mt-2" style={{ fontSize: '20px' }}></i>
-                                <div className="border rounded px-3 py-2 d-flex justify-content-between align-items-start flex-grow-1">
-                                  <div className="d-flex flex-row flex-wrap flex-grow-1 me-2">
-                                    <input
-                                      type="checkbox"
-                                      className="form-check-input me-2 mt-1"
-                                      checked={item.is_completed}
-                                      style={{cursor: "pointer"}}
-                                      onChange={() => toggleChecklistItem(item.id, !item.is_completed)}
-                                    />
-                                    <span className="text-wrap" style={{ wordBreak: 'break-word' }}>{item.title}</span>
+                                <div className="border rounded px-3 py-2 d-flex flex-column flex-grow-1 ">
+                                  <div className="d-flex justify-content-between w-100 align-items-start">
+                                    <div className="d-flex flex-row align-items-start flex-grow-1 me-2 w-100">
+                                      <input
+                                        type="checkbox"
+                                        className="form-check-input me-2 mt-1"
+                                        checked={item.is_completed}
+                                        style={{ cursor: "pointer" }}
+                                        onChange={() => toggleChecklistItem(item.id, !item.is_completed)}
+                                      />
+                                      <div className="flex-grow-1" style={{ minWidth: 0 }}>
+                                        <span
+                                          className="text-wrap d-block"
+                                          style={{
+                                            wordBreak: 'break-word',
+                                            textDecoration: item.is_completed ? 'line-through' : 'none'
+                                          }}
+                                        >
+                                          {item.title}
+                                        </span>
+                                      </div>
+                                    </div>
+                                    <div className="dropdown align-self-start ms-2" data-bs-auto-close="true">
+                                      <button
+                                        className="btn btn-sm p-0 border-0 bg-transparent"
+                                        type="button"
+                                        data-bs-toggle="dropdown"
+                                        aria-expanded="false"
+                                      >
+                                        <MoreVertical size={18} />
+                                      </button>
+                                      <ul className="dropdown-menu dropdown-menu-end">
+                                        <li>
+                                          <button 
+                                            className="dropdown-item" 
+                                            onClick={(e) => {
+                                              const dropdown = e.target.closest('.dropdown');
+                                              const toggleButton = dropdown?.querySelector('[data-bs-toggle="dropdown"]');
+                                              if (toggleButton) toggleButton.click();
+
+                                              setNewChecklistItemEdit(item.title);
+                                              setChecklistItemIdEdit(item.id);
+                                              setShowChecklistItemEditModal(true);
+                                            }}
+                                          >
+                                            Edit
+                                          </button>
+                                        </li>
+                                        <li>
+                                          <button 
+                                            className="dropdown-item" 
+                                            onClick={(e) => {
+                                              const dropdown = e.target.closest('.dropdown');
+                                              const toggleButton = dropdown?.querySelector('[data-bs-toggle="dropdown"]');
+                                              if (toggleButton) toggleButton.click();
+                                              
+                                              setChecklistItemIdEdit(item.id);
+                                              setShowMoveChecklistItemModal(true)
+                                            }}
+                                          >
+                                            Move
+                                          </button>
+                                        </li>
+                                        <li>
+                                          <button 
+                                            className="dropdown-item" 
+                                            onClick={(e) => {
+                                              const dropdown = e.target.closest('.dropdown');
+                                              const toggleButton = dropdown?.querySelector('[data-bs-toggle="dropdown"]');
+                                              if (toggleButton) toggleButton.click();
+                                              
+                                              setChecklistItemIdEdit(item.id);
+                                              setCurrentMemberItem(item.assign_to_user != null ? item.assign_to_user.data : [])
+                                              setShowMemberItemModal(true)
+                                            }}
+                                          >
+                                            Members
+                                          </button>
+                                        </li>
+                                        <li>
+                                          <button 
+                                            className="dropdown-item" 
+                                            onClick={(e) => {
+                                              const dropdown = e.target.closest('.dropdown');
+                                              const toggleButton = dropdown?.querySelector('[data-bs-toggle="dropdown"]');
+                                              if (toggleButton) toggleButton.click();
+                                              
+                                              setChecklistItemIdEdit(item.id);
+                                              setShowDueDateItemModal(true)
+                                            }}
+                                          >
+                                            Due Date
+                                          </button>
+                                        </li>
+                                        <li>
+                                          <button 
+                                            className="dropdown-item" 
+                                            onClick={(e) => {
+                                              const dropdown = e.target.closest('.dropdown');
+                                              const toggleButton = dropdown?.querySelector('[data-bs-toggle="dropdown"]');
+                                              if (toggleButton) toggleButton.click();
+
+                                              handleDeleteChecklistItem(item.id);
+                                            }}
+                                          >
+                                            Delete
+                                          </button>
+                                        </li>
+                                        <li>
+                                          <button 
+                                            className="dropdown-item" 
+                                            onClick={(e) => {
+                                              const dropdown = e.target.closest('.dropdown');
+                                              const toggleButton = dropdown?.querySelector('[data-bs-toggle="dropdown"]');
+                                              if (toggleButton) toggleButton.click();
+
+                                              handleConvertChecklistItem(item.id);
+                                            }}
+                                          >
+                                            Convert To Task
+                                          </button>
+                                        </li>
+                                      </ul>
+                                    </div>
                                   </div>
-                                  <div className="dropdown" data-bs-auto-close="true">
-                                    <button
-                                      className="btn btn-sm p-0 border-0 bg-transparent"
-                                      type="button"
-                                      data-bs-toggle="dropdown"
-                                      aria-expanded="false"
-                                    >
-                                      <MoreVertical size={18} />
-                                    </button>
-                                    <ul className="dropdown-menu dropdown-menu-end">
-                                      <li>
-                                        <button 
-                                          className="dropdown-item" 
-                                          onClick={(e) => {
-                                            const dropdown = e.target.closest('.dropdown');
-                                            const toggleButton = dropdown?.querySelector('[data-bs-toggle="dropdown"]');
-                                            if (toggleButton) toggleButton.click();
 
-                                            setNewChecklistItemEdit(item.title);
-                                            setChecklistItemIdEdit(item.id);
-                                            setShowChecklistItemEditModal(true);
-                                          }}
-                                        >
-                                          Edit
-                                        </button>
-                                      </li>
-                                      <li>
-                                        <button 
-                                          className="dropdown-item" 
-                                          onClick={(e) => {
-                                            const dropdown = e.target.closest('.dropdown');
-                                            const toggleButton = dropdown?.querySelector('[data-bs-toggle="dropdown"]');
-                                            if (toggleButton) toggleButton.click();
-                                            
-                                            // move
-                                            alert("codingan move nya belum ada bro")
-                                          }}
-                                        >
-                                          Move
-                                        </button>
-                                      </li>
-                                      <li>
-                                        <button 
-                                          className="dropdown-item" 
-                                          onClick={(e) => {
-                                            const dropdown = e.target.closest('.dropdown');
-                                            const toggleButton = dropdown?.querySelector('[data-bs-toggle="dropdown"]');
-                                            if (toggleButton) toggleButton.click();
-                                            
-                                            // member
-                                            alert("codingan member nya belum ada bro")
-                                          }}
-                                        >
-                                          Members
-                                        </button>
-                                      </li>
-                                      <li>
-                                        <button 
-                                          className="dropdown-item" 
-                                          onClick={(e) => {
-                                            const dropdown = e.target.closest('.dropdown');
-                                            const toggleButton = dropdown?.querySelector('[data-bs-toggle="dropdown"]');
-                                            if (toggleButton) toggleButton.click();
-                                            
-                                            // due date
-                                            alert("codingan due date nya belum ada bro")
-                                          }}
-                                        >
-                                          Due Date
-                                        </button>
-                                      </li>
-                                      <li>
-                                        <button 
-                                          className="dropdown-item" 
-                                          onClick={(e) => {
-                                            const dropdown = e.target.closest('.dropdown');
-                                            const toggleButton = dropdown?.querySelector('[data-bs-toggle="dropdown"]');
-                                            if (toggleButton) toggleButton.click();
+                                  {item.due_date && (() => {
+                                    const date = new Date(item.due_date.replace(' ', 'T'));
+                                    const now = new Date();
+                                    const isCompletedStatus = item.is_completed === true;
 
-                                            handleDeleteChecklistItem(item.id);
-                                          }}
-                                        >
-                                          Delete
-                                        </button>
-                                      </li>
-                                      <li>
-                                        <button 
-                                          className="dropdown-item" 
-                                          onClick={(e) => {
-                                            const dropdown = e.target.closest('.dropdown');
-                                            const toggleButton = dropdown?.querySelector('[data-bs-toggle="dropdown"]');
-                                            if (toggleButton) toggleButton.click();
+                                    const sameYear = date.getFullYear() === now.getFullYear();
 
-                                            handleConvertChecklistItem(item.id);
-                                          }}
-                                        >
-                                          Convert To Task
-                                        </button>
-                                      </li>
-                                    </ul>
-                                  </div>
+                                    const datePart = date.toLocaleDateString(undefined, {
+                                      year: sameYear ? undefined : 'numeric',
+                                      month: 'short',
+                                      day: 'numeric',
+                                    });
+
+                                    const timePart = date.toLocaleTimeString(undefined, {
+                                      hour: 'numeric',
+                                      minute: '2-digit',
+                                      hour12: true,
+                                    });
+
+                                    let badgeClass = "badge bg-success-subtle text-success";
+                                    let additionalText = "";
+
+                                    if (isCompletedStatus) {
+                                      additionalText = " - completed";
+                                    } else {
+                                      const diffInMs = date - now;
+                                      const diffInDays = Math.floor(diffInMs / (1000 * 60 * 60 * 24));
+
+                                      if (diffInMs < 0) {
+                                        badgeClass = "badge bg-danger-subtle text-danger";
+                                        additionalText = " - overdue";
+                                      } else if (diffInDays <= 1) {
+                                        badgeClass = "badge bg-secondary-subtle text-secondary";
+                                        additionalText = " - due soon";
+                                      } else {
+                                        badgeClass = "badge bg-secondary-subtle text-secondary";
+                                      }
+                                    }
+
+                                    return (
+                                      <div className="d-inline-block mt-2">
+                                        <span className={`${badgeClass} d-inline-flex align-items-center px-3 py-2 fs-8 fw-semibold position-relative`}>
+                                          {datePart}, {timePart}{additionalText}
+                                          <button
+                                            onClick={() => handleRemoveDueDateItem(item.id)}
+                                            style={{
+                                              position: 'absolute',
+                                              top: '-6px',
+                                              right: '-6px',
+                                              backgroundColor: 'red',
+                                              border: 'none',
+                                              borderRadius: '50%',
+                                              color: 'white',
+                                              fontWeight: 'bold',
+                                              fontSize: '0.8rem',
+                                              width: '18px',
+                                              height: '18px',
+                                              padding: 0,
+                                              cursor: 'pointer',
+                                              lineHeight: '1',
+                                              textAlign: 'center',
+                                              boxShadow: '0 0 2px rgba(0,0,0,0.3)'
+                                            }}
+                                            aria-label="Remove due date"
+                                          >
+                                            <X size={13} />
+                                          </button>
+                                        </span>
+                                      </div>
+                                    );
+                                  })()}
+                                  
+                                  {item.assign_to_user && (() => {
+                                    return (
+                                      <div className="d-flex flex-row flex-wrap mt-2">
+                                        {item.assign_to_user.data.map((member, idx) => {
+                                          const user = allMember.find(u => u.id === member.id);
+                                          if (!user) return null;
+                                          const initials = getInitials(user.name);
+                                          const bgColor = getColorFromInitial(initials);
+                                          const textColor = getContrastingTextColor(bgColor);
+
+                                          return (
+                                            <div key={idx} className="d-inline-block me-2 mb-2">
+                                              <li style={{ listStyleType: 'none' }}>
+                                                <div
+                                                  className="rounded-circle d-flex align-items-center justify-content-center"
+                                                  style={{
+                                                    backgroundColor: bgColor,
+                                                    width: '28px',       // diperkecil dari 40px
+                                                    height: '28px',
+                                                    fontSize: '0.7rem',  // teks diperkecil
+                                                    color: textColor,
+                                                    fontWeight: 600,
+                                                  }}
+                                                  title={user.name}
+                                                >
+                                                  {initials}
+                                                </div>
+                                              </li>
+                                            </div>
+                                          );
+                                        })}
+                                      </div>
+                                    );
+                                  })()}
                                 </div>
                               </div>
                             </li>
@@ -2219,6 +2425,195 @@ const TaskDetail = ({ task, onClose, onDelete}) => {
                 <button className="popup-btn cancel" onClick={() => setShowChecklistItemEditModal(false)}>
                   Cancel
                 </button>
+              </div>
+            </div>
+          </div>
+        )}
+
+        {showMoveChecklistItemModal && (
+          <div
+            className="modal fade show d-block"
+            tabIndex={-1}
+            role="dialog"
+            aria-labelledby="moveChecklistItemLabel"
+            aria-modal="true"
+            onClick={() => setShowMoveChecklistItemModal(false)}
+          >
+            <div className="modal-dialog modal-dialog-centered modal-sm" role="document">
+              <div className="modal-content" onClick={e => e.stopPropagation()}>
+                <div className="modal-header">
+                  <FontAwesomeIcon icon={faArrowsAlt} className="me-2" />
+                  <h5 className="modal-title" id="moveChecklistItemLabel">Move Item</h5>
+                  <button
+                    type="button"
+                    className="btn-close"
+                    aria-label="Close"
+                    onClick={() => setShowMoveChecklistItemModal(false)}
+                  />
+                </div>
+                <div className="modal-body text-start">
+                  <div className="mb-3">
+                    <label className="form-label">Choose Checklist:</label>
+                    <select
+                      className="form-select"
+                      value={selectedChecklist}
+                      onChange={e => setSelectedChecklist(e.target.value)}
+                    >
+                      <option value="">Select Checklist</option>
+                      {checklist.map(chk => (
+                        <option key={chk.id} value={chk.id}>{chk.title}</option>
+                      ))}
+                    </select>
+                  </div>
+                </div>
+                <div className="modal-footer">
+                  <button
+                    type="button"
+                    className="btn btn-secondary"
+                    onClick={() => {
+                      setSelectedChecklist('')
+                      setShowMoveChecklistItemModal(false)
+                    }}
+                  >
+                    Cancel
+                  </button>                
+                  <button
+                    type="button"
+                    className="btn fw-bold"
+                    style={{ backgroundColor: '#063970', color: 'white' }}
+                    onClick={handleMoveChecklistItem}
+                  >
+                    Move
+                  </button>
+                </div>
+              </div>
+            </div>
+          </div>
+        )}
+
+        {showDueDateItemModal && (
+          <div className="due-date-content">
+            <div className="due-date-overlay" onClick={(e) => e.stopPropagation()}>
+              <h2>Set Due Date Item</h2>
+              <input
+                type="datetime-local"
+                step="1"
+                value={dueDateItem ?? ''}
+                onChange={handleDateItemChange}
+              />
+
+              <div style={{marginTop: '16px', display: 'flex', gap: '10px'}}>
+                <button onClick={handleSaveDueDateItem}
+                        style={{flex: 1, backgroundColor: '#28a745', color: '#fff'}}>
+                    Save
+                </button>
+                <button onClick={toggleDueDateItemModal} style={{flex: 1}}>
+                    Close
+                </button>
+              </div>
+            </div>
+          </div>
+        )}
+
+        {showMemberItemModal && (
+          <div
+            className="modal fade show d-block"
+            tabIndex={-1}
+            role="dialog"
+            aria-labelledby="addMemberLabel"
+            aria-modal="true"
+            onClick={(e) => e.stopPropagation()}
+          >
+            <div
+              className="modal-dialog modal-dialog-centered modal-dialog-scrollable modal-md"
+              role="document"
+              style={{ maxHeight: '80vh' }}
+            >
+              <div className="modal-content">
+                <div className="modal-header">
+                  <FontAwesomeIcon icon={faUserPlus} className="me-2" />
+                  <h5 className="modal-title" id="addMemberLabel">
+                    Add Member to Item
+                  </h5>
+                  <button tpe="button" 
+                  className="btn-close" 
+                  aria-label="Close"
+                  onClick={closeModalMemberItem}
+                  ></button>
+                </div>
+                <div className="modal-body d-flex flex-column">
+                  <input
+                    id="searchInput"
+                    type="text"
+                    className="form-control mb-3"
+                    placeholder="Enter member name or email"
+                    value={searchUser}
+                    onChange={(e) => handleSearchUserChange(e.target.value)}
+                    onClick={(e) => e.stopPropagation()}
+                  />
+
+                    <div className="mb-4">
+                      <ul className="list-unstyled d-flex flex-column align-items-start">
+                        {(filteredUsers.length === 0 ? ( 
+                          <div className="text-muted w-100 text-center">
+                            {searchUser ? "No members found" : "No members available"}
+                          </div>
+                        ) : (
+                          (filteredUsers || []).map((user, idx) => {
+                            const initials = getInitials(user.name);
+                            const bgColor = getColorFromInitial(initials);
+                            const textColor = getContrastingTextColor(bgColor);
+                            const isMember = currentMemberItem.some(member => member.id === user.id);
+                            return (
+                              <li key={idx} className="d-flex align-items-center mb-2">
+                                {/* checkbox */}
+                                <input
+                                  type="checkbox"
+                                  className="form-check-input me-2"
+                                  id={`select-user-${idx}`}
+                                  title={`Select ${user.name}`}
+                                  defaultChecked={isMember}
+                                  onChange={() => handleCheckboxChangeMemberItem(user)}
+                                />
+
+                                {/* avatar initials */}
+                                <div
+                                  className="rounded-circle d-flex align-items-center justify-content-center"
+                                  style={{
+                                    backgroundColor: bgColor,
+                                    width: '40px',
+                                    height: '40px',
+                                    color: textColor,
+                                    fontWeight: '600',
+                                    cursor: 'pointer'
+                                  }}
+                                  title={user.name}
+                                >
+                                  {initials}
+                                </div>
+
+                                {/* name & role */}
+                                <div className="ms-2 d-flex flex-column">
+                                  <span>{user.name}</span>
+                                  <small className="text-muted">{user.role.name} - {user.divisi.name}</small>
+                                </div>
+                              </li>
+                            );
+                          })
+                        ))}
+                      </ul>
+                    </div>
+                  </div>
+                <div className="modal-footer">
+                  <button
+                    type="button"
+                    className="btn fw-bold"
+                    style={{ backgroundColor: "#063970", color: "white" }}
+                    onClick={handleSaveChangesMemberItem}
+                  >
+                    Save Changes
+                  </button>
+                </div>
               </div>
             </div>
           </div>
