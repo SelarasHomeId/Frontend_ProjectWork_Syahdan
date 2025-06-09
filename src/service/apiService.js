@@ -15,10 +15,7 @@ export const apiRequest = async ({
 }) => {
   const url = `${BASE_URL}${endpoint}`;
   let headers = { "Content-Type": contentType };
-
-  if (!token) {
-    token = Cookies.get("token");
-  }
+  token = Cookies.get("token");
 
   if (token != null) {
     headers["Authorization"] = `Bearer ${token}`;
@@ -29,7 +26,7 @@ export const apiRequest = async ({
     try {
       const response = await authLogout();
       if (response.success) {
-        Swal.fire({
+        return Swal.fire({
           title: "Logout",
           text: "Sesi Anda Telah Berakhir, Silahkan Login Ulang",
           icon: "warning",
@@ -91,7 +88,7 @@ export const apiRequest = async ({
         try {
           const response = await authLogout();
           if (response.success) {
-            Swal.fire({
+            return Swal.fire({
               title: "Logout",
               text: "Sesi Anda Telah Berakhir, Silahkan Login Ulang",
               icon: "warning",
@@ -119,13 +116,19 @@ export const apiRequest = async ({
 
 // ==================================================================================================== //
 // Fungsi untuk memperbarui token jika sesi habis
-const refreshToken = async () => {
-  const response = await apiRequest({
-    method: "POST",
-    endpoint: "/auth/refresh-token",
-  })
-  Cookies.set("token", response.data.token, { expires: 36500, secure: true, sameSite: "Strict" });
-  return response.data.token;
+export const refreshToken = async () => {
+  const url = `${BASE_URL}/auth/refresh-token`;
+  const token = Cookies.get("token");
+  let headers = { "Content-Type": "application/json" };
+  if (token != null) {
+    headers["Authorization"] = `Bearer ${token}`;
+  }
+  const hitAPI = async () => {
+    return axios.post(url, null, { headers });
+  };
+  const response = await hitAPI();
+  Cookies.set("token", response.data.data.token, { expires: 36500, secure: true, sameSite: "Strict" });
+  return response.data.data.token;
 };
 
 // ==================================================================================================== //
@@ -622,12 +625,7 @@ export const apiRequestExportData = async ({
 }) => {
   const url = `${BASE_URL}${endpoint}`;
   let headers = { "Content-Type": "application/json" };
-
-
-  if (!token) {
-    token = Cookies.get("token");
-  }
-
+  token = Cookies.get("token");
 
   if (token != null) {
     headers["Authorization"] = `Bearer ${token}`;
@@ -638,7 +636,7 @@ export const apiRequestExportData = async ({
     try {
       const response = await authLogout();
       if (response.success) {
-        Swal.fire({
+        return Swal.fire({
           title: "Logout",
           text: "Sesi Anda Telah Berakhir, Silahkan Login Ulang",
           icon: "warning",
@@ -686,7 +684,7 @@ export const apiRequestExportData = async ({
         try {
           const response = await authLogout();
           if (response.success) {
-            Swal.fire({
+            return Swal.fire({
               title: "Logout",
               text: "Sesi Anda Telah Berakhir, Silahkan Login Ulang",
               icon: "warning",
@@ -746,11 +744,3 @@ export const processDownloadExcel = async (endpoint) => {
   }
 }
 
-export const refreshTokenForWebsocket = async () => {
-  const response = await apiRequest({
-    method: "POST",
-    endpoint: "/auth/refresh-token",
-  })
-  Cookies.set("token", response.data.token, { expires: 36500, secure: true, sameSite: "Strict" });
-  return response.data.token;
-};

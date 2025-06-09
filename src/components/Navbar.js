@@ -135,7 +135,7 @@ function Navbar({ showSidebar, toggleNavbar, showDetailTask }) {
     try {
       const response = await authLogout();
       if (response.success) {
-        Swal.fire({
+        return Swal.fire({
           title: "Berhasil Logout",
           text: "Sampai jumpa kembali...",
           icon: "success",
@@ -242,11 +242,12 @@ function Navbar({ showSidebar, toggleNavbar, showDetailTask }) {
         if (response.success) {
           const logoutRes = await authLogout();
           if (logoutRes.success) {
-            Swal.fire({
+            return Swal.fire({
               title: "Berhasil!",
               text: "Password anda telah diubah.",
               icon: "success",
-              confirmButtonText: "OK",
+              timer: 2500,
+              showConfirmButton: false,
             }).then(() => {
               removeAllCookies();
               navigate("/");

@@ -1,9 +1,7 @@
 import React, { useState, useRef, useEffect, useCallback } from "react";
 import {
   X, Eye, Users, Tag, CheckSquare, Paperclip, Image, 
-  Trash,Edit,Calendar,
-  Pencil,
-  MoreVertical
+  Trash, Edit, Calendar, Pencil, MoreVertical, CalendarPlus, ListCheck
 } from "lucide-react";
 import { EditorContent, useEditor } from "@tiptap/react";
 import StarterKit from "@tiptap/starter-kit";
@@ -36,7 +34,7 @@ import { faUser } from '@fortawesome/free-regular-svg-icons'
 import { faTag, faUserPlus } from '@fortawesome/free-solid-svg-icons';
 import { faArrowsAlt } from '@fortawesome/free-solid-svg-icons';
 import { getColorFromInitial, getInitials, getContrastingTextColor, } from "../utils/general";
-import { debounce } from "lodash";
+import { debounce,} from "lodash";
 import csvIcon from "../assets/img/csv.png";
 import docxIcon from "../assets/img/docx.png";
 import mp3Icon from "../assets/img/mp3.png";
@@ -2138,24 +2136,53 @@ const TaskDetail = ({ task, onClose, onDelete}) => {
         )}
         
         {showDueDateModal && (
-          <div className="due-date-content">
-            <div className="due-date-overlay" onClick={(e) => e.stopPropagation()}>
-              <h2>Set Due Date</h2>
-              <input
-                type="datetime-local"
-                step="1"
-                value={dueDate ?? ''}
-                onChange={handleDateChange}
-              />
-
-              <div style={{marginTop: '16px', display: 'flex', gap: '10px'}}>
-                <button onClick={handleSaveDueDate}
-                        style={{flex: 1, backgroundColor: '#28a745', color: '#fff'}}>
+          <div
+            className="modal fade show d-block"
+            tabIndex={-1}
+            role="dialog"
+            aria-labelledby="dueDateLabel"
+            aria-modal="true"
+            onClick={toggleDueDateModal}
+          >
+            <div className="modal-dialog modal-dialog-centered modal-sm" role="document">
+              <div className="modal-content" onClick={(e) => e.stopPropagation()}>
+                <div className="modal-header">
+                  <CalendarPlus className="me-2" size={20} />
+                  <h3 className="modal-title" id="dueDateLabel">Set Due Date</h3>
+                  <button
+                    type="button"
+                    className="btn-close"
+                    aria-label="Close"
+                    onClick={toggleDueDateModal}
+                  />
+                </div>
+                <div className="modal-body text-start">
+                  <label className="form-label">Select Date & Time:</label>
+                  <input
+                    type="datetime-local"
+                    step="1"
+                    className="form-control"
+                    value={dueDate ?? ''}
+                    onChange={handleDateChange}
+                  />
+                </div>
+                <div className="modal-footer">
+                  <button
+                    type="button"
+                    className="btn btn-secondary"
+                    onClick={toggleDueDateModal}
+                  >
+                    Cancel
+                  </button>
+                  <button
+                    type="button"
+                    className="btn fw-bold"
+                    style={{ backgroundColor: '#063970', color: 'white' }}
+                    onClick={handleSaveDueDate}
+                  >
                     Save
-                </button>
-                <button onClick={toggleDueDateModal} style={{flex: 1}}>
-                    Close
-                </button>
+                  </button>
+                </div>
               </div>
             </div>
           </div>
@@ -2174,7 +2201,7 @@ const TaskDetail = ({ task, onClose, onDelete}) => {
               <div className="modal-content" onClick={e => e.stopPropagation()}>
                 <div className="modal-header">
                   <FontAwesomeIcon icon={faArrowsAlt} className="me-2" />
-                  <h5 className="modal-title" id="moveTaskLabel">Move Task</h5>
+                  <h3 className="modal-title" id="moveTaskLabel">Move Task</h3>
                   <button
                     type="button"
                     className="btn-close"
@@ -2253,9 +2280,11 @@ const TaskDetail = ({ task, onClose, onDelete}) => {
             <div className="modal-dialog modal-dialog-centered modal-sm" role="document">
               <div className="modal-content" onClick={e => e.stopPropagation()}>
                 <div className="modal-header">
+                  <Trash className="me-2" size={20}/>
                   <h5 className="modal-title" id="deleteTaskLabel">
                     Confirm Delete
                   </h5>
+                  
                   <button
                     type="button"
                     className="btn-close"
@@ -2269,18 +2298,18 @@ const TaskDetail = ({ task, onClose, onDelete}) => {
                 <div className="modal-footer">
                   <button
                     type="button"
+                    className="btn btn-secondary"
+                    onClick={() => setShowDeleteConfirm(false)}
+                  >
+                    Cancel
+                  </button>
+                  <button
+                    type="button"
                     className="btn fw-bold"
                     style={{ backgroundColor: '#dc3545', color: 'white' }}
                     onClick={handleDeleteTask}
                   >
                     Yes, Delete
-                  </button>
-                  <button
-                    type="button"
-                    className="btn btn-secondary"
-                    onClick={() => setShowDeleteConfirm(false)}
-                  >
-                    Cancel
                   </button>
                 </div>
               </div>
@@ -2342,29 +2371,53 @@ const TaskDetail = ({ task, onClose, onDelete}) => {
 
         {showChecklistModal && (
           <div
-            className="popup-overlay"
-            onClick={(e) => e.stopPropagation()}
+            className="modal fade show d-block"
+            tabIndex={-1}
+            role="dialog"
+            aria-labelledby="checklistLabel"
+            aria-modal="true"
+            onClick={() => setShowChecklistModal(false)}
           >
-            <div className="popup-box">
-              <h3>Add Checklist</h3>
-              <div className="popup-section">
-                <input
-                  type="text"
-                  value={newChecklist}
-                  onChange={(e) => setNewChecklist(e.target.value)}
-                  placeholder="Add checklist"
-                  className="form-control"
-                  onClick={(e) => e.stopPropagation()}
-                  onKeyDown={(e) => e.key === 'Enter' && handleAddChecklist()}
-                />
-              </div>
-              <div className="popup-buttons mt-3">
-                <button className="popup-btn confirm" onClick={handleAddChecklist}>
-                  Save
-                </button>
-                <button className="popup-btn cancel" onClick={() => setShowChecklistModal(false)}>
-                  Cancel
-                </button>
+            <div className="modal-dialog modal-dialog-centered modal-sm" role="document">
+              <div className="modal-content" onClick={(e) => e.stopPropagation()}>
+                <div className="modal-header">
+                  <ListCheck className="me-2" size={20} />
+                  <h3 className="modal-title" id="checklistLabel">Add Checklist</h3>
+                  <button
+                    type="button"
+                    className="btn-close"
+                    aria-label="Close"
+                    onClick={() => setShowChecklistModal(false)}
+                  />
+                </div>
+                <div className="modal-body text-start">
+                  <input
+                    type="text"
+                    className="form-control"
+                    value={newChecklist}
+                    onChange={(e) => setNewChecklist(e.target.value)}
+                    placeholder="Add checklist"
+                    onClick={(e) => e.stopPropagation()}
+                    onKeyDown={(e) => e.key === 'Enter' && handleAddChecklist()}
+                  />
+                </div>
+                <div className="modal-footer">
+                  <button
+                    type="button"
+                    className="btn btn-secondary"
+                    onClick={() => setShowChecklistModal(false)}
+                  >
+                    Cancel
+                  </button>
+                  <button
+                    type="button"
+                    className="btn fw-bold"
+                    style={{ backgroundColor: '#063970', color: 'white' }}
+                    onClick={handleAddChecklist}
+                  >
+                    Save
+                  </button>
+                </div>
               </div>
             </div>
           </div>
@@ -2498,7 +2551,7 @@ const TaskDetail = ({ task, onClose, onDelete}) => {
               <input
                 type="datetime-local"
                 step="1"
-                value={dueDateItem ?? ''}
+                value={dueDateItem}
                 onChange={handleDateItemChange}
               />
 

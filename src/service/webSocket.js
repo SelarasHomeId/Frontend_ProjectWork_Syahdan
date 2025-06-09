@@ -2,7 +2,7 @@ import { useCallback, useEffect, useRef } from "react";
 import { Centrifuge } from "centrifuge";
 import { BASE_URL_SOCKET } from "../utils/constant";
 import Cookies from "js-cookie";
-import { refreshTokenForWebsocket } from "./apiService";
+import { refreshToken } from "./apiService";
 
 export const useCentrifuge = ({ userId, onDataReceive }) => {
   const centrifugeRef = useRef(null);
@@ -47,7 +47,7 @@ export const useCentrifuge = ({ userId, onDataReceive }) => {
       if (ctx.code === 109) {
         console.log("🔄 Token expired. Attempting reconnect...");
         setTimeout( async () => {
-          await refreshTokenForWebsocket();
+          await refreshToken();
           connectCentrifuge();
         }, 1000);
       }
