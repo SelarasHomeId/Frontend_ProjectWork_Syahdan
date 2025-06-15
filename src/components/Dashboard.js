@@ -524,7 +524,7 @@ const SummaryTask = ({ summaryData, formatDate }) => {
               margin: '0 0.25rem',
               padding: '0.4rem 0.8rem',
               minWidth: '20%',
-              maxWidth: '45%',
+              maxWidth: '100%',
               minHeight: '2.5rem',
               height: 'auto',
               backgroundColor: isActive ? '#1564C0' : '#F2FAFC',
