@@ -6,7 +6,7 @@ import { authLogout, changePassword, fetchNotifications, getTaskById, markNotifi
 import Swal from "sweetalert2";
 import { removeAllCookies, validatePassword } from "../utils/general";
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { faEnvelopeOpen, faEnvelope } from '@fortawesome/free-solid-svg-icons';
+import { faEnvelopeOpen, faEnvelope, faCheckDouble } from '@fortawesome/free-solid-svg-icons';
 import LogoSelarasSidebar from "../assets/img/selarasBackground.jpg";
 import Cookies from "js-cookie";
 import notifSound from '../assets/notif_sound.ogg'
@@ -30,6 +30,7 @@ function Navbar({ showSidebar, toggleNavbar, showDetailTask }) {
   const [showUserDropdown, setShowUserDropdown] = useState(false);
   const audioRef = useRef(new Audio(notifSound));
   const { setBadge, clearBadge } = useBadge();
+  const [isReadingAll, setIsReadingAll] = useState(false);
 
   const loadNotifications = useCallback(async () => {
     const response = await fetchNotifications();
@@ -303,6 +304,22 @@ function Navbar({ showSidebar, toggleNavbar, showDetailTask }) {
     setShowNotificationDropdown(false);
   };
 
+  const handleReadAllNotif = async () => {
+    setIsReadingAll(true);
+    if (!notifications || notifications.length === 0) return;
+
+    for (const notif of notifications) {
+      if (!notif.is_read) {
+        const response = await markNotificationAsRead(notif.id);
+        if (!response.success) {
+          console.error(`Gagal menandai notif ${notif.id} sebagai read`);
+        }
+      }
+    }
+    loadNotifications();
+    setIsReadingAll(false);
+  };
+
   return (
     <nav className="navbar navbar-expand-lg navbar-dark bg-dark" style={{ height: '90px', minHeight: '80px', maxHeight: '60px' }}>
       <div className="container-fluid d-flex align-items-center justify-content-between">
@@ -345,25 +362,51 @@ function Navbar({ showSidebar, toggleNavbar, showDetailTask }) {
               <span className="notification-badge">{unreadNotif}</span>
             )}
               <div className={`notification-dropdown ${showNotificationDropdown?'show':''}`}>
-                <h6 className="dropdown-header">Notifikasi</h6>
+                <div className="dropdown-header d-flex justify-content-between align-items-center">
+                  <span className="fs-5">Notifikasi</span>
+                  <button
+                    className="btn btn-link p-0 m-0 text-primary text-decoration-none hover-underline"
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      handleReadAllNotif();
+                    }}
+                    disabled={isReadingAll}
+                    title="Tandai sudah dibaca semua"
+                  >
+                    {isReadingAll ? (
+                      <span
+                        className="spinner-border spinner-border-sm me-1"
+                        role="status"
+                        aria-hidden="true"
+                      ></span>
+                    ) : (
+                      <FontAwesomeIcon icon={faCheckDouble} size="lg" />
+                    )}
+                  </button>
+                </div>
                 {notifications != null ? (
-                  notifications.map((notif, index) => (
+                  notifications
+                  .sort((a, b) => Number(a.is_read) - Number(b.is_read))
+                  .map((notif, index) => (
                     <li key={index} className="notification-item" onClick={() => handleClickNotification(notif.id, notif.task_id)}>
-                        {notif.is_read ? (
-                            <span className="mr-2">
-                                <FontAwesomeIcon icon={faEnvelopeOpen} className="notification-icon read" />
-                            </span>
-                        ) : (
-                            <span className="mr-2">
-                                <FontAwesomeIcon icon={faEnvelope} className="notification-icon unread" />
-                            </span>
-                        )}
-                        <span>
-                            {notif.title}<br/>  
-                            <span className='notification-message'>
-                                {notif.message}
-                            </span>
+                      {notif.is_read ? (
+                        <span className="mr-2">
+                          <FontAwesomeIcon icon={faEnvelopeOpen} className="notification-icon read" />
                         </span>
+                      ) : (
+                        <span className="mr-2">
+                          <FontAwesomeIcon icon={faEnvelope} className="notification-icon unread" />
+                        </span>
+                      )}
+                      <span>
+                        {notif.title}<br />
+                        <span className="notification-message d-block">
+                          {notif.message}
+                        </span>
+                        <div className="notification-message text-muted small text-end fst-italic">
+                          {notif.created_at.replace('T', ' ').replace('Z', '')}
+                        </div>
+                      </span>
                     </li>
                   ))
                 ) : (

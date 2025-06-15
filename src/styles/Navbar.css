@@ -274,6 +274,10 @@
   font-size: 12px; /* text-xs */
 }
 
+.hover-underline:hover {
+  text-decoration: underline !important;
+}
+
 /* Responsive Design */
 @media (max-width: 768px) {
   .navbar {
