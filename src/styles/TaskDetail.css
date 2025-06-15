@@ -178,6 +178,7 @@
   padding: 8px; /* Ruang di dalam editor */
   background-color: #fff; /* Warna background */
   font-family: Arial, sans-serif; /* Font default */
+  border: 2px solid #ccc;
 }
 
 .tiptap p {
