@@ -1,7 +1,9 @@
 import React, { useState, useRef, useEffect, useCallback } from "react";
 import {
   X, Eye, Users, Tag, CheckSquare, Paperclip, Image, 
-  Trash, Edit, Calendar, Pencil, MoreVertical, CalendarPlus, ListCheck
+  Trash, Edit, Calendar, Pencil, MoreVertical, CalendarPlus, ListCheck, ListTodo,
+  FileText,
+  Tags
 } from "lucide-react";
 import { EditorContent, useEditor } from "@tiptap/react";
 import StarterKit from "@tiptap/starter-kit";
@@ -30,9 +32,7 @@ import { Move } from 'lucide-react';
 import TextAlign from '@tiptap/extension-text-align'
 import { FaAlignLeft, FaAlignCenter, FaAlignJustify, FaAlignRight, FaTrash,} from 'react-icons/fa';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
-import { faUser } from '@fortawesome/free-regular-svg-icons'
-import { faTag, faUserPlus } from '@fortawesome/free-solid-svg-icons';
-import { faArrowsAlt } from '@fortawesome/free-solid-svg-icons';
+import { faArrowsAlt, faUserPlus } from '@fortawesome/free-solid-svg-icons';
 import { getColorFromInitial, getInitials, getContrastingTextColor, } from "../utils/general";
 import { debounce,} from "lodash";
 import csvIcon from "../assets/img/csv.png";
@@ -53,6 +53,10 @@ const TaskDetail = ({ task, onClose, onDelete}) => {
   const [isEditingTitle, setIsEditingTitle] = useState(false);
   const [title, setTitle] = useState(task.title || "");
   const [currentTitle, setCurrentTitle] = useState("");
+  const [currentWorkspace, setCurrentWorkspace] = useState("");
+  const [currentBoard, setCurrentBoard] = useState("");
+  const [currentUpdatedAt, setCurrentUpdatedAt] = useState("");
+  const [currentUpdatedBy, setCurrentUpdatedBy] = useState("");
   //IS COMPLETE
   const [isCompleted, setIsCompleted] = useState(false);
   //IS WATCH
@@ -142,6 +146,7 @@ const TaskDetail = ({ task, onClose, onDelete}) => {
         console.error(err);
         alert('Gagal update due date');
       }
+      await fetchComment();
     }
   };
 
@@ -154,6 +159,7 @@ const TaskDetail = ({ task, onClose, onDelete}) => {
       console.error(err);
       alert('Gagal update due date');
     }
+    await fetchComment();
   };
 
   const handleToggleComplete = async () => {
@@ -165,6 +171,7 @@ const TaskDetail = ({ task, onClose, onDelete}) => {
       console.error('Gagal update completed:', e);
       setIsCompleted(!next);
     }
+    await fetchComment();
   };
 
   // Handle due date
@@ -180,6 +187,7 @@ const TaskDetail = ({ task, onClose, onDelete}) => {
       console.error(err);
       alert('Gagal update due date');
     }
+    await fetchComment();
   };
 
   const handleRemoveDueDate = async () => {
@@ -190,6 +198,7 @@ const TaskDetail = ({ task, onClose, onDelete}) => {
       console.error(err);
       alert('Gagal update due date');
     }
+    await fetchComment();
   };
 
   const handleSaveTitle = async () => {
@@ -210,6 +219,7 @@ const TaskDetail = ({ task, onClose, onDelete}) => {
       // Rollback ke nilai sebelumnya jika gagal
       setTitle(currentTitle);
     }
+    await fetchComment();
   };
 
   const handleToggleWatch = async () => {
@@ -222,6 +232,7 @@ const TaskDetail = ({ task, onClose, onDelete}) => {
       console.error('Gagal update watch:', e);
       setIsWatched(!newWatch);
     }
+    await fetchComment();
   };
 
   //USER AND MEMBER 
@@ -266,6 +277,7 @@ const TaskDetail = ({ task, onClose, onDelete}) => {
       console.error('Gagal update task members', err);
       alert('Error updating task');
     }
+    await fetchComment();
   };
 
   const closeModal = useCallback(() => {
@@ -304,6 +316,7 @@ const TaskDetail = ({ task, onClose, onDelete}) => {
       console.error(err);
       alert('Gagal update label');
     }
+    await fetchComment();
   };
 
   const handleNewLabelSubmit = async () => {
@@ -321,6 +334,7 @@ const TaskDetail = ({ task, onClose, onDelete}) => {
       console.error('Gagal menambah label:', err);
       alert('Gagal menambah label');
     }
+    await fetchComment();
   };
 
   const handleLabelDelete = async (labelId) => {
@@ -333,6 +347,7 @@ const TaskDetail = ({ task, onClose, onDelete}) => {
       console.error("Gagal menghapus label:", err);
       alert("Gagal menghapus label");
     }
+    await fetchComment();
   };
 
   const handleLabelUpdate = async (lbl) => {
@@ -348,6 +363,7 @@ const TaskDetail = ({ task, onClose, onDelete}) => {
       console.error('Gagal update label:', err);
       alert('Gagal memperbarui label');
     }
+    await fetchComment();
   };
 
   const fetchLabels = () => {
@@ -372,6 +388,7 @@ const TaskDetail = ({ task, onClose, onDelete}) => {
       setNewChecklist("");
       setShowChecklistModal(false)
     }
+    await fetchComment();
   };
 
   const handleEditChecklist = async () => {
@@ -384,11 +401,13 @@ const TaskDetail = ({ task, onClose, onDelete}) => {
       setChecklistIdEdit(0)
       setShowChecklistEditModal(false)
     }
+    await fetchComment();
   };
 
   const handleDeleteChecklist =  async (checklistId) => {
     await deleteTaskChecklist(checklistId)
     await fetchChecklist();
+    await fetchComment();
   };
 
   const handleAddChecklistItem = async (checklistId) => {
@@ -404,6 +423,7 @@ const TaskDetail = ({ task, onClose, onDelete}) => {
       ...prev, 
       [checklistId]: ''
     }))
+    await fetchComment();
   };
 
   const toggleChecklistItem = async (itemId, newStatus) => {
@@ -411,6 +431,7 @@ const TaskDetail = ({ task, onClose, onDelete}) => {
       is_completed: newStatus
     })
     await fetchChecklist()
+    await fetchComment();
   };
 
   const handleRenameChecklistItem = async () => {
@@ -423,16 +444,19 @@ const TaskDetail = ({ task, onClose, onDelete}) => {
       setChecklistItemIdEdit(0)
       setShowChecklistItemEditModal(false)
     }
+    await fetchComment();
   };
 
   const handleDeleteChecklistItem =  async (itemId) => {
     await deleteTaskChecklistItem(itemId)
     await fetchChecklist();
+    await fetchComment();
   };
 
   const handleConvertChecklistItem =  async (itemId) => {
     await convertTaskChecklistItem(itemId)
     await fetchChecklist();
+    await fetchComment();
   };
 
   const handleMoveChecklistItem = async () => {
@@ -449,6 +473,7 @@ const TaskDetail = ({ task, onClose, onDelete}) => {
       console.error('Gagal memindah item:', err);
       alert('Gagal memindah item');
     }
+    await fetchComment();
   };
 
   const handleDateItemChange = (e) => {
@@ -466,6 +491,7 @@ const TaskDetail = ({ task, onClose, onDelete}) => {
       console.error(err);
       alert('Gagal update due date item');
     }
+    await fetchComment();
   };
 
   const handleRemoveDueDateItem = async (itemId) => {
@@ -477,6 +503,7 @@ const TaskDetail = ({ task, onClose, onDelete}) => {
       console.error(err);
       alert('Gagal update due date item');
     }
+    await fetchComment();
   };
 
   const closeModalMemberItem = useCallback(() => {
@@ -510,6 +537,7 @@ const TaskDetail = ({ task, onClose, onDelete}) => {
       console.error(err);
       alert('Gagal update member item');
     }
+    await fetchComment();
   };
 
   //DESCRIPTION
@@ -545,8 +573,8 @@ const TaskDetail = ({ task, onClose, onDelete}) => {
       editor.commands.setContent(res.data.data.description || '');
     } catch (e) {
       console.error('Gagal menyimpan:', e);
-     
     }
+    await fetchComment();
   };
 
   //TOOLBAR
@@ -654,6 +682,7 @@ const TaskDetail = ({ task, onClose, onDelete}) => {
       // reset input
       e.target.value = null;
     }
+    await fetchComment();
   };
 
   const fetchAttachment = async () => {
@@ -685,6 +714,7 @@ const TaskDetail = ({ task, onClose, onDelete}) => {
     } catch (err) {
       console.error('Delete failed:', err);
     }
+    await fetchComment();
   };
 
   // Download handler
@@ -737,6 +767,7 @@ const TaskDetail = ({ task, onClose, onDelete}) => {
       console.error("Rename failed:", err);
       alert("Gagal mengganti nama file");
     }
+    await fetchComment();
   };
 
   const closeAllDropdown = () => {
@@ -754,6 +785,7 @@ const TaskDetail = ({ task, onClose, onDelete}) => {
   const handleOpenMove = () => {
     setShowMoveModal(true);
     setLoadingWorkspaces(true);
+    setLoadingBoards(true)
     workspaceFind()
       .then(data => {
         setWorkspaces(data || []);
@@ -768,14 +800,22 @@ const TaskDetail = ({ task, onClose, onDelete}) => {
     if (!selectedWorkspace || !selectedBoard) return alert('Pilih workspace dan board terlebih dahulu');
     try {
       await updateTask(task.id, {workspace_id: selectedWorkspace,board_id: selectedBoard});
-      alert('Task berhasil dipindah');
       setShowMoveModal(false);
-      const res = await getTaskById(task.id);
-      onClose(res.data.data);
+      const resWorkspace = await workspaceFind();
+      if (resWorkspace) {
+        const selectedWp = resWorkspace.find(wp => wp.id === parseInt(selectedWorkspace));
+        setCurrentWorkspace(selectedWp?.name || "");
+      }
+      const resBoard = await getAllBoardByWorkspaceId(selectedWorkspace);
+      if (resBoard) {
+        const selectedBrd = resBoard.find(board => board.id === parseInt(selectedBoard));
+        setCurrentBoard(selectedBrd?.name || "");
+      }
     } catch (err) {
       console.error('Gagal memindah task:', err);
       alert('Gagal memindah task');
     }
+    await fetchComment();
   };
 
   const handleDeleteTask = async () => {
@@ -811,6 +851,13 @@ const TaskDetail = ({ task, onClose, onDelete}) => {
         setTaskData(data);
         setIsWatched(!!data.watch);
         setIsCompleted(!!data.is_completed);
+        setCurrentWorkspace(data.workspace.name)
+        const resBoard = await getAllBoardByWorkspaceId(data.workspace.id)
+        if (resBoard) {
+          setCurrentBoard(resBoard.map(board => board.id === data.board_id ? board.name : ""))
+        }
+        setCurrentUpdatedAt(data.updated_at)
+        setCurrentUpdatedBy(data.updated_by.name)
         setActivity(data.comment.data)
         setChecklist(data.checklist.data)
         setDueDate(data.due_date)
@@ -866,12 +913,13 @@ const TaskDetail = ({ task, onClose, onDelete}) => {
     getAllBoardByWorkspaceId(selectedWorkspace)
       .then(data => {
         setBoards(data || []);
-        const currentBoard = data?.find(b => b.id === task.board_id);
+        const boardTemp = selectedBoard === '' ? task.board_id : parseInt(selectedBoard)
+        const currentBoard = data?.find(b => b.id === boardTemp);
         setSelectedBoard(currentBoard ? currentBoard.id.toString() : '');
       })
       .catch(err => console.error('Gagal fetch boards:', err))
       .finally(() => setLoadingBoards(false));
-  }, [showMoveModal, selectedWorkspace, task.board_id]);
+  }, [showMoveModal, selectedWorkspace, task.board_id, selectedBoard]);
 
   // 5. Fetch all members (hanya saat komponen mount)
   useEffect(() => {
@@ -1100,94 +1148,120 @@ const TaskDetail = ({ task, onClose, onDelete}) => {
             <div 
               className="d-flex flex-column flex-grow-1 w-75"
             >
-              <div className="d-flex align-items-center flex-wrap gap-2 mb-3">
-                  <button
-                      className={`btn btn-sm d-inline-flex align-items-center px-3 py-1 fs-6 fw-semibold ${
-                      isWatched ? 'btn-success' : 'btn-outline-secondary'
-                      }`}
-                      onClick={handleToggleWatch}
-                  >
-                      <Eye size={16} className="me-1" />
-                      {isWatched ? 'Watching' : 'Watch'}
-                  </button>
-
-                  {dueDate && (() => {
-                    const date = new Date(dueDate.replace(' ', 'T'));
-                    const now = new Date();
-                    const isCompletedStatus = isCompleted === true;
-
-                    const sameYear = date.getFullYear() === now.getFullYear();
-
-                    const datePart = date.toLocaleDateString(undefined, {
-                      year: sameYear ? undefined : 'numeric',
-                      month: 'short',
-                      day: 'numeric',
-                    });
-
-                    const timePart = date.toLocaleTimeString(undefined, {
-                      hour: 'numeric',
-                      minute: '2-digit',
-                      hour12: true,
-                    });
-
-                    let badgeClass = "badge bg-success-subtle text-success";
-                    let additionalText = "";
-
-                    if (isCompletedStatus) {
-                      additionalText = " - completed";
-                    } else {
-                      const diffInMs = date - now;
-                      const diffInDays = Math.floor(diffInMs / (1000 * 60 * 60 * 24));
-
-                      if (diffInMs < 0) {
-                        badgeClass = "badge bg-danger-subtle text-danger";
-                        additionalText = " - overdue";
-                      } else if (diffInDays <= 1) {
-                        badgeClass = "badge bg-secondary-subtle text-secondary";
-                        additionalText = " - due soon";
-                      } else {
-                        badgeClass = "badge bg-secondary-subtle text-secondary";
-                      }
-                    }
-
-                    return (
-                      <div className="position-relative d-inline-block">
-                        <span className={`${badgeClass} d-inline-flex align-items-center px-3 py-2 fs-6 fw-semibold`}>
-                          {datePart}, {timePart}{additionalText}
-                        </span>
-                        <button 
-                          onClick={handleRemoveDueDate}
-                          style={{
-                            position: 'absolute',
-                            top: '-8px',
-                            right: '-8px',
-                            backgroundColor: 'red',
-                            border: 'none',
-                            borderRadius: '50%',
-                            color: 'white',
-                            fontWeight: 'bold',
-                            fontSize: '0.8rem',
-                            width: '20px',
-                            height: '20px',
-                            padding: 0,
-                            cursor: 'pointer',
-                            lineHeight: '1',
-                            textAlign: 'center',
-                            boxShadow: '0 0 2px rgba(0,0,0,0.3)'
-                          }}
-                          aria-label="Remove due date"
-                        >
-                          <X size={15} />
-                        </button>
-                      </div>
-                    );
-                  })()}
+              <div className="d-flex align-items-start flex-wrap gap-4 mb-3">
+                {/* Watch button + text above it */}
+                <div className="d-flex flex-column align-items-start">
+                  <span className="mb-1 text-muted fw-semibold small">
+                    Summary
+                  </span>
+                  <div className="mb-2">
+                    <strong>{currentWorkspace} - {currentBoard}</strong>
+                    <div className="text-muted">
+                      <span className="fw-semibold">
+                        {currentUpdatedBy?.trim() === "" ? "Created At:" : "Latest Update:"}
+                      </span>
+                      <i> {currentUpdatedAt.replace('T', ' ').replace('Z', '')} {currentUpdatedBy !== "" && ` by ${currentUpdatedBy}`}</i>
+                    </div>
+                  </div>
+                </div>
               </div>
 
-              <div className="mb-4">
-                <h5 className="text-start section-title mb-2">
-                  <FontAwesomeIcon icon={faUser} className="me-2" /> Member
-                </h5>
+              <div className="d-flex align-items-start flex-wrap gap-4 mb-3">
+                {/* Watch button + text above it */}
+                <div className="d-flex flex-column align-items-start">
+                  <span className="mb-1 text-muted fw-semibold small">
+                    For Send Notification
+                  </span>
+                  <button
+                    className={`btn btn-sm d-inline-flex align-items-center px-3 py-1 fs-6 fw-semibold ${
+                      isWatched ? 'btn-success' : 'btn-outline-secondary'
+                    }`}
+                    onClick={handleToggleWatch}
+                  >
+                    <Eye size={16} className="me-1" />
+                    {isWatched ? 'Watching' : 'Watch'}
+                  </button>
+                </div>
+
+                {/* Due date badge (tetap sejajar dengan tombol Watch) */}
+                {dueDate && (() => {
+                  const date = new Date(dueDate.replace(' ', 'T'));
+                  const now = new Date();
+                  const isCompletedStatus = isCompleted === true;
+
+                  const sameYear = date.getFullYear() === now.getFullYear();
+
+                  const datePart = date.toLocaleDateString(undefined, {
+                    year: sameYear ? undefined : 'numeric',
+                    month: 'short',
+                    day: 'numeric',
+                  });
+
+                  const timePart = date.toLocaleTimeString(undefined, {
+                    hour: 'numeric',
+                    minute: '2-digit',
+                    hour12: true,
+                  });
+
+                  let badgeClass = "badge bg-success-subtle text-success";
+                  let additionalText = "";
+
+                  if (isCompletedStatus) {
+                    additionalText = " - completed";
+                  } else {
+                    const diffInMs = date - now;
+                    const diffInDays = Math.floor(diffInMs / (1000 * 60 * 60 * 24));
+
+                    if (diffInMs < 0) {
+                      badgeClass = "badge bg-danger-subtle text-danger";
+                      additionalText = " - overdue";
+                    } else if (diffInDays <= 1) {
+                      badgeClass = "badge bg-secondary-subtle text-secondary";
+                      additionalText = " - due soon";
+                    } else {
+                      badgeClass = "badge bg-secondary-subtle text-secondary";
+                    }
+                  }
+
+                  return (
+                    <div className="position-relative d-inline-block mt-4">
+                      <span className={`${badgeClass} d-inline-flex align-items-center px-3 py-2 fs-6 fw-semibold`}>
+                        {datePart}, {timePart}{additionalText}
+                      </span>
+                      <button 
+                        onClick={handleRemoveDueDate}
+                        style={{
+                          position: 'absolute',
+                          top: '-8px',
+                          right: '-8px',
+                          backgroundColor: 'red',
+                          border: 'none',
+                          borderRadius: '50%',
+                          color: 'white',
+                          fontWeight: 'bold',
+                          fontSize: '0.8rem',
+                          width: '20px',
+                          height: '20px',
+                          padding: 0,
+                          cursor: 'pointer',
+                          lineHeight: '1',
+                          textAlign: 'center',
+                          boxShadow: '0 0 2px rgba(0,0,0,0.3)'
+                        }}
+                        aria-label="Remove due date"
+                      >
+                        <X size={15} />
+                      </button>
+                    </div>
+                  );
+                })()}
+              </div>
+
+              <div>
+                <h3 className="section-title d-flex align-items-center gap-2 mb-3">
+                  <Users size={18} className="text-muted" />
+                  Member
+                </h3>
                 {currentMember.length === 0 ? (
                   <p className="text-muted">Belum ada member.</p>
                 ) : (
@@ -1199,7 +1273,7 @@ const TaskDetail = ({ task, onClose, onDelete}) => {
                       const bgColor = getColorFromInitial(initials);
                       const textColor = getContrastingTextColor(bgColor);
                       return (
-                        <li key={idx} className="me-2 mb-2">
+                        <li key={idx} className="me-2">
                           <div
                             className="rounded-circle d-flex align-items-center justify-content-center"
                             style={{
@@ -1220,11 +1294,11 @@ const TaskDetail = ({ task, onClose, onDelete}) => {
                 )}
               </div>
 
-              <div className="mb-4">
-                <h5 className="text-start section-title mb-2">
-                  <FontAwesomeIcon icon={faTag} className="me-2" />
+              <div className="mb-2">
+                <h3 className="section-title mb-3 d-flex align-items-center gap-2">
+                  <Tags size={18} className="text-muted" />
                   Label
-                </h5>
+                </h3>
                 
                 {labeled && labeled.length > 0 ? (
                   <div className="d-flex flex-wrap">
@@ -1247,11 +1321,11 @@ const TaskDetail = ({ task, onClose, onDelete}) => {
               </div>
 
               <div
-                className="description-wrapper rounded mb-4"
-                style={{ padding: '4px 8px 8px' }}
+                className="description-wrapper rounded mb-3"
               >
-                <h3 className="section-title mb-2">
-                  <i className="fas fa-align-left me-2" /> Description
+                <h3 className="section-title mb-3 d-flex align-items-center gap-2">
+                  <FileText size={18} className="text-muted" />
+                  Description
                 </h3>
 
                 <div className="description-box bg-light">
@@ -1622,8 +1696,8 @@ const TaskDetail = ({ task, onClose, onDelete}) => {
                 )}
               </div>
 
-              <div className="attachment-section mb-4">
-                <h3 className="section-title mb-2 d-flex align-items-center gap-2">
+              <div className="attachment-section mb-3">
+                <h3 className="section-title mb-3 d-flex align-items-center gap-2">
                   <Paperclip size={18} className="text-muted" />
                   Attachment
                 </h3>
@@ -1721,7 +1795,10 @@ const TaskDetail = ({ task, onClose, onDelete}) => {
               </div>
 
               <div className="mb-4">
-                <h3 className="section-title mb-2">Activity</h3>
+                <h3 className="section-title mb-3 d-flex align-items-center gap-2">
+                  <ListTodo size={18} className="text-muted" />
+                  Activity
+                </h3>
                 <div className="comment-wrapper d-flex mb-3">
                   <input
                     type="text"
