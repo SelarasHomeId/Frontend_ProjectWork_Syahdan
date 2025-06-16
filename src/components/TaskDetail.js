@@ -1183,7 +1183,7 @@ const TaskDetail = ({ task, onClose, onDelete}) => {
                       <span className="fw-semibold">
                         {currentUpdatedBy?.trim() === "" ? "Created At:" : "Latest Update:"}
                       </span>
-                      <i> {currentUpdatedAt.replace('T', ' ').replace('Z', '')} {currentUpdatedBy !== "" && ` by ${currentUpdatedBy}`}</i>
+                      <i> {currentUpdatedAt.replace('T', ' ').replace('Z', '')}</i> {currentUpdatedBy !== "" && (<div className="text-muted fw-semibold">By {currentUpdatedBy}</div>)}
                     </div>
                   </div>
                 </div>
