@@ -457,11 +457,11 @@ export const createLabel = async ({ title, color }) => {
   return response.data.data;
 };
 
-export const updateLabel = async ({ labelId, title }) => {
+export const updateLabel = async ({ labelId, title, color }) => {
   const response = await apiRequest({
     method: "PUT",
     endpoint: `/task/label/${labelId}`,
-    body: { title }
+    body: { title, color }
   });
   return response.data.data;
 };

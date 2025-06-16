@@ -729,7 +729,7 @@ const Task = ({ task, boardId, index, moveTask, loadTasksForBoard, handleClickTa
         <div className="task-details">
           {task.label && (
             <div className="task-labels">
-              {task.label.data.map((label, idx) => (
+              {(task.label.data || []).map((label, idx) => (
                 <span 
                   key={idx} 
                   className="task-label"

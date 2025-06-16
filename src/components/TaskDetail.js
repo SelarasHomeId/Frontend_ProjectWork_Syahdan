@@ -33,7 +33,7 @@ import TextAlign from '@tiptap/extension-text-align'
 import { FaAlignLeft, FaAlignCenter, FaAlignJustify, FaAlignRight, FaTrash,} from 'react-icons/fa';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import { faArrowsAlt, faUserPlus } from '@fortawesome/free-solid-svg-icons';
-import { getColorFromInitial, getInitials, getContrastingTextColor, } from "../utils/general";
+import { getColorFromInitial, getInitials, getContrastingTextColor, decimalToHexColor, hexColorToDecimal, } from "../utils/general";
 import { debounce,} from "lodash";
 import csvIcon from "../assets/img/csv.png";
 import docxIcon from "../assets/img/docx.png";
@@ -95,8 +95,10 @@ const TaskDetail = ({ task, onClose, onDelete}) => {
   const [labels, setLabels] = useState([]); 
   const [labeled, setCurrentLabeled] = useState([]);
   const [showAddLabelModal, setShowAddLabelModal] = useState(false);
+  const [showEditLabelModal, setShowEditLabelModal] = useState(false);
   const [newLabelName, setNewLabelName] = useState('');
   const [newLabelColor, setNewLabelColor] = useState('#ff0000'); 
+  const [labelEdit, setLabelEdit] = useState({}); 
   // DESCRIPTION
   const [taskData, setTaskData] = useState(null);
   const [isEditing, setIsEditing] = useState(false);
@@ -294,11 +296,14 @@ const TaskDetail = ({ task, onClose, onDelete}) => {
   const handleLabelToggle = lbl => {
     setCurrentLabeled(prev => {
       const exists = prev.some(l => l.id === lbl.id);
+      const isDifferent = prev.some(l => l.id === lbl.id && (l.title !== lbl.title || l.color !== lbl.color));
       if (exists) {
-        // hapus label
-        return prev.filter(l => l.id !== lbl.id);
+        if (isDifferent) {
+          return prev.map(l => l.id === lbl.id ? lbl : l);
+        } else {
+          return prev.filter(l => l.id !== lbl.id);
+        }
       } else {
-        // tambah label
         return [...prev, lbl];
       }
     });
@@ -350,14 +355,32 @@ const TaskDetail = ({ task, onClose, onDelete}) => {
     await fetchComment();
   };
 
-  const handleLabelUpdate = async (lbl) => {
-    const newTitle = window.prompt('Edit nama label:', lbl.title || '');
-    if (newTitle === null) return;
-    if (!newTitle.trim()) return alert('Nama label tidak boleh kosong');
-
+  const handleLabelUpdate = async () => {
+    if (!labelEdit.title.trim()) return alert('Nama label tidak boleh kosong');
     try {
-      await updateLabel({ labelId: lbl.id, title: newTitle.trim() });
-      alert(`Label diperbarui menjadi "${newTitle.trim()}"`);
+      await updateLabel({ labelId: labelEdit.id, title: labelEdit.title.trim(), color: labelEdit.color.toString() });
+
+      setLabelEdit({})
+      setShowEditLabelModal(false)
+
+      setCurrentLabeled(prev => {
+        const exists = prev.some(l => l.id === labelEdit.id);
+        const isDifferent = prev.some(
+          l =>
+            l.id === labelEdit.id &&
+            (l.title !== labelEdit.title.trim() ||
+            l.color !== labelEdit.color.toString())
+        );
+        if (exists && isDifferent) {
+          return prev.map(l => l.id === labelEdit.id ? {
+            ...l,
+            title: labelEdit.title.trim(),
+            color: labelEdit.color.toString()
+          } : l);
+        }
+        return prev;
+      });
+
       fetchLabels();
     } catch (err) {
       console.error('Gagal update label:', err);
@@ -2012,7 +2035,10 @@ const TaskDetail = ({ task, onClose, onDelete}) => {
                         <span
                               className="flex-grow-1 p-2 rounded d-flex align-items-center"
                               style={{ backgroundColor: parseColor(lbl.color), color: '#fff', cursor: 'pointer' }}
-                              onClick={() => handleLabelUpdate(lbl)}
+                              onClick={() => {
+                                setShowEditLabelModal(true)
+                                setLabelEdit(lbl)
+                              }}
                             >
                               {lbl.title || '(no title)'}
                               <Edit size={14} className="ms-2" />
@@ -2101,6 +2127,53 @@ const TaskDetail = ({ task, onClose, onDelete}) => {
                   </button>
                   <button className="btn btn-success" onClick={handleNewLabelSubmit}>
                     Create
+                  </button>
+                </div>
+              </div>
+            </div>
+          </div>
+        )}
+
+        {showEditLabelModal && (
+          <div className="modal fade show d-block" tabIndex={-1} role="dialog" onClick={e => e.stopPropagation()}>
+            <div className="modal-dialog modal-dialog-centered" role="document">
+              <div className="modal-content">
+                <div className="modal-header">
+                  <h5 className="modal-title">Update Label</h5>
+                  <button type="button" className="btn-close" onClick={() => setShowEditLabelModal(false)} />
+                </div>
+                <div className="modal-body">
+                  <div className="mb-3">
+                    <label className="form-label">Nama Label</label>
+                    <input
+                      type="text"
+                      className="form-control"
+                      value={labelEdit.title}
+                      onChange={e => setLabelEdit(prev => ({
+                        ...prev,
+                        title: e.target.value
+                      }))}
+                    />
+                  </div>
+                  <div className="mb-3">
+                    <label className="form-label">Pilih Warna</label>
+                    <input
+                      type="color"
+                      className="form-control form-control-color"
+                      value={decimalToHexColor(labelEdit.color)}
+                      onChange={e => setLabelEdit(prev => ({
+                        ...prev,
+                        color: hexColorToDecimal(e.target.value)
+                      }))}
+                    />
+                  </div>
+                </div>
+                <div className="modal-footer">
+                  <button className="btn btn-secondary" onClick={() => setShowEditLabelModal(false)}>
+                    Cancel
+                  </button>
+                  <button className="btn btn-success" onClick={handleLabelUpdate}>
+                    Update
                   </button>
                 </div>
               </div>
