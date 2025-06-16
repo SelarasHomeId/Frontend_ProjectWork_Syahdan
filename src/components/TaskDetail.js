@@ -1180,10 +1180,15 @@ const TaskDetail = ({ task, onClose, onDelete}) => {
                   <div className="mb-2">
                     <strong>{currentWorkspace} - {currentBoard}</strong>
                     <div className="text-muted">
-                      <span className="fw-semibold">
-                        {currentUpdatedBy?.trim() === "" ? "Created At:" : "Latest Update:"}
+                      <span>
+                        <i>
+                          {currentUpdatedBy?.trim() === "" ? "Created At: " : "Latest Update: "}
+                        </i>
                       </span>
-                      <i> {currentUpdatedAt.replace('T', ' ').replace('Z', '')}</i> {currentUpdatedBy !== "" && (<div className="text-muted fw-semibold">By {currentUpdatedBy}</div>)}
+                      <i>
+                        {currentUpdatedAt.replace('T', ' ').replace('Z', '')}
+                        {currentUpdatedBy !== "" && (<div className="text-muted">By {currentUpdatedBy}</div>)}
+                      </i>
                     </div>
                   </div>
                 </div>
