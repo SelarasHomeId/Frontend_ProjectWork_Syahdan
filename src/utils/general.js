@@ -56,7 +56,9 @@ export const decimalToHexColor = (color) => {
 }
 
 export const hexColorToDecimal = (hexColor) => {
-  return parseInt(hexColor.replace("#", ""), 16);
+  const hex = hexColor.replace("#", "");
+  const fullHex = hex.length === 6 ? "FF" + hex : hex;
+  return parseInt(fullHex, 16);
 };
 
 export const getInitials = (name) => {

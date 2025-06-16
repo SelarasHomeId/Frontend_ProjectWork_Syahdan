@@ -1403,6 +1403,104 @@ const TaskDetail = ({ task, onClose, onDelete}) => {
               </div>
 
               <div className="attachment-section mb-4">
+                <h3 className="section-title mb-3 d-flex align-items-center gap-2">
+                  <Paperclip size={18} className="text-muted" />
+                  Attachment
+                </h3>
+                {attachments.length === 0 ? (
+                  <div className="border rounded p-3 text-muted text-center">Belum ada File</div>
+                ) : (
+                  <div className="d-flex flex-row align-items-start flex-nowrap overflow-auto" style={{ gap: '0.25rem' }}>
+                    {attachments.map((att, idx) => (
+                      <div
+                        key={att.id}
+                        className="border rounded p-3 me-3 mb-3 text-start position-relative"
+                        style={{
+                          minWidth: '150px', // sebelumnya 120px
+                          cursor: IMAGE_EXTENSIONS.includes(att.ext) ? 'pointer' : 'default',
+                          position: 'relative',
+                          zIndex: 1
+                        }}
+                        onClick={() => handlePreview(att)}
+                      >
+                        <div className="mb-2 d-flex align-items-center justify-content-center bg-light border rounded"
+                            style={{ height: '120px', width: '120px', overflow: 'hidden', padding: '8px' }}>
+                          <img
+                            src={
+                              att.ext === 'csv' ? csvIcon : 
+                              att.ext === 'docx' ? docxIcon : 
+                              att.ext === 'mp3' ? mp3Icon : 
+                              att.ext === 'mp4' ? mp4Icon : 
+                              att.ext === 'pdf' ? pdfIcon : 
+                              att.ext === 'pptx' ? pptxIcon : 
+                              att.ext === 'txt' ? txtIcon : 
+                              att.ext === 'xlsx' ? xlsxIcon : 
+                              att.ext === 'jpg' || 'jpeg' || 'png' ? imgIcon:
+                              "no image"
+                            }
+                            alt={att.ext}
+                            style={{
+                              maxWidth: '100%',
+                              maxHeight: '100%',
+                              objectFit: IMAGE_EXTENSIONS.includes(att.ext) ? 'cover' : 'contain',
+                              borderRadius: '6px',
+                              display: 'block'
+                            }}
+                          />
+                        </div>
+                        <div className="text-truncate small" title={att.name}>
+                          {att.name.length > 15 ? att.name.slice(0, 15) + '...' : att.name}
+                        </div>
+                        {/* Dropdown toggle */}
+                        <button
+                          className="btn btn-sm fw-bold fs-5 position-absolute dropdown-toggle-btn"
+                          style={{ top: '12px', right: '-4px' }} 
+                          onClick={e => {
+                            e.stopPropagation();
+                            toggleDropdown(idx);
+                          }}
+                        >
+                          ⋮
+                        </button>
+                        {/* Dropdown menu */}
+                        {att.showDropdown && (
+                          <div
+                            className="custom-dropdown p-2 bg-light border rounded"
+                            style={{
+                              position: 'absolute',
+                              top: '32px',
+                              right: '8px',
+                              zIndex: 9999, 
+                              backgroundColor: 'white',
+                              display: 'block',
+                            }}
+                          >
+                            <button className="dropdown-item" onClick={e => { e.stopPropagation(); handleFileDownload(att); closeAllDropdown();}}>
+                              Download
+                            </button>
+                            <button className="dropdown-item" onClick={e => { e.stopPropagation(); handleFileDelete(att); closeAllDropdown();}}>
+                              Delete
+                            </button>
+                            <button
+                              className="dropdown-item"
+                              onClick={e=> {
+                                e.stopPropagation();
+                                const newName = prompt('Enter new file name:', att.name);
+                                if (newName) handleEditFileName(att, newName);
+                                closeAllDropdown();
+                              }}
+                            >
+                              Edit Name
+                            </button>
+                          </div>
+                        )}
+                      </div>
+                    ))}
+                  </div>
+                )}
+              </div>
+
+              <div className="attachment-section mb-4">
                 <h3 className="section-title mb-2 d-flex align-items-center gap-2">
                   <CheckSquare size={18} className="text-muted" />
                   Checklist
@@ -1713,104 +1811,6 @@ const TaskDetail = ({ task, onClose, onDelete}) => {
                             </li>
                           ))}
                         </ul>
-                      </div>
-                    ))}
-                  </div>
-                )}
-              </div>
-
-              <div className="attachment-section mb-3">
-                <h3 className="section-title mb-3 d-flex align-items-center gap-2">
-                  <Paperclip size={18} className="text-muted" />
-                  Attachment
-                </h3>
-                {attachments.length === 0 ? (
-                  <div className="border rounded p-3 text-muted text-center">Belum ada File</div>
-                ) : (
-                  <div className="d-flex flex-row align-items-start flex-nowrap overflow-auto" style={{ gap: '0.25rem' }}>
-                    {attachments.map((att, idx) => (
-                      <div
-                        key={att.id}
-                        className="border rounded p-3 me-3 mb-3 text-start position-relative"
-                        style={{
-                          minWidth: '150px', // sebelumnya 120px
-                          cursor: IMAGE_EXTENSIONS.includes(att.ext) ? 'pointer' : 'default',
-                          position: 'relative',
-                          zIndex: 1
-                        }}
-                        onClick={() => handlePreview(att)}
-                      >
-                        <div className="mb-2 d-flex align-items-center justify-content-center bg-light border rounded"
-                            style={{ height: '120px', width: '120px', overflow: 'hidden', padding: '8px' }}>
-                          <img
-                            src={
-                              att.ext === 'csv' ? csvIcon : 
-                              att.ext === 'docx' ? docxIcon : 
-                              att.ext === 'mp3' ? mp3Icon : 
-                              att.ext === 'mp4' ? mp4Icon : 
-                              att.ext === 'pdf' ? pdfIcon : 
-                              att.ext === 'pptx' ? pptxIcon : 
-                              att.ext === 'txt' ? txtIcon : 
-                              att.ext === 'xlsx' ? xlsxIcon : 
-                              att.ext === 'jpg' || 'jpeg' || 'png' ? imgIcon:
-                              "no image"
-                            }
-                            alt={att.ext}
-                            style={{
-                              maxWidth: '100%',
-                              maxHeight: '100%',
-                              objectFit: IMAGE_EXTENSIONS.includes(att.ext) ? 'cover' : 'contain',
-                              borderRadius: '6px',
-                              display: 'block'
-                            }}
-                          />
-                        </div>
-                        <div className="text-truncate small" title={att.name}>
-                          {att.name.length > 15 ? att.name.slice(0, 15) + '...' : att.name}
-                        </div>
-                        {/* Dropdown toggle */}
-                        <button
-                          className="btn btn-sm fw-bold fs-5 position-absolute dropdown-toggle-btn"
-                          style={{ top: '12px', right: '-4px' }} 
-                          onClick={e => {
-                            e.stopPropagation();
-                            toggleDropdown(idx);
-                          }}
-                        >
-                          ⋮
-                        </button>
-                        {/* Dropdown menu */}
-                        {att.showDropdown && (
-                          <div
-                            className="custom-dropdown p-2 bg-light border rounded"
-                            style={{
-                              position: 'absolute',
-                              top: '32px',
-                              right: '8px',
-                              zIndex: 9999, 
-                              backgroundColor: 'white',
-                              display: 'block',
-                            }}
-                          >
-                            <button className="dropdown-item" onClick={e => { e.stopPropagation(); handleFileDownload(att); closeAllDropdown();}}>
-                              Download
-                            </button>
-                            <button className="dropdown-item" onClick={e => { e.stopPropagation(); handleFileDelete(att); closeAllDropdown();}}>
-                              Delete
-                            </button>
-                            <button
-                              className="dropdown-item"
-                              onClick={e=> {
-                                e.stopPropagation();
-                                const newName = prompt('Enter new file name:', att.name);
-                                if (newName) handleEditFileName(att, newName);
-                                closeAllDropdown();
-                              }}
-                            >
-                              Edit Name
-                            </button>
-                          </div>
-                        )}
                       </div>
                     ))}
                   </div>
