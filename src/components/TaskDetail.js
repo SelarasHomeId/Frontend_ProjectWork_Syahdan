@@ -880,7 +880,7 @@ const TaskDetail = ({ task, onClose, onDelete}) => {
           setCurrentBoard(resBoard.map(board => board.id === data.board_id ? board.name : ""))
         }
         setCurrentUpdatedAt(data.updated_at)
-        setCurrentUpdatedBy(data.updated_by.name)
+        setCurrentUpdatedBy(data.updated_by.name !== "" ? data.updated_by.name : data.created_by.name)
         setActivity(data.comment.data)
         setChecklist(data.checklist.data)
         setDueDate(data.due_date)
@@ -1180,15 +1180,11 @@ const TaskDetail = ({ task, onClose, onDelete}) => {
                   <div className="mb-2">
                     <strong>{currentWorkspace} - {currentBoard}</strong>
                     <div className="text-muted">
-                      <span>
-                        <i>
-                          {currentUpdatedBy?.trim() === "" ? "Created At: " : "Latest Update: "}
-                        </i>
-                      </span>
-                      <i>
-                        {currentUpdatedAt.replace('T', ' ').replace('Z', '')}
-                        {currentUpdatedBy !== "" && (<div className="text-muted">By {currentUpdatedBy}</div>)}
-                      </i>
+                      <div>
+                        <span className="fst-italic">Latest Update: </span>
+                        <span className="fst-italic">{currentUpdatedAt.replace('T', ' ').replace('Z', '')}</span>
+                      </div>
+                      <div className="text-muted fst-italic">By {currentUpdatedBy}</div>
                     </div>
                   </div>
                 </div>
