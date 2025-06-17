@@ -4,6 +4,8 @@ import { removeAllCookies } from "../utils/general";
 import Cookies from "js-cookie";
 import Swal from "sweetalert2";
 
+let isSessionExpiredHandled = false;
+
 // ==================================================================================================== //
 // Fungsi utama untuk melakukan request API
 export const apiRequest = async ({
@@ -23,29 +25,27 @@ export const apiRequest = async ({
 
   const id = Cookies.get('id');
   if (token != null && (id === undefined || id === null)){
-    try {
-      const response = await authLogout();
-      if (response.success) {
-        return Swal.fire({
-          title: "Logout",
-          text: "Sesi Anda Telah Berakhir, Silahkan Login Ulang",
-          icon: "warning",
-          iconColor: "#dc3545",
-          timer: 2500,
-          showConfirmButton: false,
-        }).then(() => {
-          removeAllCookies();
-          window.location.replace('/');
-        });
+    if (!isSessionExpiredHandled) {
+      isSessionExpiredHandled = true
+      try {
+        const response = await singleAuthLogout();
+        if (response.success) {
+          return Swal.fire({
+            title: "Logout",
+            text: "Sesi Anda Telah Berakhir, Silahkan Login Ulang",
+            icon: "warning",
+            timer: 2500,
+            showConfirmButton: false,
+          }).then(() => {
+            removeAllCookies();
+            window.location.replace('/');
+          });
+        }
+      } catch (error) {
+        console.error(error)
       }
-    } catch (error) {
-      Swal.fire({
-        title: "Gagal Logout, hubungi admin anda",
-        text: error,
-        icon: "error",
-        confirmButtonText: "OK",
-      });
     }
+    return;
   }
 
   if (contentType === "multipart/form-data" && (method.toUpperCase() === "POST" || method.toUpperCase() === "PUT" )) {
@@ -85,14 +85,15 @@ export const apiRequest = async ({
         throw new Error("Gagal memperbarui token");
       }
     }else if(error.status === 422 && (endpoint !== "/auth/login" || endpoint !== "/auth/send-email/forgot-password")){
+      if (!isSessionExpiredHandled) {
+        isSessionExpiredHandled = true
         try {
-          const response = await authLogout();
+          const response = await singleAuthLogout();
           if (response.success) {
             return Swal.fire({
               title: "Logout",
               text: "Sesi Anda Telah Berakhir, Silahkan Login Ulang",
               icon: "warning",
-              iconColor: "#dc3545",
               timer: 2500,
               showConfirmButton: false,
             }).then(() => {
@@ -101,13 +102,10 @@ export const apiRequest = async ({
             });
           }
         } catch (error) {
-          Swal.fire({
-            title: "Gagal Logout, hubungi admin anda",
-            text: error,
-            icon: "error",
-            confirmButtonText: "OK",
-          });
+          console.error(error)
         }
+      }
+      return;
     }
     console.error(`Error pada request ${method} ${endpoint}:`, error);
     return { success: false, error: error.response?.data || error.message };
@@ -129,6 +127,21 @@ export const refreshToken = async () => {
   const response = await hitAPI();
   Cookies.set("token", response.data.data.token, { expires: 36500, secure: true, sameSite: "Strict" });
   return response.data.data.token;
+};
+
+export const singleAuthLogout = async () => {
+  const url = `${BASE_URL}/auth/logout`;
+  const token = Cookies.get("token");
+  let headers = { "Content-Type": "application/json" };
+  const body = { logout_from: "web"}
+  if (token != null) {
+    headers["Authorization"] = `Bearer ${token}`;
+  }
+  const hitAPI = async () => {
+    return axios.post(url, body, { headers });
+  };
+  const response = await hitAPI();
+  return response.data;
 };
 
 // ==================================================================================================== //
@@ -633,29 +646,27 @@ export const apiRequestExportData = async ({
 
   const id = Cookies.get('id');
   if (token != null && (id === undefined || id === null)){
-    try {
-      const response = await authLogout();
-      if (response.success) {
-        return Swal.fire({
-          title: "Logout",
-          text: "Sesi Anda Telah Berakhir, Silahkan Login Ulang",
-          icon: "warning",
-          iconColor: "#dc3545",
-          timer: 2500,
-          showConfirmButton: false,
-        }).then(() => {
-          removeAllCookies();
-          window.location.replace('/');
-        });
+    if (!isSessionExpiredHandled) {
+      isSessionExpiredHandled = true
+      try {
+        const response = await singleAuthLogout();
+        if (response.success) {
+          return Swal.fire({
+            title: "Logout",
+            text: "Sesi Anda Telah Berakhir, Silahkan Login Ulang",
+            icon: "warning",
+            timer: 2500,
+            showConfirmButton: false,
+          }).then(() => {
+            removeAllCookies();
+            window.location.replace('/');
+          });
+        }
+      } catch (error) {
+        console.error(error)
       }
-    } catch (error) {
-      Swal.fire({
-        title: "Gagal Logout, hubungi admin anda",
-        text: error,
-        icon: "error",
-        confirmButtonText: "OK",
-      });
     }
+    return;
   }
  
   const hitAPI = async () => {
@@ -681,14 +692,15 @@ export const apiRequestExportData = async ({
         throw new Error("Gagal memperbarui token");
       }
     }else if(error.status === 422 && (endpoint !== "/auth/login" || endpoint !== "/auth/send-email/forgot-password")){
+      if (!isSessionExpiredHandled) {
+        isSessionExpiredHandled = true
         try {
-          const response = await authLogout();
+          const response = await singleAuthLogout();
           if (response.success) {
             return Swal.fire({
               title: "Logout",
               text: "Sesi Anda Telah Berakhir, Silahkan Login Ulang",
               icon: "warning",
-              iconColor: "#dc3545",
               timer: 2500,
               showConfirmButton: false,
             }).then(() => {
@@ -697,13 +709,10 @@ export const apiRequestExportData = async ({
             });
           }
         } catch (error) {
-          Swal.fire({
-            title: "Gagal Logout, hubungi admin anda",
-            text: error,
-            icon: "error",
-            confirmButtonText: "OK",
-          });
+          console.error(error)
         }
+      }
+      return;
     }
     console.error(`Error pada request ${method} ${endpoint}:`, error);
     return { success: false, error: error.response?.data || error.message };

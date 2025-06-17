@@ -34,7 +34,7 @@ function Navbar({ showSidebar, toggleNavbar, showDetailTask }) {
 
   const loadNotifications = useCallback(async () => {
     const response = await fetchNotifications();
-    if (response.success) {
+    if (response && response.success) {
       setNotifications(response.data.data);
       setUnreadNotifBefore(unreadNotif);
       setUnreadNotif(response.data.count_unread);
@@ -51,18 +51,6 @@ function Navbar({ showSidebar, toggleNavbar, showDetailTask }) {
 
   useEffect(() => {
     loadNotifications();
-    if (!Cookies.get("id")) {
-      Swal.fire({
-        title: "Session anda telah berakhir.",
-        text: "Sampai jumpa kembali...",
-        icon: "success",
-        timer: 2500,
-        showConfirmButton: false,
-      }).then(() => {
-        removeAllCookies();
-        navigate("/");
-      });
-    }
     if (unreadNotif > 0 && unreadNotif > unreadNotifBefore) {
       if (audioRef.current) {
         audioRef.current.play().catch(() => {

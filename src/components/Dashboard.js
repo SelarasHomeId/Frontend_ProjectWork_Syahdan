@@ -74,10 +74,10 @@ function Dashboard({showDetailTask}) {
   ]);
 
 
-  if (accessRes.success) setCountAccess(accessRes.data);
-  if (taskRes.success) setCountCalculateTask(taskRes.data.data);
-  if (contactRes.success) setContactData(contactRes.data.data);
-  if (affiliateRes.success) setAffiliateData(affiliateRes.data.data);
+  if (accessRes && accessRes.success) setCountAccess(accessRes.data);
+  if (taskRes && taskRes.success) setCountCalculateTask(taskRes.data.data);
+  if (contactRes && contactRes.success) setContactData(contactRes.data.data);
+  if (affiliateRes && affiliateRes.success) setAffiliateData(affiliateRes.data.data);
 }, []);
 
 
