@@ -77,7 +77,7 @@ function Home() {
         ) : currentPage === "project" ? (
           <Project />
         ) : (
-          <Workspace workspaceId={currentPage.split("_")[1]} toDetailTask={toDetailTask} />
+          <Workspace workspaceId={currentPage.split("_")[1]} toDetailTask={toDetailTask} setToDetailTask={setToDetailTask} />
         )}
       </div>
     )

@@ -16,7 +16,7 @@ const ItemTypes = {
   BOARD: "board",
 };
 
-const Workspace = ({ workspaceId, toDetailTask }) => {
+const Workspace = ({ workspaceId, toDetailTask, setToDetailTask }) => {
   const [boards, setBoards] = useState([]);
   const [newBoardTitle, setNewBoardTitle] = useState("");
   const [isAddingBoard, setIsAddingBoard] = useState(false);
@@ -72,8 +72,9 @@ const Workspace = ({ workspaceId, toDetailTask }) => {
   useEffect(() => {
     if (toDetailTask){
       setSelectedTask(toDetailTask);
+      setToDetailTask(null)
     }
-  }, [toDetailTask])
+  }, [toDetailTask, setToDetailTask])
 
   const loadBoardsAndTasks = async (workspaceId) => {
     const response = await getAllBoardByWorkspaceId(workspaceId);
