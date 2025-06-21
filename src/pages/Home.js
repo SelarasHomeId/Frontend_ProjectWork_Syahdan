@@ -90,14 +90,13 @@ function Home() {
           position: "fixed",
           top: 0,
           width: "100%",
-          zIndex: 1000, // Pastikan navbar di atas elemen lain
+          zIndex: 1000,
         }}
       >
         <Navbar showSidebar={isSidebarActive} toggleNavbar={toggleNavbar} showDetailTask={showDetailTask} />
       </div>
 
       <div className="d-flex flex-grow-1" style={{ marginTop: "56px" }}> 
-        {/* Sidebar */}
         <div
           className="sidebar bg-dark"
           style={{
@@ -112,8 +111,6 @@ function Home() {
         >
           <Sidebar showSidebar={isSidebarActive} onPageChange={handlePageChange} thisHasCover={handleHasCover} />
         </div>
-
-        {/* Konten full layar jika sidebar nonaktif */}
         <div
           className="content flex-grow-1 p-3"
           style={{

@@ -305,7 +305,6 @@ function Dashboard({showDetailTask}) {
             <h2 style={{ whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
               Social Media Click
             </h2>
-            {/* wrapper tinggi tetap agar PieChart tidak menciut */}
             <div className="w-100" style={{ height: '500px' }}>
               <PieChart data={socialMediaData} height={300} />
             </div>
@@ -323,7 +322,6 @@ function Dashboard({showDetailTask}) {
             <h2 style={{ whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
               Contact & Affiliate
             </h2>
-            {/* wrapper tinggi tetap agar PieChart tidak menciut */}
             <div className="w-100" style={{ height: '500px' }}>
               <PieChart data={contactAffiliateData} height={300} />
             </div>
@@ -365,8 +363,6 @@ function Dashboard({showDetailTask}) {
               </button>
             </div>
 
-
-            {/* Tambahkan div pembungkus dengan overflow-x: auto */}
             <div className="table-wrapper">
               <table className="role-table">
                 <thead>
@@ -432,9 +428,7 @@ function Dashboard({showDetailTask}) {
   );
 }
 
-
 const SummaryTask = ({ summaryData, formatDate }) => {
-  // default ke workspace pertama
   const [activeWorkspace, setActiveWorkspace] = useState(
     summaryData?.[0]?.id ?? null
   );
@@ -500,7 +494,6 @@ const SummaryTask = ({ summaryData, formatDate }) => {
       </button>
     </div>
    
-    {/* tombol workspace */}
     <div
       className="d-flex flex-nowrap mb-4 "
       role="group"
@@ -543,7 +536,7 @@ const SummaryTask = ({ summaryData, formatDate }) => {
               <div
                 type="button"
                 onClick={(e) => {
-                  e.stopPropagation(); // mencegah klik tombol luar
+                  e.stopPropagation();
                   handleDownloadClickWorkspace(ws.id);
                 }}
                 className="btn btn-sm p-0 m-0"
@@ -567,8 +560,6 @@ const SummaryTask = ({ summaryData, formatDate }) => {
       })}
     </div>
 
-
-      {/* board cards — scrollable horizontal */}
       <div
         className="wbs-boards"
         style={{
@@ -606,7 +597,6 @@ const SummaryTask = ({ summaryData, formatDate }) => {
                 className="card-body"
                 style={{ padding: '0.5rem', lineHeight: 1.2 }}
               >
-                {/* title + badges */}
                 <div
                   className="d-flex align-items-center mb-1"
                   style={{ justifyContent: 'flex-end' }}
@@ -638,8 +628,6 @@ const SummaryTask = ({ summaryData, formatDate }) => {
                   </span>
                 </div>
 
-
-                {/* 2. Title lebih tebal */}
                 <h6
                   className="mb-1"
                   style={{ fontWeight: '700', fontSize: '1rem', margin: 0 }}
@@ -647,8 +635,6 @@ const SummaryTask = ({ summaryData, formatDate }) => {
                   {boardItem.name}
                 </h6>
 
-
-                {/* tanggal */}
                 <p
                   className="card-text"
                   style={{
@@ -661,8 +647,6 @@ const SummaryTask = ({ summaryData, formatDate }) => {
                 </p>
               </div>
 
-
-              {/* Tombol Download muncul jika board ini dipilih */}
               {selectedBoardId === boardItem.id && (
                 <button
                   type="button"
@@ -692,8 +676,6 @@ const SummaryTask = ({ summaryData, formatDate }) => {
           </div>
         ))}
 
-
-        {/* fallback */}
         {activeWorkspace && boards.length === 0 && (
           <div style={{ minWidth: '200px', flex: '0 0 auto' }}>
             <p className="text-muted mb-0">No boards available.</p>

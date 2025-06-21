@@ -1,4 +1,3 @@
-// CardList.js
 import React from 'react';
 
 function CardList({ divisiName }) {

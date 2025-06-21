@@ -503,7 +503,6 @@ const User = () => {
                   <td>{user.created_at.replace("T", " ").replace("Z", "")}</td>
                   <td>
                   <div className="d-flex align-items-center gap-2">
-                    {/* Edit Button */}
                     <button
                       className="action-button btn btn-warning d-flex align-items-center justify-content-center"
                       onClick={() => handleEditUser(user.id)}
@@ -512,7 +511,6 @@ const User = () => {
                     >
                       <MdEdit style={{ fontSize: '1.4rem' }} />
                     </button>
-                    {/* Delete Button */}
                     <button
                       className="btn btn-danger btn-sm p-2 d-flex align-items-center justify-content-center"
                       onClick={() => handleDeleteUser(user.id)}
@@ -521,8 +519,6 @@ const User = () => {
                     >
                       <i className="fas fa-trash-alt fa-fw"></i>
                     </button>
-
-                    {/* Reset Password Button */}
                     <button
                       className="btn btn-secondary btn-sm p-2 d-flex align-items-center justify-content-center"
                       onClick={() => handleResetPassword(user.id)}

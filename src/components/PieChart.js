@@ -2,7 +2,6 @@ import React from 'react';
 import { Pie } from 'react-chartjs-2';
 import { Chart as ChartJS, ArcElement, Tooltip, Legend } from 'chart.js';
 
-// Daftarkan komponen yang diperlukan oleh Chart.js
 ChartJS.register(ArcElement, Tooltip, Legend);
 
 const PieChart = ({ data, height = 1000 }) => {
@@ -26,7 +25,7 @@ const PieChart = ({ data, height = 1000 }) => {
     <div
       className="w-100"
       style={{
-        height: `${height}px`, // Tetapkan tinggi tetap sesuai prop
+        height: `${height}px`,
       }}
     >
       <Pie data={chartData} options={options} />

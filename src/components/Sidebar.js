@@ -45,7 +45,6 @@ function Sidebar({ showSidebar, onPageChange, thisHasCover }) {
       <div className={`sidebar-container bg-dark ${showSidebar ? "active" : ""}`}>
         <div className="sidebar text-white p-3">
           
-          {/* Logo hanya muncul saat sidebar terbuka */}
           {showSidebar && (
             <div className="sidebar-logo text-center mb-3 clickable" >
               {LogoSelarasSidebar ? (
@@ -56,7 +55,6 @@ function Sidebar({ showSidebar, onPageChange, thisHasCover }) {
             </div>
           )}
 
-          {/* Dashboard */}
           <div>
             <h6 className="sidebar-item clickable" onClick={() => {
                 onPageChange("dashboard");
@@ -66,7 +64,6 @@ function Sidebar({ showSidebar, onPageChange, thisHasCover }) {
             </h6>
           </div>
 
-          {/* Workspace */}
           <div>
             <h6
               className="sidebar-item clickable"
@@ -113,7 +110,6 @@ function Sidebar({ showSidebar, onPageChange, thisHasCover }) {
             )}
           </div>
 
-          {/* Masterdata (Hanya untuk Admin) */}
           {shouldShowMasterdata && (
             <div>
               <h6

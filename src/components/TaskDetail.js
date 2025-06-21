@@ -48,8 +48,16 @@ import LogoSelaras from "../assets/img/selaras_logo2.png";
 import Cookies from "js-cookie";
 
 const TaskDetail = ({ task, onClose, onDelete}) => {
-//=====================*USE STATE*===============================//
-  //TITLE
+
+  // ============================== USE STATE ============================== //
+  // COVER
+  const [coverImage, setCoverImage] = useState(null);
+  const fileInputCoverRef = useRef(null);
+  // IS COMPLETE
+  const [isCompleted, setIsCompleted] = useState(false);
+  // IS WATCH
+  const [isWatched, setIsWatched] = useState(false);
+  // TITLE
   const [isEditingTitle, setIsEditingTitle] = useState(false);
   const [title, setTitle] = useState(task.title || "");
   const [currentTitle, setCurrentTitle] = useState("");
@@ -57,14 +65,46 @@ const TaskDetail = ({ task, onClose, onDelete}) => {
   const [currentBoard, setCurrentBoard] = useState("");
   const [currentUpdatedAt, setCurrentUpdatedAt] = useState("");
   const [currentUpdatedBy, setCurrentUpdatedBy] = useState("");
-  //IS COMPLETE
-  const [isCompleted, setIsCompleted] = useState(false);
-  //IS WATCH
-  const [isWatched, setIsWatched] = useState(false);
-  //COVER IMAGE
-  const [coverImage, setCoverImage] = useState(null);
-  const fileInputCoverRef = useRef(null);
-  //CHECKLIST
+  // DELETE
+  const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
+  // MOVE
+  const [showMoveModal, setShowMoveModal] = useState(false);
+  const [workspaces, setWorkspaces] = useState([]);
+  const [boards, setBoards] = useState([]);
+  const [selectedWorkspace, setSelectedWorkspace] = useState('');
+  const [selectedBoard, setSelectedBoard] = useState('');
+  const [loadingWorkspaces, setLoadingWorkspaces] = useState(false);
+  const [loadingBoards, setLoadingBoards] = useState(false);
+  // DUE DATE
+  const [showDueDateModal, setShowDueDateModal] = useState(false);
+  const [dueDate, setDueDate] = useState('');
+  const toggleDueDateModal = () => {
+    setShowDueDateModal(!showDueDateModal);
+  };
+  // DESCRIPTION
+  const [taskData, setTaskData] = useState(null);
+  const [isEditing, setIsEditing] = useState(false);
+  // MEMBER
+  const [showMemberModal, setShowMemberModal] = useState(false);
+  const [currentMember, setCurrentMember] = useState([]);
+  const [allMember, setAllMember] = useState([]);
+  const [allUser, setAllUser] = useState([]);
+  const [searchUser, setSearchUser] = useState('');
+  const [filteredUsers, setFilteredUsers] = useState([]);
+  // LABEL
+  const [showLabelModal, setShowLabelModal] = useState(false);
+  const [labels, setLabels] = useState([]); 
+  const [labeled, setCurrentLabeled] = useState([]);
+  const [showAddLabelModal, setShowAddLabelModal] = useState(false);
+  const [showEditLabelModal, setShowEditLabelModal] = useState(false);
+  const [newLabelName, setNewLabelName] = useState('');
+  const [newLabelColor, setNewLabelColor] = useState('#ff0000'); 
+  const [labelEdit, setLabelEdit] = useState({}); 
+  // ATTACHMENT
+  const [attachments, setAttachments] = useState([]);
+  const fileInputAttachmentRef = useRef(null);
+  const IMAGE_EXTENSIONS = ['jpg', 'jpeg', 'png'];
+  // CHECKLIST
   const [showChecklistModal, setShowChecklistModal] = useState(false);
   const [checklist, setChecklist] = useState([]);
   const [newChecklistItem, setNewChecklistItem] = useState({});
@@ -83,38 +123,7 @@ const TaskDetail = ({ task, onClose, onDelete}) => {
   };
   const [showMemberItemModal, setShowMemberItemModal] = useState(false);
   const [currentMemberItem, setCurrentMemberItem] = useState([]);
-  // MEMBER
-  const [showMemberModal, setShowMemberModal] = useState(false);
-  const [currentMember, setCurrentMember] = useState([]);
-  const [allMember, setAllMember] = useState([]);
-  const [allUser, setAllUser] = useState([]);
-  const [searchUser, setSearchUser] = useState('');
-  const [filteredUsers, setFilteredUsers] = useState([]);
-  // LABEL
-  const [showLabelModal, setShowLabelModal] = useState(false);
-  const [labels, setLabels] = useState([]); 
-  const [labeled, setCurrentLabeled] = useState([]);
-  const [showAddLabelModal, setShowAddLabelModal] = useState(false);
-  const [showEditLabelModal, setShowEditLabelModal] = useState(false);
-  const [newLabelName, setNewLabelName] = useState('');
-  const [newLabelColor, setNewLabelColor] = useState('#ff0000'); 
-  const [labelEdit, setLabelEdit] = useState({}); 
-  // DESCRIPTION
-  const [taskData, setTaskData] = useState(null);
-  const [isEditing, setIsEditing] = useState(false);
-  // DUE DATE
-  const [showDueDateModal, setShowDueDateModal] = useState(false);
-  const [dueDate, setDueDate] = useState('');
-  const toggleDueDateModal = () => {
-    setShowDueDateModal(!showDueDateModal);
-  };
-  //ATTACHMENT
-  const [attachments, setAttachments] = useState([]);
-  const fileInputAttachmentRef = useRef(null);
-  const IMAGE_EXTENSIONS = ['jpg', 'jpeg', 'png'];
-  //DELETE
-  const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
-  //COMMMENT
+  // ACTIVITY
   const [comment, setComment] = useState("");
   const [activity, setActivity] = useState([]);
   const [showCommentModal, setShowCommentModal] = useState(false);
@@ -122,17 +131,10 @@ const TaskDetail = ({ task, onClose, onDelete}) => {
   const [commentIdEdit, setCommentIdEdit] = useState(0);
   const [showCommentDeleteConfirm, setShowCommentDeleteConfirm] = useState(false);
   const [commentIdDelete, setCommentIdDelete] = useState(0);
-  //MOVE
-  const [showMoveModal, setShowMoveModal] = useState(false);
-  const [workspaces, setWorkspaces] = useState([]);
-  const [boards, setBoards] = useState([]);
-  const [selectedWorkspace, setSelectedWorkspace] = useState('');
-  const [selectedBoard, setSelectedBoard] = useState('');
-  const [loadingWorkspaces, setLoadingWorkspaces] = useState(false);
-  const [loadingBoards, setLoadingBoards] = useState(false);
-//======================= *END USE STATE*====================================
 
-//======================= *START FUNCTION*====================================  
+
+  // ============================== HANDLER FUNCTION ============================== //
+  // COVER
   const handleCoverImageChange = async (e) => {
     const file = e.target.files[0];
     if (file) {
@@ -145,8 +147,7 @@ const TaskDetail = ({ task, onClose, onDelete}) => {
       try {
         await updateTask(task.id, { cover: file });
       } catch (err) {
-        console.error(err);
-        alert('Gagal update due date');
+        console.error('Error change cover:', err);
       }
       await fetchComment();
     }
@@ -158,25 +159,107 @@ const TaskDetail = ({ task, onClose, onDelete}) => {
       await updateTask(task.id, { delete_cover: true });
       setCoverImage(null);
     } catch (err) {
-      console.error(err);
-      alert('Gagal update due date');
+      console.error('Error remove cover:', err);
     }
     await fetchComment();
   };
 
+  // IS COMPLETE
   const handleToggleComplete = async () => {
     const next = !isCompleted;
     setIsCompleted(next);
     try {
       await updateTask(task.id, { is_completed: next });
     } catch (e) {
-      console.error('Gagal update completed:', e);
+      console.error('Error update completed:', e);
       setIsCompleted(!next);
     }
     await fetchComment();
   };
 
-  // Handle due date
+  // IS WATCH
+  const handleToggleWatch = async () => {
+    const newWatch = !isWatched;
+    setIsWatched(newWatch);
+
+    try {
+      await updateTask(task.id, { watch: newWatch });
+    } catch (e) {
+      console.error('Error update watch:', e);
+      setIsWatched(!newWatch);
+    }
+    await fetchComment();
+  };
+
+  // TITLE
+  const handleSaveTitle = async () => {
+    if(!title.trim()) {
+      alert('Judul tidak boleh kosong');
+      return;
+    }
+    
+    try {
+      await updateTask(task.id, { title: title }, "application/json");
+      const res = await getTaskById(task.id);
+      setTaskData(res.data);
+      setIsEditingTitle(false);
+    } catch (err) {
+      console.error('Error update title:', err);
+      setTitle(currentTitle);
+    }
+    await fetchComment();
+  };
+
+  // DELETE
+  const handleDeleteTask = async () => {
+    try {
+      await deleteTask(task.id);
+      alert('Task berhasil dihapus');
+      setShowDeleteConfirm(false);
+      onDelete?.(task.id);
+      onClose();
+    } catch (err) {
+      console.error('Error delete task:', err.response?.data || err.message);
+    }
+  };
+
+  // MOVE
+  const handleOpenMove = () => {
+    setShowMoveModal(true);
+    setLoadingWorkspaces(true);
+    setLoadingBoards(true)
+    workspaceFind()
+      .then(data => {
+        setWorkspaces(data || []);
+        const currentWs = task.workspace?.id?.toString() || '';
+        setSelectedWorkspace(currentWs);
+      })
+      .catch(err => console.error('Error fetch workspaces:', err))
+      .finally(() => setLoadingWorkspaces(false));
+  };
+
+  const handleMoveTask = async () => {
+    if (!selectedWorkspace || !selectedBoard) return alert('Pilih workspace dan board terlebih dahulu');
+    try {
+      await updateTask(task.id, {workspace_id: selectedWorkspace,board_id: selectedBoard});
+      setShowMoveModal(false);
+      const resWorkspace = await workspaceFind();
+      if (resWorkspace) {
+        const selectedWp = resWorkspace.find(wp => wp.id === parseInt(selectedWorkspace));
+        setCurrentWorkspace(selectedWp?.name || "");
+      }
+      const resBoard = await getAllBoardByWorkspaceId(selectedWorkspace);
+      if (resBoard) {
+        const selectedBrd = resBoard.find(board => board.id === parseInt(selectedBoard));
+        setCurrentBoard(selectedBrd?.name || "");
+      }
+    } catch (err) {
+      console.error('Error move task:', err);
+    }
+    await fetchComment();
+  };
+
+  // DUE DATE
   const handleDateChange = (e) => {
     setDueDate(e.target.value.replace("T", " "));
   };
@@ -186,8 +269,7 @@ const TaskDetail = ({ task, onClose, onDelete}) => {
       await updateTask(task.id, { due_date: dueDate }, "application/json");
       setShowDueDateModal(false);
     } catch (err) {
-      console.error(err);
-      alert('Gagal update due date');
+      console.error('Error save due date:', err);
     }
     await fetchComment();
   };
@@ -197,47 +279,74 @@ const TaskDetail = ({ task, onClose, onDelete}) => {
       await updateTask(task.id, { due_date: '' }, "application/json");
       setDueDate('')
     } catch (err) {
-      console.error(err);
-      alert('Gagal update due date');
+      console.error('Error remove due date:', err);
     }
     await fetchComment();
   };
 
-  const handleSaveTitle = async () => {
-    if(!title.trim()) { // Validasi title tidak boleh kosong
-      alert('Judul tidak boleh kosong');
-      return;
-    }
-    
+  // DESCRIPTION
+  const editor = useEditor({
+    extensions: [StarterKit, 
+      ImageExtension, 
+      Bold, 
+      Italic, 
+      Heading, 
+      ListItem, 
+      BulletList, 
+      OrderedList,  
+      TextAlign.configure({
+      types: ['heading', 'paragraph'], 
+    }),],
+    content:'',
+    onUpdate: ({ editor }) => {
+      console.log("Description updated:", editor.getHTML());
+    },
+  });
+
+  const handleSaveDescription = async () => {
+    if (!editor) return;
+    const rawHtml = editor.getHTML();
+    const isEmpty = editor.state.doc.textContent.trim().length === 0;
+    const newDescription = isEmpty ? '' : rawHtml;
+
     try {
-      await updateTask(task.id, { title: title }, "application/json");
-      // Jika perlu refresh data dari server
+      await updateTask(task.id, { description: newDescription });
+      setIsEditing(false);
       const res = await getTaskById(task.id);
-      setTaskData(res.data);
-      setIsEditingTitle(false);
-    } catch (err) {
-      console.error('Gagal menyimpan judul:', err);
-      alert('Gagal menyimpan judul');
-      // Rollback ke nilai sebelumnya jika gagal
-      setTitle(currentTitle);
-    }
-    await fetchComment();
-  };
-
-  const handleToggleWatch = async () => {
-    const newWatch = !isWatched;
-    setIsWatched(newWatch);
-
-    try {
-      await updateTask(task.id, { watch: newWatch });
+      setTaskData(res.data.data);
+      editor.commands.setContent(res.data.data.description || '');
     } catch (e) {
-      console.error('Gagal update watch:', e);
-      setIsWatched(!newWatch);
+      console.error('Error save description:', e);
     }
     await fetchComment();
   };
 
-  //USER AND MEMBER 
+  const toolbarButtons = [
+    { label: "B", action: () => editor?.chain().focus().toggleBold().run() },
+    { label: "I", action: () => editor?.chain().focus().toggleItalic().run() },
+    { label: "H1", action: () => editor?.chain().focus().toggleHeading({ level: 1 }).run() },
+    { label: "H2", action: () => editor?.chain().focus().toggleHeading({ level: 2 }).run() },
+    { label: "• List", action: () => editor?.chain().focus().toggleBulletList().run() },
+    { label: "1. Number", action: () => editor?.chain().focus().toggleOrderedList().run() },
+    {
+      label: <FaAlignLeft />,
+      action: () => editor?.chain().focus().setTextAlign('left').run(),
+    },
+    {
+      label: <FaAlignCenter />,
+      action: () => editor?.chain().focus().setTextAlign('center').run(),
+    },
+    {
+      label: <FaAlignRight />,
+      action: () => editor?.chain().focus().setTextAlign('right').run(),
+    },
+    {
+      label: <FaAlignJustify />,
+      action: () => editor?.chain().focus().setTextAlign('justify').run(),
+    },
+  ];
+
+  // MEMBER
   const debounceSearch = useRef(
     debounce((value, users) => {
       const filtered = value 
@@ -276,8 +385,7 @@ const TaskDetail = ({ task, onClose, onDelete}) => {
       setTaskData(res.data.data);
       closeModal();
     } catch (err) {
-      console.error('Gagal update task members', err);
-      alert('Error updating task');
+      console.error('Error update task members:', err);
     }
     await fetchComment();
   };
@@ -292,7 +400,7 @@ const TaskDetail = ({ task, onClose, onDelete}) => {
     }
   },[allUser, setShowMemberModal]);
 
-  //lABEL
+  // LABEL
   const handleLabelToggle = lbl => {
     setCurrentLabeled(prev => {
       const exists = prev.some(l => l.id === lbl.id);
@@ -313,13 +421,11 @@ const TaskDetail = ({ task, onClose, onDelete}) => {
     const labelIds = labeled.map(l => l.id);
     try {
       await updateTask(task.id, { label: labelIds },"application/json");
-      // jika perlu refresh task dari server:
       const res = await getTaskById(task.id);
       setTaskData(res.data.data);
       setShowLabelModal(false);
     } catch (err) {
-      console.error(err);
-      alert('Gagal update label');
+      console.error('Error update label:', err);
     }
     await fetchComment();
   };
@@ -336,8 +442,7 @@ const TaskDetail = ({ task, onClose, onDelete}) => {
       setShowAddLabelModal(false);
       setShowLabelModal(true);
     } catch (err) {
-      console.error('Gagal menambah label:', err);
-      alert('Gagal menambah label');
+      console.error('Error create label:', err);
     }
     await fetchComment();
   };
@@ -349,8 +454,7 @@ const TaskDetail = ({ task, onClose, onDelete}) => {
       setLabels(prev => prev.filter(l => l.id !== labelId));
       setCurrentLabeled(prev => prev.filter(l => l.id !== labelId));
     } catch (err) {
-      console.error("Gagal menghapus label:", err);
-      alert("Gagal menghapus label");
+      console.error("Error delete label:", err);
     }
     await fetchComment();
   };
@@ -383,8 +487,7 @@ const TaskDetail = ({ task, onClose, onDelete}) => {
 
       fetchLabels();
     } catch (err) {
-      console.error('Gagal update label:', err);
-      alert('Gagal memperbarui label');
+      console.error('Error update label:', err);
     }
     await fetchComment();
   };
@@ -392,10 +495,148 @@ const TaskDetail = ({ task, onClose, onDelete}) => {
   const fetchLabels = () => {
     getLabel()
       .then(data => setLabels(data || []))
-      .catch(err => console.error("Gagal fetch labels:", err));
+      .catch(err => console.error("Error fetch labels:", err));
   };
 
-  //CHECKLIST 
+  const parseColor = (colorInt) => {
+    const color = parseInt(colorInt, 10);
+    const red = (color >> 16) & 255;
+    const green = (color >> 8) & 255;
+    const blue = color & 255;
+    return `rgb(${red}, ${green}, ${blue})`;
+  };
+
+  // ATTACHMENT
+  const toggleDropdown = idx => {
+    setAttachments(prev =>
+      prev.map((att, i) => ({
+        ...att,
+        showDropdown: i === idx ? !att.showDropdown : false
+      }))
+    );
+  };
+
+  const handleAttachmentUpload = async e => {
+    const file = e.target.files[0];
+    if (!file) return;
+    try {
+      const res = await uploadAttachment(task.id, file);
+      if (res.success) {
+        const resfile = await getTaskFiles(task.id);
+        if (resfile.success && Array.isArray(resfile.data.data)) {
+          const files = resfile.data.data.map(f => ({
+            id: f.id,
+            name: f.file.name,
+            ext: f.file.ext,
+            urlDownload: f.file.content,
+            urlView: f.file.view_saved,
+            createdAt: f.created_at,
+            showDropdown: false,
+          }));
+          setAttachments(files);
+        }
+      }
+    } catch (err) {
+      console.error('Error upload failed:', err);
+    } finally {
+      e.target.value = null;
+    }
+    await fetchComment();
+  };
+
+  const fetchAttachment = async () => {
+    try {
+      const res = await getTaskFiles(task.id);
+      if (res.success && Array.isArray(res.data.data)) {
+        const files = res.data.data.map(f => ({
+          id: f.id,
+          name: f.file.name,
+          ext: f.file.ext,
+          urlDownload: f.file.content,
+          urlView: f.file.view_saved,
+          createdAt: f.created_at,
+          showDropdown: false,
+        }));
+        setAttachments(files);
+      }
+    } catch (err) {
+      console.error('Failed to fetch attachments:', err);
+    }
+  };
+
+  const handleFileDelete = async (att) => {
+    if (!window.confirm(`Delete "${att.name}"?`)) return;
+
+    try {
+      await deleteAttachment(att.id);
+      fetchAttachment();
+    } catch (err) {
+      console.error('Failed delete file:', err);
+    }
+    await fetchComment();
+  };
+
+  const handleFileDownload = (fileObj) => {
+    const link = document.createElement('a');
+    link.href = fileObj.urlDownload;
+    link.download = fileObj.name;
+    link.click();
+  };
+
+  const handlePreview = (att) => {
+    const imageExt = ['jpg', 'jpeg', 'png'];
+    const pdfExt = ['pdf'];
+    const docExt = ['doc', 'docx'];
+    const pptExt = ['ppt', 'pptx'];
+    const videoExt = ['mp4', 'mov'];
+    const audioExt = ['mp3', 'wav'];
+    const txtExt = ['txt'];
+    const xlsxExt = ['xlsx', 'xls'];
+
+    const ext = att.ext.toLowerCase();
+
+    if (imageExt.includes(ext)) {
+      window.open(att.urlView, '_blank');
+    } else if (pdfExt.includes(ext)) {
+      window.open(att.urlView, '_blank');
+    } else if (docExt.includes(ext) || pptExt.includes(ext) || xlsxExt.includes(ext)) {
+      const viewerURL = `https://docs.google.com/viewer?url=${encodeURIComponent(att.urlView)}&embedded=true`;
+      window.open(viewerURL, '_blank');
+    } else if (videoExt.includes(ext)) {
+      window.open(att.urlView, '_blank');
+    } else if (audioExt.includes(ext)) {
+      window.open(att.urlView, '_blank');
+    } else if (txtExt.includes(ext)) {
+      window.open(att.urlView, '_blank');
+    } else {
+      alert('Preview tidak tersedia untuk ekstensi ini.');
+    }
+  };
+
+  const handleEditFileName = async (att, newName) => {
+    if (!newName.trim()) return;
+    
+    try {
+      await renameAttachment(att.id, newName.trim());
+      fetchAttachment();
+    } catch (err) {
+      console.error("Rename file failed:", err);
+    }
+    await fetchComment();
+  };
+
+  const closeAllDropdown = () => {
+    setAttachments(prev =>
+      prev.map(att => ({
+        ...att,
+        showDropdown: false,
+      }))
+    );
+  };
+
+  const triggerFileUpload = () => fileInputAttachmentRef.current?.click();
+
+  // CHECKLIST 
   const fetchChecklist = async () => {
     const response = await getAllChecklistByTaskId(task.id)
     setChecklist(response);
@@ -493,8 +734,7 @@ const TaskDetail = ({ task, onClose, onDelete}) => {
       setSelectedChecklist('')
       setShowMoveChecklistItemModal(false)
     } catch (err) {
-      console.error('Gagal memindah item:', err);
-      alert('Gagal memindah item');
+      console.error('Error move item:', err);
     }
     await fetchComment();
   };
@@ -511,8 +751,7 @@ const TaskDetail = ({ task, onClose, onDelete}) => {
       setDueDateItem('')
       setShowDueDateItemModal(false);
     } catch (err) {
-      console.error(err);
-      alert('Gagal update due date item');
+      console.error('Error save due date item:', err);
     }
     await fetchComment();
   };
@@ -523,8 +762,7 @@ const TaskDetail = ({ task, onClose, onDelete}) => {
       await fetchChecklist()
       setDueDateItem('')
     } catch (err) {
-      console.error(err);
-      alert('Gagal update due date item');
+      console.error('Error remove due date item:', err);
     }
     await fetchComment();
   };
@@ -557,83 +795,12 @@ const TaskDetail = ({ task, onClose, onDelete}) => {
       setCurrentMemberItem([])
       closeModalMemberItem();
     } catch (err) {
-      console.error(err);
-      alert('Gagal update member item');
+      console.error('Error change member item:', err);
     }
     await fetchComment();
   };
 
-  //DESCRIPTION
-  const editor = useEditor({
-    extensions: [StarterKit, 
-      ImageExtension, 
-      Bold, 
-      Italic, 
-      Heading, 
-      ListItem, 
-      BulletList, 
-      OrderedList,  
-      TextAlign.configure({
-      types: ['heading', 'paragraph'], 
-    }),],
-    content:'',
-    onUpdate: ({ editor }) => {
-      console.log("Description updated:", editor.getHTML());
-    },
-  });
-
-  const handleSaveDescription = async () => {
-    if (!editor) return;
-    const rawHtml = editor.getHTML();
-    const isEmpty = editor.state.doc.textContent.trim().length === 0;
-    const newDescription = isEmpty ? '' : rawHtml;
-
-    try {
-      await updateTask(task.id, { description: newDescription });
-      setIsEditing(false);
-      const res = await getTaskById(task.id);
-      setTaskData(res.data.data);
-      editor.commands.setContent(res.data.data.description || '');
-    } catch (e) {
-      console.error('Gagal menyimpan:', e);
-    }
-    await fetchComment();
-  };
-
-  //TOOLBAR
-  const toolbarButtons = [
-    { label: "B", action: () => editor?.chain().focus().toggleBold().run() },
-    { label: "I", action: () => editor?.chain().focus().toggleItalic().run() },
-    { label: "H1", action: () => editor?.chain().focus().toggleHeading({ level: 1 }).run() },
-    { label: "H2", action: () => editor?.chain().focus().toggleHeading({ level: 2 }).run() },
-    { label: "• List", action: () => editor?.chain().focus().toggleBulletList().run() },
-    { label: "1. Number", action: () => editor?.chain().focus().toggleOrderedList().run() },
-    {
-      label: <FaAlignLeft />,
-      action: () => editor?.chain().focus().setTextAlign('left').run(),
-    },
-    {
-      label: <FaAlignCenter />,
-      action: () => editor?.chain().focus().setTextAlign('center').run(),
-    },
-    {
-      label: <FaAlignRight />,
-      action: () => editor?.chain().focus().setTextAlign('right').run(),
-    },
-    {
-      label: <FaAlignJustify />,
-      action: () => editor?.chain().focus().setTextAlign('justify').run(),
-    },
-  ];
-
-  const parseColor = (colorInt) => {
-    const color = parseInt(colorInt, 10);
-    const red = (color >> 16) & 255;
-    const green = (color >> 8) & 255;
-    const blue = color & 255;
-    return `rgb(${red}, ${green}, ${blue})`;
-  };
-
+  // ACTIVITY
   const fetchComment = async () => {
     const response = await getAllCommentByTaskId(task.id)
     setActivity(response);
@@ -669,203 +836,16 @@ const TaskDetail = ({ task, onClose, onDelete}) => {
     setShowCommentDeleteConfirm(false)
   };
 
-  //======================== FILE ATTACHMENT=======================
-  const toggleDropdown = idx => {
-    setAttachments(prev =>
-      prev.map((att, i) => ({
-        ...att,
-        showDropdown: i === idx ? !att.showDropdown : false
-      }))
-    );
-  };
 
-  const handleAttachmentUpload = async e => {
-    const file = e.target.files[0];
-    if (!file) return;
-    try {
-      const res = await uploadAttachment(task.id, file);
-      if (res.success) {
-        const resfile = await getTaskFiles(task.id);
-        if (resfile.success && Array.isArray(resfile.data.data)) {
-          const files = resfile.data.data.map(f => ({
-            id: f.id,
-            name: f.file.name,
-            ext: f.file.ext,
-            urlDownload: f.file.content,
-            urlView: f.file.view_saved,
-            createdAt: f.created_at,
-            showDropdown: false,
-          }));
-          setAttachments(files);
-        }
-      }
-    } catch (err) {
-      console.error('Upload failed:', err);
-    } finally {
-      // reset input
-      e.target.value = null;
-    }
-    await fetchComment();
-  };
-
-  const fetchAttachment = async () => {
-    try {
-      const res = await getTaskFiles(task.id);
-      if (res.success && Array.isArray(res.data.data)) {
-        const files = res.data.data.map(f => ({
-          id: f.id,
-          name: f.file.name,
-          ext: f.file.ext,
-          urlDownload: f.file.content,
-          urlView: f.file.view_saved,
-          createdAt: f.created_at,
-          showDropdown: false,
-        }));
-        setAttachments(files);
-      }
-    } catch (err) {
-      console.error('Failed to fetch attachments:', err);
-    }
-  };
-
-  const handleFileDelete = async (att) => {
-    if (!window.confirm(`Delete "${att.name}"?`)) return;
-
-    try {
-      await deleteAttachment(att.id);
-      fetchAttachment();
-    } catch (err) {
-      console.error('Delete failed:', err);
-    }
-    await fetchComment();
-  };
-
-  // Download handler
-  const handleFileDownload = (fileObj) => {
-    const link = document.createElement('a');
-    link.href = fileObj.urlDownload;
-    link.download = fileObj.name;
-    link.click();
-  };
-
-  //PreviewFile
-  const handlePreview = (att) => {
-    const imageExt = ['jpg', 'jpeg', 'png'];
-    const pdfExt = ['pdf'];
-    const docExt = ['doc', 'docx'];
-    const pptExt = ['ppt', 'pptx'];
-    const videoExt = ['mp4', 'mov'];
-    const audioExt = ['mp3', 'wav'];
-    const txtExt = ['txt'];
-    const xlsxExt = ['xlsx', 'xls'];
-
-    const ext = att.ext.toLowerCase();
-
-    if (imageExt.includes(ext)) {
-      window.open(att.urlView, '_blank');
-    } else if (pdfExt.includes(ext)) {
-      window.open(att.urlView, '_blank');
-    } else if (docExt.includes(ext) || pptExt.includes(ext) || xlsxExt.includes(ext)) {
-      const viewerURL = `https://docs.google.com/viewer?url=${encodeURIComponent(att.urlView)}&embedded=true`;
-      window.open(viewerURL, '_blank');
-    } else if (videoExt.includes(ext)) {
-      window.open(att.urlView, '_blank');
-    } else if (audioExt.includes(ext)) {
-      window.open(att.urlView, '_blank');
-    } else if (txtExt.includes(ext)) {
-      window.open(att.urlView, '_blank');
-    } else {
-      alert('Preview tidak tersedia untuk ekstensi ini.');
-    }
-  };
-
-  // Rename handler
-  const handleEditFileName = async (att, newName) => {
-    if (!newName.trim()) return;
-    
-    try {
-      await renameAttachment(att.id, newName.trim());
-      fetchAttachment();
-    } catch (err) {
-      console.error("Rename failed:", err);
-      alert("Gagal mengganti nama file");
-    }
-    await fetchComment();
-  };
-
-  const closeAllDropdown = () => {
-    setAttachments(prev =>
-      prev.map(att => ({
-        ...att,
-        showDropdown: false,
-      }))
-    );
-  };
-
-  const triggerFileUpload = () => fileInputAttachmentRef.current?.click();
-
-  // ======================= MOVE========================================//
-  const handleOpenMove = () => {
-    setShowMoveModal(true);
-    setLoadingWorkspaces(true);
-    setLoadingBoards(true)
-    workspaceFind()
-      .then(data => {
-        setWorkspaces(data || []);
-        const currentWs = task.workspace?.id?.toString() || '';
-        setSelectedWorkspace(currentWs);
-      })
-      .catch(err => console.error('Gagal fetch workspaces:', err))
-      .finally(() => setLoadingWorkspaces(false));
-  };
-
-  const handleMoveTask = async () => {
-    if (!selectedWorkspace || !selectedBoard) return alert('Pilih workspace dan board terlebih dahulu');
-    try {
-      await updateTask(task.id, {workspace_id: selectedWorkspace,board_id: selectedBoard});
-      setShowMoveModal(false);
-      const resWorkspace = await workspaceFind();
-      if (resWorkspace) {
-        const selectedWp = resWorkspace.find(wp => wp.id === parseInt(selectedWorkspace));
-        setCurrentWorkspace(selectedWp?.name || "");
-      }
-      const resBoard = await getAllBoardByWorkspaceId(selectedWorkspace);
-      if (resBoard) {
-        const selectedBrd = resBoard.find(board => board.id === parseInt(selectedBoard));
-        setCurrentBoard(selectedBrd?.name || "");
-      }
-    } catch (err) {
-      console.error('Gagal memindah task:', err);
-      alert('Gagal memindah task');
-    }
-    await fetchComment();
-  };
-
-  const handleDeleteTask = async () => {
-    try {
-      await deleteTask(task.id);
-      alert('Task berhasil dihapus');
-      setShowDeleteConfirm(false);
-      onDelete?.(task.id);
-      onClose();
-    } catch (err) {
-      console.error('Gagal menghapus task:', err.response?.data || err.message);
-      alert('Gagal menghapus task');
-    }
-  };
-//======================= END MOVE ======================================//
-
-//=======================* END FUNCTION*====================================
-
-  //=======================*USE EFFECT*======================================//
-  // 1. Sync currentTitle dengan title
+  // ============================== USE EFFECT ============================== //
+  // Fetch title
   useEffect(() => {
     if (title !== currentTitle) {
       setCurrentTitle(title);
     }
   }, [title,currentTitle]);
 
-  // 2. Fetch task detail (sekali tiap task.id berubah)
+  // Fetch task
   useEffect(() => {
     const fetchTask = async () => {
       try {
@@ -886,19 +866,20 @@ const TaskDetail = ({ task, onClose, onDelete}) => {
         setDueDate(data.due_date)
         setCoverImage(data.cover != null ? data.cover.view_saved : null)
       } catch (e) {
-        console.error('Gagal load task:', e);
+        console.error('Error load task:', e);
       }
     };
     fetchTask();
   }, [task]);
 
+  // Fetch description
   useEffect(() => {
     if (editor && taskData?.description) {
       editor.commands.setContent(taskData.description || '');
     }
   }, [editor, taskData?.description]);
 
-  // 3. Fetch attachment files
+  // Fetch file
   useEffect(() => {
     if (!task.id) return;
 
@@ -925,7 +906,7 @@ const TaskDetail = ({ task, onClose, onDelete}) => {
     fetchFiles();
   }, [task]);
 
-  // 4. Move modal - fetch boards by workspace
+  // Fetch  for move
   useEffect(() => {
     if (!showMoveModal || !selectedWorkspace) {
       setBoards([]);
@@ -940,18 +921,18 @@ const TaskDetail = ({ task, onClose, onDelete}) => {
         const currentBoard = data?.find(b => b.id === boardTemp);
         setSelectedBoard(currentBoard ? currentBoard.id.toString() : '');
       })
-      .catch(err => console.error('Gagal fetch boards:', err))
+      .catch(err => console.error('Error fetch boards:', err))
       .finally(() => setLoadingBoards(false));
   }, [showMoveModal, selectedWorkspace, task.board_id, selectedBoard]);
 
-  // 5. Fetch all members (hanya saat komponen mount)
+  // Fetch all user
   useEffect(() => {
     getAllUser('/user?no_paging=yes')
       .then(res => setAllMember(res.data.data))
-      .catch(err => console.error('Gagal fetch user:', err));
+      .catch(err => console.error('Error fetch user:', err));
   }, []);
 
-  // 6. Fetch users saat buka Member Modal
+  // Fetch searching user
   useEffect(() => {
     if (showMemberModal || showMemberItemModal) {
       getAllUser('/user?no_paging=yes')
@@ -959,18 +940,18 @@ const TaskDetail = ({ task, onClose, onDelete}) => {
           setAllUser(res.data.data);
           setFilteredUsers(res.data.data);
         })
-        .catch(err => console.error('Gagal fetch user:', err));
+        .catch(err => console.error('Error fetch user:', err));
     }
   }, [showMemberModal, showMemberItemModal]);
 
-  // 7. Fetch labels saat buka Label Modal atau selesai Add Label
+  // Fetch show label
   useEffect(() => {
     if (showLabelModal || (!showAddLabelModal && showLabelModal)) {
       fetchLabels();
     }
   }, [showLabelModal, showAddLabelModal]);
 
-  // 8. Editor event listener
+  // Fetch focus
   useEffect(() => {
     if (!editor) return;
 
@@ -982,19 +963,21 @@ const TaskDetail = ({ task, onClose, onDelete}) => {
     };
   }, [editor]);
 
-  // 9. Debounce cleanup
+  // Fetch debounce
   useEffect(() => {
     return () => {
       debounceSearch.cancel();
     };
   }, [debounceSearch]);
 
+  // Fetch member & label
   useEffect(() => {
     setCurrentMember(task.assign_to_user?.data || []);
     setCurrentLabeled(task.label?.data || []);
   }, [task]);
-  //=======================*END USE EFFECT*======================================//
+
   
+  // ============================== RETURN ============================== //
   return (
     <>
       {!taskData && (
@@ -1020,7 +1003,6 @@ const TaskDetail = ({ task, onClose, onDelete}) => {
               backgroundRepeat: 'no-repeat',
             }}
           >
-            {/* Section 1: Close Button */}
             <div className="d-flex justify-content-between align-items-center w-100 mb-2 position-relative">
               {coverImage && (
                 <button
@@ -1046,19 +1028,13 @@ const TaskDetail = ({ task, onClose, onDelete}) => {
                   <FaTrash size={14} color="#000"/>
                 </button>
               )}
-
-              {/* Loading tengah */}
               {taskData === null && (
                 <div className="d-flex align-items-center gap-2 position-absolute start-50 translate-middle-x">
                   <div className="spinner-border spinner-border-sm text-danger" role="status" />
                   <span className="text-danger small">Prepare your data...</span>
                 </div>
               )}
-
-              {/* Spacer kiri agar jarak merata */}
               <div style={{ width: '24px' }} />
-
-              {/* Tombol close kanan */}
               <button 
                 className="btn btn-light p-1 ms-auto" 
                 onClick={onClose}
@@ -1068,7 +1044,6 @@ const TaskDetail = ({ task, onClose, onDelete}) => {
               </button>
             </div>
 
-            {/* Section 2: Cover Image */}
             <div
                 className="position-relative mb-3"
                 style={{
@@ -1109,8 +1084,6 @@ const TaskDetail = ({ task, onClose, onDelete}) => {
                     </div>
                 )}
               </div>
-
-              {/* Hidden file input */}
               <input
                   type="file"
                   accept="image/*"
@@ -1120,7 +1093,6 @@ const TaskDetail = ({ task, onClose, onDelete}) => {
               />
             </div>
 
-            {/* Section 3: Completion Check + Title */}
             <div className="d-flex align-items-center gap-3 w-100">
               <div
                 className={`check-circle d-flex align-items-center justify-content-center 
@@ -1142,7 +1114,7 @@ const TaskDetail = ({ task, onClose, onDelete}) => {
                   className="form-control flex-grow-1 text-start"
                   value={title}
                   onChange={e => setTitle(e.target.value)}
-                  onBlur={handleSaveTitle} // Simpan saat keluar dari input
+                  onBlur={handleSaveTitle}
                   onKeyDown={e => e.key === 'Enter' && handleSaveTitle()}
                   autoFocus
                   style={{ 
@@ -1172,7 +1144,6 @@ const TaskDetail = ({ task, onClose, onDelete}) => {
               className="d-flex flex-column flex-grow-1 w-75"
             >
               <div className="d-flex align-items-start flex-wrap gap-4 mb-3">
-                {/* Watch button + text above it */}
                 <div className="d-flex flex-column align-items-start">
                   <span className="mb-1 text-muted fw-semibold small">
                     Summary
@@ -1191,7 +1162,6 @@ const TaskDetail = ({ task, onClose, onDelete}) => {
               </div>
 
               <div className="d-flex align-items-start flex-wrap gap-4 mb-3">
-                {/* Watch button + text above it */}
                 <div className="d-flex flex-column align-items-start">
                   <span className="mb-1 text-muted fw-semibold small">
                     For Send Notification
@@ -1207,7 +1177,6 @@ const TaskDetail = ({ task, onClose, onDelete}) => {
                   </button>
                 </div>
 
-                {/* Due date badge (tetap sejajar dengan tombol Watch) */}
                 {dueDate && (() => {
                   const date = new Date(dueDate.replace(' ', 'T'));
                   const now = new Date();
@@ -1417,7 +1386,7 @@ const TaskDetail = ({ task, onClose, onDelete}) => {
                         key={att.id}
                         className="border rounded p-3 me-3 mb-3 text-start position-relative"
                         style={{
-                          minWidth: '150px', // sebelumnya 120px
+                          minWidth: '150px',
                           cursor: IMAGE_EXTENSIONS.includes(att.ext) ? 'pointer' : 'default',
                           position: 'relative',
                           zIndex: 1
@@ -1452,7 +1421,7 @@ const TaskDetail = ({ task, onClose, onDelete}) => {
                         <div className="text-truncate small" title={att.name}>
                           {att.name.length > 15 ? att.name.slice(0, 15) + '...' : att.name}
                         </div>
-                        {/* Dropdown toggle */}
+
                         <button
                           className="btn btn-sm fw-bold fs-5 position-absolute dropdown-toggle-btn"
                           style={{ top: '12px', right: '-4px' }} 
@@ -1463,7 +1432,7 @@ const TaskDetail = ({ task, onClose, onDelete}) => {
                         >
                           ⋮
                         </button>
-                        {/* Dropdown menu */}
+
                         {att.showDropdown && (
                           <div
                             className="custom-dropdown p-2 bg-light border rounded"
@@ -1790,9 +1759,9 @@ const TaskDetail = ({ task, onClose, onDelete}) => {
                                                   className="rounded-circle d-flex align-items-center justify-content-center"
                                                   style={{
                                                     backgroundColor: bgColor,
-                                                    width: '28px',       // diperkecil dari 40px
+                                                    width: '28px',
                                                     height: '28px',
-                                                    fontSize: '0.7rem',  // teks diperkecil
+                                                    fontSize: '0.7rem',
                                                     color: textColor,
                                                     fontWeight: 600,
                                                   }}
@@ -1848,10 +1817,9 @@ const TaskDetail = ({ task, onClose, onDelete}) => {
 
                     return (
                       <div key={index} className="activity-item d-flex mb-2 align-items-start">
-                        {/* Avatar */}
                         {isHistory ? (
                           <img
-                            src={LogoSelaras} // Ganti dengan path sesuai lokasi logo kamu
+                            src={LogoSelaras}
                             alt="History Logo"
                             className="rounded-circle me-2 flex-shrink-0"
                             style={{ width: '36px', height: '36px', minWidth: '36px', objectFit: 'cover' }}
@@ -1872,7 +1840,6 @@ const TaskDetail = ({ task, onClose, onDelete}) => {
                           </div>
                         )}
 
-                        {/* Kontainer Isi */}
                         <div className="d-flex flex-grow-1">
                           {!isHistory ? (
                             <div
@@ -1880,19 +1847,14 @@ const TaskDetail = ({ task, onClose, onDelete}) => {
                                 wordBreak: 'break-word',
                                 overflowWrap: 'break-word',
                                 whiteSpace: 'normal',
-                                width: '100%', // Tambahkan ini agar isi membentang penuh
+                                width: '100%',
                                 display: 'flex',
                                 flexDirection: 'column'
                               }}
                             >
                               <strong className="d-block">{data.created_by.name}</strong>
-
-                              {/* Komentar */}
                               <div className="mb-2">{data.comment}</div>
-
-                              {/* Baris bawah: Edit | Delete dan Timestamp */}
                               <div className="d-flex justify-content-between align-items-center w-100">
-                                {/* Kiri: Edit | Delete */}
                                 {isCommentEdit ? (
                                   <div className="d-flex">
                                     <div
@@ -1920,7 +1882,6 @@ const TaskDetail = ({ task, onClose, onDelete}) => {
                                 ) : (
                                   <div></div>
                                 )}
-                                {/* Kanan: Timestamp */}
                                 <small className="text-muted">
                                   {data.updated_at.replace("T", " ").replace("Z", "")}
                                 </small>
@@ -2006,7 +1967,6 @@ const TaskDetail = ({ task, onClose, onDelete}) => {
           >
             <div className="modal-dialog modal-dialog-centered modal-sm" role="document">
               <div className="modal-content">
-                {/* Header */}
                 <div className="modal-header">
                   <Tag className="me-2" size={20} /> 
                   <h5 className="modal-title" id="addLabelTitle">Add Task Label</h5>
@@ -2017,8 +1977,6 @@ const TaskDetail = ({ task, onClose, onDelete}) => {
                     onClick={() => setShowLabelModal(false)}
                   />
                 </div>
-
-                {/* Body */}
                 <div className="modal-body">
                   {labels.length > 0 ? (
                     <ul className="list-unstyled mb-0">
@@ -2063,10 +2021,7 @@ const TaskDetail = ({ task, onClose, onDelete}) => {
                     <p className="mb-0">Belum ada label.</p>
                   )}
                 </div>
-
-                {/* Footer */}
                 <div className="modal-footer row g-0 w-100 px-0 justify-content-center">
-                  {/* Button Kiri */}
                     <div className="col-5 pe-1 ms-0">
                       <button
                         type="button"
@@ -2077,7 +2032,6 @@ const TaskDetail = ({ task, onClose, onDelete}) => {
                         Add Label
                       </button>
                     </div>
-                  {/* Button Kanan */}
                     <div className="col-5 ps-1">
                       <button
                         type="button"
@@ -2233,7 +2187,6 @@ const TaskDetail = ({ task, onClose, onDelete}) => {
                             const isMember = currentMember.some(member => member.id === user.id);
                             return (
                               <li key={idx} className="d-flex align-items-center mb-2">
-                                {/* checkbox */}
                                 <input
                                   type="checkbox"
                                   className="form-check-input me-2"
@@ -2242,8 +2195,6 @@ const TaskDetail = ({ task, onClose, onDelete}) => {
                                   defaultChecked={isMember}
                                   onChange={() => handleCheckboxChange(user)}
                                 />
-
-                                {/* avatar initials */}
                                 <div
                                   className="rounded-circle d-flex align-items-center justify-content-center"
                                   style={{
@@ -2258,8 +2209,6 @@ const TaskDetail = ({ task, onClose, onDelete}) => {
                                 >
                                   {initials}
                                 </div>
-
-                                {/* name & role */}
                                 <div className="ms-2 d-flex flex-column">
                                   <span>{user.name}</span>
                                   <small className="text-muted">{user.role.name} - {user.divisi.name}</small>
@@ -2770,7 +2719,6 @@ const TaskDetail = ({ task, onClose, onDelete}) => {
                             const isMember = currentMemberItem.some(member => member.id === user.id);
                             return (
                               <li key={idx} className="d-flex align-items-center mb-2">
-                                {/* checkbox */}
                                 <input
                                   type="checkbox"
                                   className="form-check-input me-2"
@@ -2779,8 +2727,6 @@ const TaskDetail = ({ task, onClose, onDelete}) => {
                                   defaultChecked={isMember}
                                   onChange={() => handleCheckboxChangeMemberItem(user)}
                                 />
-
-                                {/* avatar initials */}
                                 <div
                                   className="rounded-circle d-flex align-items-center justify-content-center"
                                   style={{
@@ -2795,8 +2741,6 @@ const TaskDetail = ({ task, onClose, onDelete}) => {
                                 >
                                   {initials}
                                 </div>
-
-                                {/* name & role */}
                                 <div className="ms-2 d-flex flex-column">
                                   <span>{user.name}</span>
                                   <small className="text-muted">{user.role.name} - {user.divisi.name}</small>

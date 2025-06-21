@@ -1,14 +1,12 @@
-// BadgeContext.js
 import { createContext, useContext } from 'react';
 
-const BadgeContext = createContext(); // Pastikan nama context benar
+const BadgeContext = createContext();
 
 export const BadgeProvider = ({ children }) => {
   const setBadge = async (count) => {
     if ('setAppBadge' in navigator) {
       await navigator.setAppBadge(count).catch(console.error);
     } else {
-      // Fallback untuk browser yang tidak support
       document.title = count > 0 ? `(${count}) ${document.title}` : document.title.replace(/^\(\d+\)\s/, '');
     }
   };
@@ -28,7 +26,6 @@ export const BadgeProvider = ({ children }) => {
   );
 };
 
-// Pastikan nama hook diekspor dengan benar
 export const useBadge = () => {
   const context = useContext(BadgeContext);
   if (!context) {

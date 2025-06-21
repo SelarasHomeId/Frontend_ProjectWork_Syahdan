@@ -21,7 +21,6 @@ export const useCentrifuge = ({ userId, onDataReceive }) => {
       const sub = centrifuge.newSubscription(channel);
 
       sub.on("publication", ctx => {
-        console.log("📩 Received:", ctx.data);
         onDataReceive?.(ctx.data);
       });
 
@@ -29,38 +28,30 @@ export const useCentrifuge = ({ userId, onDataReceive }) => {
     };
 
     centrifuge.on("connect", ctx => {
-      console.log("✅ Connected to Centrifuge:", ctx);
       subscribeToChannel();
 
       centrifuge.rpc("your_rpc_method", { key: "value" })
         .then(result => {
-          console.log("📡 RPC Success:", result.data);
+          console.log("RPC Success:", result.data);
         })
         .catch(error => {
-          console.error("⚠️ RPC Error:", error);
+          console.error("RPC Error:", error);
         });
     });
 
     centrifuge.on("disconnect", ctx => {
-      console.log("❌ Disconnected:", ctx.code, ctx.reason);
-
       if (ctx.code === 109) {
-        console.log("🔄 Token expired. Attempting reconnect...");
         setTimeout( async () => {
           await refreshToken();
           connectCentrifuge();
         }, 1000);
       }
-      
       if (ctx.code === 3500) {
-        console.log("🔄 Token invalid. Attempting reconnect...");
         setTimeout(() => {
           connectCentrifuge();
         }, 1000);
       }
-
       if (ctx.code === 3000) {
-        console.log("🚪 Manual disconnect (e.g., logout). No reconnect needed.");
         return;
       }
     });
@@ -71,21 +62,19 @@ export const useCentrifuge = ({ userId, onDataReceive }) => {
     try {
       centrifugeRef.current?.disconnect?.();
     } catch (err) {
-      console.warn("❗Error during previous disconnect:", err);
+      console.warn("Error during previous disconnect:", err);
     }
     centrifugeRef.current = centrifuge;
   }, [userId, onDataReceive]);
 
   useEffect(() => {
-    console.log("🚀 Initializing Centrifuge...");
     connectCentrifuge();
 
     return () => {
-      console.log("🧹 Cleaning up Centrifuge...");
       try {
         centrifugeRef.current?.disconnect?.();
       } catch (err) {
-        console.warn("❗Error during cleanup disconnect:", err);
+        console.warn("Error during cleanup disconnect:", err);
       }
     };
   }, [connectCentrifuge]);

@@ -23,7 +23,6 @@ const Role = () => {
   
   return (
     <div className="container-fluid px-3 py-4">
-     {/* Header Section */}
       <header className="text-center mb-5" style={{ padding: '2rem ', background: 'linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%)' }}>
       <p className="lead" style={{
           fontSize: '1.25rem',
@@ -36,7 +35,6 @@ const Role = () => {
         </p>
       </header>
 
-      {/* Grid Roles */}
       <div className="row justify-content-center">
         {roles.map((role) => (
           <div 

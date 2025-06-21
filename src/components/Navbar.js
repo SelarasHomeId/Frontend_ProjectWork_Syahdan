@@ -300,7 +300,7 @@ function Navbar({ showSidebar, toggleNavbar, showDetailTask }) {
       if (!notif.is_read) {
         const response = await markNotificationAsRead(notif.id);
         if (!response.success) {
-          console.error(`Gagal menandai notif ${notif.id} sebagai read`);
+          console.error(`Error read all notif`);
         }
       }
     }

@@ -5,7 +5,7 @@ export const validatePassword = (password) => {
   const uppercaseRegex = /[A-Z]/;
   const lowercaseRegex = /[a-z]/;
   const numberRegex = /[0-9]/;
-  const specialCharRegex = /[\W_]/; // \W = non-word character (special characters)
+  const specialCharRegex = /[\W_]/;
 
   if (password.length < minLength) {
     return "Password baru harus memiliki minimal 10 karakter.";
@@ -23,7 +23,7 @@ export const validatePassword = (password) => {
     return "Password baru harus mengandung karakter spesial (!@#$%^&* dll).";
   }
 
-  return null; // Password valid
+  return null;
 }
 
 export const setAllCookiesUserData = (response) => {
@@ -50,7 +50,6 @@ export const removeAllCookies = () => {
   });
 };
 
-// ============================================START INITIAL=============
 export const decimalToHexColor = (color) => {
   return `#${Number(color).toString(16).toUpperCase().padStart(8, '0').substring(2)}`;
 }
@@ -114,7 +113,6 @@ export const getContrastingTextColor = (bgHex) => {
 
   return lum < 0.5 ? '#FFFFFF' : '#000000';
 };
-// ============================================END INITIAL=============
 
 export const formatDate = (dateStr) => {
   const date = new Date(dateStr);

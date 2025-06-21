@@ -129,6 +129,7 @@ export const refreshToken = async () => {
   return response.data.data.token;
 };
 
+// Fungsi single logout
 export const singleAuthLogout = async () => {
   const url = `${BASE_URL}/auth/logout`;
   const token = Cookies.get("token");
@@ -145,7 +146,7 @@ export const singleAuthLogout = async () => {
 };
 
 // ==================================================================================================== //
-// AUTHENTICATION (Login, Logout, Reset Password)
+// AUTHENTICATION
 export const authLogin = async (email, password) => {
   return await apiRequest({
     method: "POST",
@@ -207,7 +208,7 @@ export const workspaceFind = async () => {
 };
 
 // ==================================================================================================== //
-// USER MANAGEMENT (CRUD)
+// USER MANAGEMENT
 export const getAllUser = async (endpoint) => {
   return await apiRequest({
     method: "GET",
@@ -253,7 +254,7 @@ export const resetPasswordUser = async (userId) => {
 };
 
 // ==================================================================================================== //
-// PROJECT MANAGEMENT (CRUD)
+// PROJECT MANAGEMENT
 export const getAllProject = async (endpoint) => {
   return await apiRequest({
     method: "GET",
@@ -294,7 +295,7 @@ export const deleteProject = async (projectId) => {
 };
 
 // ==================================================================================================== //
-// DIVISION MANAGEMENT (CRUD)
+// DIVISION MANAGEMENT
 export const getAllDivision = async (endpoint) => {
   return await apiRequest({
     method: "GET",
@@ -630,6 +631,8 @@ export const convertTaskChecklistItem = async (checklistItemId) => {
   });
 };
 
+// ==================================================================================================== //
+// EXPORT DATA
 export const apiRequestExportData = async ({
   method,
   endpoint,

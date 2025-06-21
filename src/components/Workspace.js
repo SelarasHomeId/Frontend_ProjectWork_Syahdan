@@ -42,7 +42,7 @@ const Workspace = ({ workspaceId, toDetailTask, setToDetailTask }) => {
         }
       }
     } catch (error) {
-      console.error("Error saat mengambil task:", error);
+      console.error("Error when get task:", error);
       Swal.fire({
         title: "Terjadi kesalahan",
         text: "Gagal mengambil data task",
@@ -98,12 +98,12 @@ const Workspace = ({ workspaceId, toDetailTask, setToDetailTask }) => {
           watch: task.watch,
         }));
         return {
-          id: board.id, //
-          name: board.name, //
-          sort_number: board.sort_number, //
-          task_total: board.task_total, //
-          workspace_id: board.workspace_id, //
-          tasks: tasks, // 
+          id: board.id,
+          name: board.name,
+          sort_number: board.sort_number,
+          task_total: board.task_total,
+          workspace_id: board.workspace_id,
+          tasks: tasks,
         };
       })
     );
@@ -270,22 +270,22 @@ const Workspace = ({ workspaceId, toDetailTask, setToDetailTask }) => {
       setBoards((prevBoards) =>
         prevBoards.map((board) =>
           board.id === boardId ? { ...board, tasks: [...board.tasks, {
-            id: detailTask.id, //
-            board_id: detailTask.board_id, //
-            title: detailTask.title, //
-            assign_to_user: detailTask.assign_to_user, //
-            checklist: detailTask.checklist.data, //
+            id: detailTask.id,
+            board_id: detailTask.board_id,
+            title: detailTask.title,
+            assign_to_user: detailTask.assign_to_user,
+            checklist: detailTask.checklist.data,
             comment: detailTask.comment && detailTask.comment.data
               ? detailTask.comment.data.filter((item) => item.is_history === false).length
               : 0,
-            cover: detailTask.cover, //
-            description: false, //
-            due_date: detailTask.due_date, //
-            file: detailTask.file.count, //
-            is_completed: detailTask.is_completed, //
-            label: detailTask.label, //
-            sort_number: detailTask.sort_number, //
-            watch: detailTask.watch, //
+            cover: detailTask.cover,
+            description: false,
+            due_date: detailTask.due_date,
+            file: detailTask.file.count,
+            is_completed: detailTask.is_completed,
+            label: detailTask.label,
+            sort_number: detailTask.sort_number,
+            watch: detailTask.watch,
           }] } : board
         )
       );

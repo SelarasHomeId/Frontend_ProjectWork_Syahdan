@@ -33,11 +33,7 @@ function Login() {
       const response = await authLogin(email, password,);
       const msg =
       response.data?.message ??
-      response.data?.data?.message ??
-      "";
-      
-      console.log("ini respon"+response)
-      console.log(msg)
+      response.data?.data?.message ?? "";
 
       if (response && response.success === true) {
         const token = response.data.token;
@@ -54,7 +50,6 @@ function Login() {
           navigate("/home");
         });
       }else {
-        console.log("masuk else ", response)
         Swal.fire({
           title: "Gagal Login",
           text: response.error.data.message,
@@ -137,7 +132,6 @@ function Login() {
       }}
       className="d-flex justify-content-center align-items-center px-3"
     >
-      {/* overlay darken */}
       <div
         style={{
           position: 'absolute',
@@ -145,8 +139,6 @@ function Login() {
           backgroundColor: 'rgba(0,0,0,0.5)',
         }}
       />
-
-      {/* Card */}
       <div
         style={{
           position: 'relative',
@@ -161,7 +153,6 @@ function Login() {
         }}
         className="card shadow-lg p-3"
       >
-        {/* Logo inside card */}
         <div className="text-center mb-4">
           <img
             src={logoImage}
@@ -177,7 +168,6 @@ function Login() {
         <h2 className="text-center mb-4 fs-2">Login</h2>
 
         <form onSubmit={handleSubmit}>
-          {/* Email */}
           <div className="input-group input-group-lg mb-4">
             <span className="input-group-text bg-white fs-5">
               <FaUser />
@@ -192,7 +182,6 @@ function Login() {
             />
           </div>
 
-          {/* Password */}
           <div className="input-group input-group-lg mb-4">
             <span className="input-group-text bg-white fs-5">
               <FaLock />
@@ -214,7 +203,6 @@ function Login() {
             </button>
           </div>
 
-          {/* Submit */}
           <button
             type="submit"
             className="btn btn-danger btn-lg w-100 mb-3"
@@ -223,7 +211,6 @@ function Login() {
           </button>
         </form>
 
-        {/* Forgot */}
         <div
           onClick={handleForgotPassword}
           className="text-center text-primary fs-5 mb-2"

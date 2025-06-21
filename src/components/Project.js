@@ -274,13 +274,12 @@ const handleEditProject = async (id) => {
         });
       }
     };
-      // Fungsi isValidUrl untuk memvalidasi URL
       const isValidUrl = (string) => {
         try {
-          new URL(string); // Mencoba membuat URL dari string
+          new URL(string);
           return true;
         } catch (e) {
-          return false; // Jika gagal, bukan URL
+          return false;
         }
       };
 
@@ -319,8 +318,7 @@ const handleEditProject = async (id) => {
             }
             setShowImagePreview(false);
           } catch (error) {
-            console.error('Gagal menghapus cover:', error);
-            Swal.fire('Error!', 'Terjadi kesalahan saat menghapus cover.', 'error');
+            console.error('Error delete cover:', error);
           }
           setIsLoading(false);
         }
@@ -397,73 +395,70 @@ const handleEditProject = async (id) => {
                           )
                         }
                       </td>
-                      {/* Tombol preview tetap di dalam table */}
-<td className='text-center'>
-  {project.cover ? (
-    <>
-      <button
-        onClick={() => {
-          setSelectedCover(project.cover.view_saved);
-          setSelectedProjectId(project.id); // simpan id untuk delete
-          setShowImagePreview(true);
-        }}
-        style={{
-          background: 'none',
-          border: 'none',
-          padding: 0,
-          cursor: 'pointer'
-        }}
-        title="Preview Gambar"
-        aria-label="Preview Gambar"
-      >
-        <i
-          className="fas fa-image"
-          style={{
-            fontSize: '1.5rem',
-            color: '#6c757d',
-            transition: 'color 0.3s ease'
-          }}
-        />
-      </button>
-    </>
-  ) : (
-    "-"
-  )}
-</td>
-
-{/* Modal Preview dengan tombol delete di header */}
-<Modal show={showImagePreview} onHide={() => setShowImagePreview(false)}>
-  <Modal.Header closeButton>
-    <Modal.Title style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', width: '100%' }}>
-      <span>Preview Cover</span>
-      <button
-        onClick={() => handleDeleteCover(selectedProjectId)}
-        style={{
-          background: 'none',
-          border: 'none',
-          padding: 0,
-          cursor: 'pointer',
-          color: '#dc3545'
-        }}
-        title="Hapus Cover"
-        aria-label="Hapus Cover"
-      >
-        <i className="fas fa-trash-alt" style={{ fontSize: '1.2rem' }} />
-      </button>
-    </Modal.Title>
-  </Modal.Header>
-  <Modal.Body>
-    {selectedCover ? (
-      <img
-        src={selectedCover}
-        alt="Project Cover Preview"
-        style={{ width: '100%' }}
-      />
-    ) : (
-      <p>URL gambar tidak valid</p>
-    )}
-  </Modal.Body>
-</Modal>
+                      <td className='text-center'>
+                        {project.cover ? (
+                          <>
+                            <button
+                              onClick={() => {
+                                setSelectedCover(project.cover.view_saved);
+                                setSelectedProjectId(project.id);
+                                setShowImagePreview(true);
+                              }}
+                              style={{
+                                background: 'none',
+                                border: 'none',
+                                padding: 0,
+                                cursor: 'pointer'
+                              }}
+                              title="Preview Gambar"
+                              aria-label="Preview Gambar"
+                            >
+                              <i
+                                className="fas fa-image"
+                                style={{
+                                  fontSize: '1.5rem',
+                                  color: '#6c757d',
+                                  transition: 'color 0.3s ease'
+                                }}
+                              />
+                            </button>
+                          </>
+                        ) : (
+                          "-"
+                        )}
+                      </td>
+                      <Modal show={showImagePreview} onHide={() => setShowImagePreview(false)}>
+                        <Modal.Header closeButton>
+                          <Modal.Title style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', width: '100%' }}>
+                            <span>Preview Cover</span>
+                            <button
+                              onClick={() => handleDeleteCover(selectedProjectId)}
+                              style={{
+                                background: 'none',
+                                border: 'none',
+                                padding: 0,
+                                cursor: 'pointer',
+                                color: '#dc3545'
+                              }}
+                              title="Hapus Cover"
+                              aria-label="Hapus Cover"
+                            >
+                              <i className="fas fa-trash-alt" style={{ fontSize: '1.2rem' }} />
+                            </button>
+                          </Modal.Title>
+                        </Modal.Header>
+                        <Modal.Body>
+                          {selectedCover ? (
+                            <img
+                              src={selectedCover}
+                              alt="Project Cover Preview"
+                              style={{ width: '100%' }}
+                            />
+                          ) : (
+                            <p>URL gambar tidak valid</p>
+                          )}
+                        </Modal.Body>
+                      </Modal>
                       <td>{project.created_at.replace("T", " ").replace("Z", "")}</td>
                       <td>
                         <div style={{ display: 'flex', justifyContent: 'center', gap: '8px' }}>
