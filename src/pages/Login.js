@@ -31,9 +31,6 @@ function Login() {
     
     try {
       const response = await authLogin(email, password,);
-      const msg =
-      response.data?.message ??
-      response.data?.data?.message ?? "";
 
       if (response && response.success === true) {
         const token = response.data.token;
