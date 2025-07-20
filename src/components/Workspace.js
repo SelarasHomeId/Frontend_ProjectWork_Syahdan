@@ -96,6 +96,7 @@ const Workspace = ({ workspaceId, toDetailTask, setToDetailTask }) => {
           label: task.label,
           sort_number: task.sort_number,
           watch: task.watch,
+          can_access: task.can_access
         }));
         return {
           id: board.id,
@@ -127,6 +128,7 @@ const Workspace = ({ workspaceId, toDetailTask, setToDetailTask }) => {
       label: task.label,
       sort_number: task.sort_number,
       watch: task.watch,
+      can_access: task.can_access
     }));
   
     setBoards((prevBoards) =>
@@ -286,6 +288,7 @@ const Workspace = ({ workspaceId, toDetailTask, setToDetailTask }) => {
             label: detailTask.label,
             sort_number: detailTask.sort_number,
             watch: detailTask.watch,
+            can_access: detailTask.can_access
           }] } : board
         )
       );
@@ -715,10 +718,29 @@ const Task = ({ task, boardId, index, moveTask, loadTasksForBoard, handleClickTa
           src={`${task.cover.view_saved}`} 
           alt={task.cover.name} 
           className="task-cover"
-          onClick={() => handleClickTask(task)}
+          onClick={() => task.can_access ? handleClickTask(task) : 
+            Swal.fire({
+              title: "Upss Maaf..",
+              text: "Anda tidak dapat mengakses tugas ini!",
+              icon: "warning",
+              confirmButtonText: "OK",
+            })
+          }
+          style={{ cursor: task.can_access ? 'pointer' : 'not-allowed', opacity: task.can_access ? 1 : 0.5 }}
         />
       )}
-      <div className="task-content" onClick={() => handleClickTask(task)}>
+      <div 
+        className="task-content" 
+        onClick={() => task.can_access ? handleClickTask(task) : 
+          Swal.fire({
+            title: "Upss Sorry..",
+            text: "Anda tidak dapat mengakses tugas ini!",
+            icon: "warning",
+            confirmButtonText: "OK",
+          })
+        }
+        style={{ cursor: task.can_access ? 'pointer' : 'not-allowed', opacity: task.can_access ? 1 : 0.5 }}
+      >
         <input
           type="checkbox"
           className="task-checkbox"

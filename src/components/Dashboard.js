@@ -198,6 +198,13 @@ function Dashboard({showDetailTask}) {
             icon: "error",
             confirmButtonText: "OK",
           })
+        }else if (task != null && !task.can_access){
+          Swal.fire({
+            title: "Upss Maaf..",
+            text: "Anda tidak dapat mengakses tugas ini!",
+            icon: "warning",
+            confirmButtonText: "OK",
+          })
         }else{
           showDetailTask(task)
         }
