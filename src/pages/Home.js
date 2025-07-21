@@ -117,7 +117,7 @@ function Home() {
             transition: "margin-left 0.3s ease",
             marginLeft: isSidebarActive ? "250px" : "0",
             width: isSidebarActive ? "calc(100% - 250px)" : "100%",
-            backgroundImage: cover ? `url(${cover.view_saved})` : "none",
+            backgroundImage: cover ? `url('${cover.view_saved}')` : "none",
             backgroundSize: "100% 100%",
             backgroundPosition: "center",
             backgroundRepeat: "no-repeat",
